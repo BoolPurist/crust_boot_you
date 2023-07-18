@@ -1,0 +1,7 @@
+---
+source: src/template_meta_data.rs
+expression: serde_version
+---
+Err(
+    "A template's name (a) is more than once listed",
+)

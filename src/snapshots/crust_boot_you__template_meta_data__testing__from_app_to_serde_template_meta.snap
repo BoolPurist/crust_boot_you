@@ -1,0 +1,18 @@
+---
+source: src/template_meta_data.rs
+expression: serde_version
+---
+SerdeTemplateMetaData {
+    templates: [
+        Template {
+            name: NotEmptyText(
+                "a",
+            ),
+        },
+        Template {
+            name: NotEmptyText(
+                "b",
+            ),
+        },
+    ],
+}
