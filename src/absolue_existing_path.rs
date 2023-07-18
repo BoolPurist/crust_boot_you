@@ -14,12 +14,12 @@ impl std::ops::Deref for AbsoluteExistingPath {
     type Target = Path;
 
     fn deref(&self) -> &Self::Target {
-        self.as_path()
+        self.as_ref()
     }
 }
 
-impl AbsoluteExistingPath {
-    pub fn as_path(&self) -> &Path {
+impl AsRef<Path> for AbsoluteExistingPath {
+    fn as_ref(&self) -> &Path {
         self.0.as_path()
     }
 }

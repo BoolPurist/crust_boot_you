@@ -94,7 +94,7 @@ pub enum FileKind {
 }
 
 pub fn detect_file_kind(path: &AbsoluteExistingPath) -> AppResult<FileKind> {
-    let file_meta = std::fs::metadata(path.as_path())
+    let file_meta = std::fs::metadata(path.as_ref())
         .with_context(|| format!("Could extract meta data from {:?}", path))?;
 
     let os_file_type = file_meta.file_type();

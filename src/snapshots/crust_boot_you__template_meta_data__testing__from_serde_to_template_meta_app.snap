@@ -3,14 +3,14 @@ source: src/template_meta_data.rs
 expression: serde_version
 ---
 Ok(
-    TemplateMetaData {
+    AllTemplateMetaData {
         templates: [
-            Template {
+            TemplateMeta {
                 name: NotEmptyText(
                     "a",
                 ),
             },
-            Template {
+            TemplateMeta {
                 name: NotEmptyText(
                     "b",
                 ),

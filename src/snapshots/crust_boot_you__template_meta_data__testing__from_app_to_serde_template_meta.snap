@@ -2,14 +2,14 @@
 source: src/template_meta_data.rs
 expression: serde_version
 ---
-SerdeTemplateMetaData {
+AllSerdeTemplateMetaData {
     templates: [
-        Template {
+        TemplateMeta {
             name: NotEmptyText(
                 "a",
             ),
         },
-        Template {
+        TemplateMeta {
             name: NotEmptyText(
                 "b",
             ),
