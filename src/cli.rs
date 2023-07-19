@@ -12,6 +12,8 @@ use clap::Parser;
 
 #[derive(Debug, Parser)]
 pub struct AppCliEntry {
+    #[clap(short, long, env = "RUN_DRY")]
+    dry: Option<bool>,
     #[clap(subcommand)]
     sub_commands: SubCommands,
 }
@@ -19,5 +21,13 @@ pub struct AppCliEntry {
 impl AppCliEntry {
     pub fn sub_commands(&self) -> &SubCommands {
         &self.sub_commands
+    }
+
+    pub fn dry(&self) -> bool {
+        if cfg!(debug_assertions) {
+            self.dry.unwrap_or(true)
+        } else {
+            self.dry.unwrap_or(false)
+        }
     }
 }

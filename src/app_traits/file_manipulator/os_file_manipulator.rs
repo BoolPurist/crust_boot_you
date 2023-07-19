@@ -27,7 +27,7 @@ impl FileManipulator for OsFileManipulator {
 
     fn ensure_dir(&self, location: &Path) -> AppResult {
         std::fs::create_dir_all(location).context("Could ensure a specific folder exits")?;
-        debug!("Ensured that fodler {:?} exits", location);
+        debug!("Ensured that folder {:?} exits", location);
         Ok(())
     }
 

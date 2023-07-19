@@ -12,6 +12,8 @@ pub const FILES_FOLDER: &str = "files";
 pub const TITLE_LIST_RESULT: &str = "List of all templates:";
 
 pub mod dev {
+    pub const TMP_ROOT: &str = "crust_boot_you_tmp";
+    pub const TMP_CWD_FOLDE: &str = "CWD";
     pub const ENTRY_FOLDER: &str = ".dev_data";
     pub const DATA_FOLDER: &str = "data";
     pub const CONFIG_FOLDER: &str = "config";

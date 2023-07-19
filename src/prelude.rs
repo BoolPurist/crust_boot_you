@@ -1,4 +1,4 @@
-use std::{io, path::PathBuf};
+use std::io;
 
 pub use crate::constants;
 pub use anyhow::Context;
@@ -12,6 +12,7 @@ pub type PathResult = AppResult<PathBuf>;
 pub use crate::app_traits::file_manipulator::FileManipulator;
 pub use crate::app_traits::path_provider::PathProvider;
 pub use crate::NotEmptyText;
+pub use std::path::{Path, PathBuf};
 
 #[cfg(test)]
 pub use mockall::automock;

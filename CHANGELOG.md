@@ -11,6 +11,13 @@ CWD: current working directory
 
 ## [unreleased]
 
+### Added 
+
+- Added dry option. If true writing operation are not executed and only the write would-be steps are described .
+### Changed 
+
+- CWD is tmp/crust_you_boot during development mode
+
 ## 0.1.1 - 2023.07.19
 
 ### Added

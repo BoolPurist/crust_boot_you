@@ -106,6 +106,7 @@ fn save_template(
     debug!("Handling subcommand: {:?}", "SaveTemplate");
     let (source_path, template_name) = (source_path.as_ref(), name);
     info!("Copying from {:?}", source_path);
+
     let file_type = on_detect_file_kind(source_path)?;
 
     let file_kind = match file_type {
