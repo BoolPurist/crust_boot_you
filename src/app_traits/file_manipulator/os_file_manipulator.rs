@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use fs_extra::dir::CopyOptions;
 
@@ -35,5 +35,19 @@ impl FileManipulator for OsFileManipulator {
         location
             .try_exists()
             .context("Could determine if file exits")
+    }
+
+    fn list_first_level_dir(&self, location: &Path) -> AppResult<Vec<PathBuf>> {
+        let mut directories: Vec<PathBuf> = Vec::new();
+        for entry in std::fs::read_dir(location)? {
+            let next = entry?;
+            let path = next.path();
+            match next.file_type() {
+                Ok(file_type) if file_type.is_dir() => directories.push(path),
+                Ok(_file) => debug!("File {:?} not listed as template", path),
+                Err(error) => warn!("Could not determine type of {:?}.\nError: {}", path, error),
+            }
+        }
+        Ok(directories)
     }
 }

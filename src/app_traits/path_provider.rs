@@ -10,6 +10,7 @@ pub use test_path_provider::TestPathProvider;
 pub trait PathProvider {
     fn data(&self) -> PathResult;
     fn config(&self) -> PathResult;
+    fn cwd(&self) -> PathResult;
 
     fn scripts(&self) -> PathResult {
         let data = self.data()?;
@@ -20,8 +21,6 @@ pub trait PathProvider {
         let data = self.data()?;
         Ok(data.join(constants::TEMPLATES_FOLDER))
     }
-
-    fn cwd(&self) -> PathResult;
 
     fn specific_entry_template_files(&self, template_name: &NotEmptyText) -> PathResult {
         let general_template_entry = self.general_template_entry()?;

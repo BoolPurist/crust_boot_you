@@ -18,7 +18,28 @@ pub fn handle(
         SubCommands::SaveTemplate(args) => {
             handle_save_template(path_provider, file_manipulator, args)
         }
+        SubCommands::ListTemplate => handle_list_template(path_provider, file_manipulator),
     }
+}
+
+fn handle_list_template(
+    path_provider: impl PathProvider,
+    file_manipulator: impl FileManipulator,
+) -> ReturnToUser {
+    let entry_point = path_provider.general_template_entry()?;
+    file_manipulator.ensure_dir(&entry_point)?;
+    let all_template_paths = file_manipulator.list_first_level_dir(&entry_point)?;
+
+    let mut output = format!("{}\n", constants::TITLE_LIST_RESULT);
+    let lines: String = all_template_paths
+        .into_iter()
+        .map(|path| {
+            let line = path.file_name().unwrap().to_string_lossy();
+            format!("{}\n", line)
+        })
+        .collect();
+    output.push_str(&lines);
+    Ok(output)
 }
 
 fn handle_load_template(
@@ -159,27 +180,18 @@ mod testing {
         path_provider::{MockPathProvider, TestPathProvider},
     };
 
-    fn construct_expected_template_folder(data_folder: &Path, name: &NotEmptyText) -> PathBuf {
-        data_folder
-            .join(constants::TEMPLATES_FOLDER)
-            .join(name.as_ref())
-            .join(constants::FILES_FOLDER)
-    }
-
     #[test]
     fn create_template_from_one_file() {
         let data_folder = PathBuf::from("user").join("data");
         let name: NotEmptyText = NotEmptyText::new("Some_Name".to_owned()).unwrap();
         let on_detect_file_kind = |_: &_| Ok(FileKind::File);
         let source_path = PathBuf::from("some/source");
-        let expected_ensured_template_folder =
-            construct_expected_template_folder(&data_folder, &name);
+        let paths =
+            TestPathProvider::new(data_folder.clone(), PathBuf::from("a"), PathBuf::from("a"));
+        let expected_ensured_template_folder = paths.specific_entry_template_files(&name).unwrap();
         let expected_target_folder = expected_ensured_template_folder.join("source");
         let expected_error_message =
             "Created template with name (Some_Name) from the file \"some/source\"".to_string();
-
-        let paths =
-            TestPathProvider::new(data_folder.clone(), PathBuf::from("a"), PathBuf::from("a"));
 
         let file_manipulator = {
             let mut file_manipulator = MockFileManipulator::default();
@@ -219,14 +231,13 @@ mod testing {
         let name: NotEmptyText = NotEmptyText::new("Some_Name".to_owned()).unwrap();
         let on_detect_file_kind = |_: &_| Ok(FileKind::Folder);
         let source_path = PathBuf::from("some/source");
-        let expected_ensured_template_folder =
-            construct_expected_template_folder(&data_folder, &name);
-        let expected_target_folder = expected_ensured_template_folder.clone();
         let expected_error_message =
             "Created template with name (Some_Name) from the folder \"some/source\"".to_string();
 
         let paths =
             TestPathProvider::new(data_folder.clone(), PathBuf::from("a"), PathBuf::from("a"));
+        let expected_ensured_template_folder = paths.specific_entry_template_files(&name).unwrap();
+        let expected_target_folder = expected_ensured_template_folder.clone();
 
         let file_manipulator = {
             let mut file_manipulator = MockFileManipulator::default();
@@ -289,7 +300,7 @@ mod testing {
             data_folder.clone(),
         );
         let name = NotEmptyText::new("I am not ther".to_string()).unwrap();
-        let assumed_template_entry_path = construct_expected_template_folder(&data_folder, &name);
+        let assumed_template_entry_path = paths.specific_entry_template_files(&name).unwrap();
         let mut files = MockFileManipulator::default();
 
         files
@@ -299,6 +310,7 @@ mod testing {
             .returning(|_| bail!("a"));
         handle_load_template(paths, files, &name).unwrap_err();
     }
+
     #[test]
     fn load_err_bail_for_source_path_does_not_exits() {
         let data_folder = PathBuf::from("/some/data");
@@ -308,8 +320,8 @@ mod testing {
             data_folder.clone(),
         );
         let name = NotEmptyText::new("I am not ther".to_string()).unwrap();
-        let assumed_template_entry_path = construct_expected_template_folder(&data_folder, &name);
         let mut files = MockFileManipulator::default();
+        let assumed_template_entry_path = paths.specific_entry_template_files(&name).unwrap();
 
         files
             .expect_try_exits()
@@ -325,9 +337,8 @@ mod testing {
         let cwd = PathBuf::from("/coding/rust");
         let paths = TestPathProvider::new(data_folder.clone(), data_folder.clone(), cwd.clone());
         let name = NotEmptyText::new("AAA".to_string()).unwrap();
-        let assumed_template_entry_path = construct_expected_template_folder(&data_folder, &name);
-        let expected_ensured_template_folder =
-            construct_expected_template_folder(&data_folder, &name);
+        let assumed_template_entry_path = paths.specific_entry_template_files(&name).unwrap();
+        let expected_ensured_template_folder = assumed_template_entry_path.clone();
 
         // Mocking
         let mut files = MockFileManipulator::default();
@@ -355,5 +366,33 @@ mod testing {
             cwd, name
         );
         assert_eq!(expected_output, output);
+    }
+
+    #[test]
+    fn list_should_return_all_templates() {
+        let mut paths = MockPathProvider::default();
+        let expected_template_entry = PathBuf::from("some/all_templates");
+        paths
+            .expect_general_template_entry()
+            .times(1)
+            .returning(|| Ok(PathBuf::from("some/all_templates")));
+        let mut files = MockFileManipulator::default();
+        let expected_ensure_template_entry = expected_template_entry.clone();
+        files
+            .expect_ensure_dir()
+            .times(1)
+            .withf(move |actual_template_entry| {
+                actual_template_entry == expected_ensure_template_entry
+            })
+            .returning(|_| Ok(()));
+        files
+            .expect_list_first_level_dir()
+            .times(1)
+            .withf(move |actual_listing_path| actual_listing_path == expected_template_entry)
+            .returning(|_| Ok(vec![PathBuf::from("rust"), PathBuf::from("python")]));
+
+        let output = handle_list_template(paths, files).unwrap();
+        let expected_ouput = format!("{}\nrust\npython\n", constants::TITLE_LIST_RESULT);
+        assert_eq!(expected_ouput, output);
     }
 }

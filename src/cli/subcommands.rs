@@ -20,6 +20,8 @@ pub enum SubCommands {
         #[arg(value_parser = validate_not_empty)]
         name: NotEmptyText,
     },
+    #[clap(alias = "lt")]
+    ListTemplate,
 }
 
 fn validate_not_empty(input: &str) -> Result<NotEmptyText, String> {

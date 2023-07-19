@@ -1,6 +1,6 @@
 use crate::prelude::*;
 pub use os_file_manipulator::OsFileManipulator;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 mod os_file_manipulator;
 
 #[cfg_attr(test, automock)]
@@ -9,4 +9,5 @@ pub trait FileManipulator {
     fn copy_dir(&self, from: &Path, to: &Path) -> AppResult;
     fn ensure_dir(&self, location: &Path) -> AppResult;
     fn try_exits(&self, location: &Path) -> AppResult<bool>;
+    fn list_first_level_dir(&self, location: &Path) -> AppResult<Vec<PathBuf>>;
 }

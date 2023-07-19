@@ -9,6 +9,7 @@ pub const TEMPLATE_META_FILE_NAME: &str = "meta_data.json";
 pub const SCRIPT_FOLDER_NAME: &str = "scripts";
 pub const DICTIONARY_FILE: &str = "dict.toml";
 pub const FILES_FOLDER: &str = "files";
+pub const TITLE_LIST_RESULT: &str = "List of all templates:";
 
 pub mod dev {
     pub const ENTRY_FOLDER: &str = ".dev_data";
