@@ -1,11 +1,12 @@
 pub use subcommands::SubCommands;
 
-mod save_template;
 mod subcommands;
-mod template_cli_arg;
 
-pub use save_template::SaveTemplateCli;
-pub use template_cli_arg::TemplateCliArg;
+pub use from_cli_path::AbsoluteExistingPath;
+pub use subcommands::SaveTemplateCli;
+pub use subcommands::TemplateCliArg;
+
+mod from_cli_path;
 
 use clap::Parser;
 

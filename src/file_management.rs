@@ -1,58 +1,17 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use anyhow::Context;
 
-use crate::{prelude::*, AbsoluteExistingPath};
-
-pub fn data_path() -> AppResult<PathBuf> {
-    let data_path = if cfg!(debug_assertions) {
-        constants::PROJECT_ROOT_PATH
-            .join(constants::dev::ENTRY_FOLDER)
-            .join(constants::dev::DATA_FOLDER)
-    } else {
-        todo!("Not implemented for prodution so far.")
-    };
-
-    debug!("Data path: {:?}", data_path);
-    Ok(data_path)
-}
-
-pub fn data_path_templates() -> AppResult<PathBuf> {
-    let data_path_folder = {
-        let data_path = data_path()?;
-        if cfg!(debug_assertions) {
-            data_path.join(constants::TEMPLATES_FOLDER)
-        } else {
-            todo!("Not implemented for prodution so far.")
-        }
-    };
-
-    debug!("Template path: {:?}", data_path_folder);
-
-    Ok(data_path_folder)
-}
-
-pub fn specefic_template_path(name: impl AsRef<Path>) -> AppResult<PathBuf> {
-    let template_path = data_path_templates()?;
-    let target_folder = template_path.join(name.as_ref());
-    Ok(target_folder)
-}
-
-pub fn ensure_path_exits(path: PathBuf) -> AppResult<AbsoluteExistingPath> {
-    debug!("Ensures that path {:?} exits", path);
-    dbg!();
-    std::fs::create_dir_all(&path)?;
-    let abs_path = AbsoluteExistingPath::new(path)?;
-    Ok(abs_path)
-}
+use crate::prelude::*;
 
 pub enum FileKind {
     File,
     Folder,
 }
 
-pub fn detect_file_kind(path: &AbsoluteExistingPath) -> AppResult<FileKind> {
-    let file_meta = std::fs::metadata(path.as_ref())
+pub fn detect_file_kind(path: impl AsRef<Path>) -> AppResult<FileKind> {
+    let path = path.as_ref();
+    let file_meta = std::fs::metadata(path)
         .with_context(|| format!("Could extract meta data from {:?}", path))?;
 
     let os_file_type = file_meta.file_type();
@@ -65,6 +24,25 @@ pub fn detect_file_kind(path: &AbsoluteExistingPath) -> AppResult<FileKind> {
     }
 }
 
-pub fn try_get_cwd() -> AppResult<PathBuf> {
-    std::env::current_dir().context("Could not retrieve current working directory")
+pub fn construct_file_target_path(
+    source_path: &Path,
+    ensured_template_folder: &Path,
+) -> PathResult {
+    let file_name = source_path.file_name().ok_or(anyhow!(
+        "Could not extract file name from {:?}",
+        source_path
+    ))?;
+
+    let file_name = &Path::new(file_name);
+    Ok(ensured_template_folder.join(file_name))
+}
+
+pub fn ensure_target_template_folder(
+    path_provider: &impl PathProvider,
+    file_manipulator: &impl FileManipulator,
+    template_name: &NotEmptyText,
+) -> PathResult {
+    let specific_template_folder = path_provider.specific_entry_template_files(template_name)?;
+    file_manipulator.ensure_dir(&specific_template_folder)?;
+    Ok(specific_template_folder)
 }

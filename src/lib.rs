@@ -4,10 +4,10 @@ extern crate anyhow;
 extern crate log;
 
 mod cli;
-mod not_empty_text;
-pub use absolue_existing_path::AbsoluteExistingPath;
+
+pub mod app_traits;
+pub mod not_empty_text;
 pub use not_empty_text::NotEmptyText;
-mod absolue_existing_path;
 pub mod constants;
 mod file_management;
 pub mod handle_commands;
