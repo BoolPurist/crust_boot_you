@@ -9,8 +9,7 @@ pub enum FileKind {
     Folder,
 }
 
-pub fn detect_file_kind(path: impl AsRef<Path>) -> AppResult<FileKind> {
-    let path = path.as_ref();
+pub fn detect_file_kind(path: &Path) -> AppResult<FileKind> {
     let file_meta = std::fs::metadata(path)
         .with_context(|| format!("Could extract meta data from {:?}", path))?;
 

@@ -1,7 +1,12 @@
 use crate::{prelude::*, NotEmptyText};
 mod dev_path_provider;
 pub use dev_path_provider::DevPathProvider;
+#[cfg(test)]
+mod test_path_provider;
+#[cfg(test)]
+pub use test_path_provider::TestPathProvider;
 
+#[cfg_attr(test, automock)]
 pub trait PathProvider {
     fn data(&self) -> PathResult;
     fn config(&self) -> PathResult;
