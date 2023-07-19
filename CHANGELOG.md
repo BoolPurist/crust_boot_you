@@ -11,7 +11,18 @@ CWD: current working directory
 
 ## [unreleased]
 
-## 0.0.1 - 2023.07.18
+## 0.1.1 - 2023.07.19
+
+### Added
+
+- Can list all names of created templates
+
+### Removed
+
+- No creating and deleting of one json file for the meta date of all templates.
+  Will come back in different form. Every template will have its own meta data file.
+
+## 0.1.0 - 2023.07.18
 
 ### Added
 
