@@ -2,11 +2,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 
-use crate::{
-    prelude::*,
-    template_meta_data::{AllSerdeTemplateMetaData, AllTemplateMetaData},
-    AbsoluteExistingPath,
-};
+use crate::{prelude::*, AbsoluteExistingPath};
 
 pub fn data_path() -> AppResult<PathBuf> {
     let data_path = if cfg!(debug_assertions) {
@@ -34,44 +30,6 @@ pub fn data_path_templates() -> AppResult<PathBuf> {
     debug!("Template path: {:?}", data_path_folder);
 
     Ok(data_path_folder)
-}
-
-pub fn template_meta_path() -> AppResult<PathBuf> {
-    let data_path = data_path()?;
-    let t = data_path.join(constants::TEMPLATE_META_FILE_NAME);
-    Ok(t)
-}
-
-pub fn get_all_template_meta() -> AppResult<AllTemplateMetaData> {
-    let path = template_meta_path()?;
-    let exits_path = path
-        .try_exists()
-        .context("Could not find out if meta template file exits")?;
-    let templates = if exits_path {
-        let content = std::fs::read_to_string(path)
-            .context("Could not read existing file for template meta")?;
-        let read_templates: AllSerdeTemplateMetaData = serde_json::from_str(&content)?;
-        let valid_templates: AllTemplateMetaData = read_templates.try_into()?;
-        valid_templates
-    } else {
-        AllTemplateMetaData::default()
-    };
-    Ok(templates)
-}
-
-pub fn save_all_template(to_save: &AllTemplateMetaData) -> AppResult {
-    let path = template_meta_path()?;
-
-    let to_save = {
-        let to_save_cloned = to_save.clone();
-        let valid: AllSerdeTemplateMetaData = to_save_cloned.into();
-        serde_json::to_string_pretty(&valid)
-    }?;
-
-    info!("Saving meta template to {:?}", path);
-    std::fs::write(path, to_save)?;
-
-    Ok(())
 }
 
 pub fn specefic_template_path(name: impl AsRef<Path>) -> AppResult<PathBuf> {

@@ -3,9 +3,6 @@ extern crate anyhow;
 #[macro_use]
 extern crate log;
 
-mod template;
-pub use template::Template;
-
 mod cli;
 mod not_empty_text;
 pub use absolue_existing_path::AbsoluteExistingPath;
@@ -16,6 +13,5 @@ mod file_management;
 pub mod handle_commands;
 pub mod logging;
 pub mod prelude;
-mod template_meta_data;
 pub use cli::AppCliEntry;
 pub use cli::SubCommands;

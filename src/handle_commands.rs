@@ -6,7 +6,6 @@ use crate::{
     cli::{SaveTemplateCli, TemplateCliArg},
     file_management::{self, FileKind},
     prelude::*,
-    template_meta_data::TemplateMeta,
     AbsoluteExistingPath, AppCliEntry, NotEmptyText, SubCommands,
 };
 pub type ReturnType = AppResult<String>;
@@ -19,11 +18,6 @@ pub fn handle(args: &AppCliEntry) -> ReturnType {
 
 fn handle_create_load_template(name: &NotEmptyText) -> ReturnType {
     debug!("Handling subcommand: {:?}", "LoadTemplate");
-    let loaded_template = file_management::get_all_template_meta()?;
-
-    if loaded_template.get_template(name.as_ref()).is_none() {
-        bail!("Template with name {} is not registered", name);
-    }
 
     let path_to_template = file_management::specefic_template_path(name.as_ref())?;
 
@@ -46,12 +40,6 @@ fn handle_save_template(from_cli: &SaveTemplateCli) -> ReturnType {
     let source_path = arguments.path();
     info!("Copying from {:?}", source_path);
     let file_type = file_management::detect_file_kind(source_path)?;
-
-    let mut meta = file_management::get_all_template_meta()?;
-    let name = arguments.name();
-    if meta.get_template(name.as_ref()).is_none() {
-        bail!("Template with with name {} already extis", name);
-    }
 
     match file_type {
         FileKind::File => {
@@ -76,10 +64,6 @@ fn handle_save_template(from_cli: &SaveTemplateCli) -> ReturnType {
             copy_content_folder(source_path, target_path)?;
         }
     }
-
-    let new = TemplateMeta::new(arguments.name().clone());
-    meta.insert_template(new)?;
-    file_management::save_all_template(&meta)?;
 
     let msg_to_user = format!(
         "Created template with name ({}) from the {:?}",
