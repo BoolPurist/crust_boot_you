@@ -1,23 +1,19 @@
 # Features
 
-### 0.0.2
+### 0.1.2
 
 - Delete template by give name
 
-### 0.0.3
-
-- List template names
-
-### 0.0.4
+### 0.1.3
 
 - Make places in files markable as placeholders which are filled during creation
  - Method 1 prompt on console
 
-### 0.0.5
+### 0.1.4
 
 - Method 2 for filling placeholders. List in config folder with fixed key/value file. 
 
-### 0.0.6
+### 0.1.5
 
 - Method 3 for filling placeholders. Script API. Script can be registered to handle a placeholder
 
