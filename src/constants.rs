@@ -11,6 +11,11 @@ pub const DICTIONARY_FILE: &str = "dict.toml";
 pub const FILES_FOLDER: &str = "files";
 pub const TITLE_LIST_RESULT: &str = "List of all templates:";
 
+pub const INIT_KIND_ONLY_EMPTY: &str = "only_empty";
+pub const INIT_KIND_NO_NAME_CONFLICT: &str = "no_name_conflict";
+pub const INIT_KIND_OVERRIDE: &str = "override";
+pub const INIT_KIND_PURGE: &str = "purge";
+
 pub mod dev {
     pub const TMP_ROOT: &str = "crust_boot_you_tmp";
     pub const TMP_CWD_FOLDE: &str = "CWD";

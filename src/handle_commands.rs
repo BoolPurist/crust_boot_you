@@ -1,5 +1,5 @@
 use crate::{
-    cli::SaveTemplateCli,
+    cli::{LoadTemplateArg, SaveTemplateCli},
     file_management::{self, FileKind},
     prelude::*,
     AppCliEntry, NotEmptyText, SubCommands,
@@ -12,8 +12,8 @@ pub fn handle(
     args: &AppCliEntry,
 ) -> ReturnToUser {
     match args.sub_commands() {
-        SubCommands::LoadTemplate { name } => {
-            handle_load_template(path_provider, file_manipulator, name)
+        SubCommands::LoadTemplate(args) => {
+            handle_load_template(path_provider, file_manipulator, &args)
         }
         SubCommands::SaveTemplate(args) => {
             handle_save_template(path_provider, file_manipulator, args)
@@ -45,9 +45,10 @@ fn handle_list_template(
 fn handle_load_template(
     path_provider: impl PathProvider,
     file_manipulator: impl FileManipulator,
-    name: &NotEmptyText,
+    load_args: &LoadTemplateArg,
 ) -> ReturnToUser {
     debug!("Handling subcommand: {:?}", "LoadTemplate");
+    let (name, _init_kind) = (load_args.name(), load_args.with());
 
     let path_to_template = path_provider.specific_entry_template_files(name)?;
 
@@ -176,9 +177,12 @@ mod testing {
     use pretty_assertions::assert_eq;
     use std::path::PathBuf;
 
-    use crate::app_traits::{
-        file_manipulator::MockFileManipulator,
-        path_provider::{MockPathProvider, TestPathProvider},
+    use crate::{
+        app_traits::{
+            file_manipulator::MockFileManipulator,
+            path_provider::{MockPathProvider, TestPathProvider},
+        },
+        cli::InitKind,
     };
 
     #[test]
@@ -309,7 +313,8 @@ mod testing {
             .times(1)
             .withf(move |to_check| to_check == assumed_template_entry_path)
             .returning(|_| bail!("a"));
-        handle_load_template(paths, files, &name).unwrap_err();
+        let args = LoadTemplateArg::new(name, InitKind::default());
+        handle_load_template(paths, files, &args).unwrap_err();
     }
 
     #[test]
@@ -329,7 +334,8 @@ mod testing {
             .times(1)
             .withf(move |to_check| to_check == assumed_template_entry_path)
             .returning(|_| Ok(false));
-        handle_load_template(paths, files, &name).unwrap_err();
+        let args = LoadTemplateArg::new(name, InitKind::default());
+        handle_load_template(paths, files, &args).unwrap_err();
     }
 
     #[test]
@@ -359,7 +365,8 @@ mod testing {
             .returning(|_, _| Ok(()));
 
         // Act
-        let output = handle_load_template(paths, files, &name).unwrap();
+        let args = LoadTemplateArg::new(name.clone(), InitKind::default());
+        let output = handle_load_template(paths, files, &args).unwrap();
 
         // Assert
         let expected_output = format!(

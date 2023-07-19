@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
+use std::{fmt::Display, str::FromStr};
 
 use crate::prelude::*;
 #[derive(Debug, Clone, Deserialize, Serialize, Hash, PartialEq, Eq)]
@@ -16,6 +16,13 @@ impl NotEmptyText {
 
     pub fn new_clone_panic(must_not_be_empty: &str) -> Self {
         Self::new(must_not_be_empty.to_owned()).unwrap()
+    }
+}
+
+impl FromStr for NotEmptyText {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        NotEmptyText::new(s.to_owned()).map_err(|error| error.to_string())
     }
 }
 

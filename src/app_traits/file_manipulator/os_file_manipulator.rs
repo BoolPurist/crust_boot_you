@@ -5,6 +5,7 @@ use fs_extra::dir::CopyOptions;
 use crate::prelude::*;
 
 use super::FileManipulator;
+
 #[derive(Default, Debug)]
 pub struct OsFileManipulator;
 

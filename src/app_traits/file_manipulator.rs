@@ -10,11 +10,12 @@ use crate::prelude::*;
 use std::path::{Path, PathBuf};
 
 use super::path_provider::get_root_dev;
+
 pub fn panic_if_outside_tmp(path: &Path) {
     let dev_root = get_root_dev();
     if !path.starts_with(get_root_dev()) {
         panic!(
-            "Path {:?} is outside of temp folder root {:?}",
+            "Path {:?} is outside of temp folder root {:?}.\n This is not allowed during development",
             path, dev_root
         );
     }
