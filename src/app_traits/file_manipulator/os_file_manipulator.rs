@@ -6,7 +6,7 @@ use std::{
 use fs_extra::dir::CopyOptions;
 
 use crate::{
-    file_management::{FileKind, FileNode},
+    file_management::{FileKind, FileNodeMeta},
     prelude::*,
 };
 
@@ -16,13 +16,13 @@ use super::FileManipulator;
 pub struct OsFileManipulator;
 
 impl FileManipulator for OsFileManipulator {
-    fn copy_file(&self, from: &Path, to: &Path) -> AppResult {
-        std::fs::copy(from, to).context("failed to copy file to target location")?;
+    fn copy_file(&self, from: &Path, to: &Path) -> AppIoResult {
+        std::fs::copy(from, to)?;
         debug!("Copied file {:?} to {:?}", from, to);
         Ok(())
     }
 
-    fn copy_dir(&self, from: &Path, to: &Path) -> AppResult {
+    fn copy_dir(&self, from: &Path, to: &Path) -> AppIoResult {
         _ = fs_extra::dir::copy(
             from,
             to,
@@ -32,19 +32,18 @@ impl FileManipulator for OsFileManipulator {
         Ok(())
     }
 
-    fn ensure_dir(&self, location: &Path) -> AppResult {
-        std::fs::create_dir_all(location).context("Could ensure a specific folder exits")?;
+    fn ensure_dir(&self, location: &Path) -> AppIoResult {
+        std::fs::create_dir_all(location)?;
         debug!("Ensured that folder {:?} exits", location);
         Ok(())
     }
 
-    fn try_exits(&self, location: &Path) -> AppResult<bool> {
-        location
-            .try_exists()
-            .context("Could determine if file exits")
+    fn try_exits(&self, location: &Path) -> AppIoResult<bool> {
+        let exits = location.try_exists()?;
+        Ok(exits)
     }
 
-    fn list_first_level_dir(&self, location: &Path) -> AppResult<Vec<PathBuf>> {
+    fn list_first_level_dir(&self, location: &Path) -> AppIoResult<Vec<PathBuf>> {
         let mut directories: Vec<PathBuf> = Vec::new();
         for entry in std::fs::read_dir(location)? {
             let next = entry?;
@@ -58,9 +57,9 @@ impl FileManipulator for OsFileManipulator {
         Ok(directories)
     }
 
-    fn all_nodes_at(&self, location: &Path) -> AppResult<Vec<FileNode>> {
-        let mut to_return: Vec<FileNode> = Vec::new();
-        let mut buffer: VecDeque<FileNode> = Default::default();
+    fn all_nodes_at(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>> {
+        let mut to_return: Vec<FileNodeMeta> = Vec::new();
+        let mut buffer: VecDeque<FileNodeMeta> = Default::default();
         walk_level_of(location, &mut buffer)?;
         while let Some(next) = buffer.pop_front() {
             walk_level_of(next.source_path(), &mut buffer)?;
@@ -69,15 +68,30 @@ impl FileManipulator for OsFileManipulator {
 
         return Ok(to_return);
 
-        fn walk_level_of(path: &Path, buffer: &mut VecDeque<FileNode>) -> AppResult {
+        fn walk_level_of(path: &Path, buffer: &mut VecDeque<FileNodeMeta>) -> AppIoResult {
             for entry in std::fs::read_dir(path)? {
                 let next = entry?;
                 let file_kind: FileKind = next.file_type()?.try_into()?;
                 let path = next.path();
-                let file_node = FileNode::new(file_kind, path);
+                let file_node = FileNodeMeta::new(file_kind, path);
                 buffer.push_back(file_node);
             }
             Ok(())
         }
+    }
+
+    fn delete_whole_folder(&self, location: &Path) -> AppIoResult {
+        std::fs::remove_dir_all(location)?;
+        info!("Deleted folder with all its content at {:?}", location);
+        Ok(())
+    }
+
+    fn write_file_to(&self, location: &Path, content: &str) -> AppIoResult {
+        debug!(
+            "Wrote to file folder with all its content at {:?}",
+            location
+        );
+        std::fs::write(location, content)?;
+        Ok(())
     }
 }

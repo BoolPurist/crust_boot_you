@@ -147,7 +147,8 @@ fn save_template(
             "Copying from source path {:?} to target path {:?}",
             source_path, target_path,
         );
-        file_manipulator.copy_dir(source_path, &target_path)
+        file_manipulator.copy_dir(source_path, &target_path)?;
+        Ok(())
     }
 
     fn handle_file(
@@ -169,7 +170,8 @@ fn save_template(
             "Copying from source path {:?} to target path {:?}",
             source_path, target_path,
         );
-        file_manipulator.copy_file(source_path, &target_path)
+        file_manipulator.copy_file(source_path, &target_path)?;
+        Ok(())
     }
 }
 
@@ -315,7 +317,7 @@ mod testing {
             .expect_try_exits()
             .times(1)
             .withf(move |to_check| to_check == assumed_template_entry_path)
-            .returning(|_| bail!("a"));
+            .returning(|_| Err(AppIoError::custom("a")));
         let args = LoadTemplateArg::new(name, InitKind::default());
         handle_load_template(paths, files, &args).unwrap_err();
     }

@@ -6,7 +6,10 @@ mod dev_os_file_manipulator;
 mod dry_file_manipulator;
 mod os_file_manipulator;
 
-use crate::{file_management::FileNode, prelude::*};
+use crate::{
+    file_management::{FileNodeMeta, LoadedNode},
+    prelude::*,
+};
 use std::path::{Path, PathBuf};
 
 use super::path_provider::get_root_dev;
@@ -23,14 +26,29 @@ pub fn panic_if_outside_tmp(path: &Path) {
 
 #[cfg_attr(test, automock)]
 pub trait FileManipulator {
-    fn copy_file(&self, from: &Path, to: &Path) -> AppResult;
-    fn copy_dir(&self, from: &Path, to: &Path) -> AppResult;
-    fn ensure_dir(&self, location: &Path) -> AppResult;
-    fn try_exits(&self, location: &Path) -> AppResult<bool>;
-    fn list_first_level_dir(&self, location: &Path) -> AppResult<Vec<PathBuf>>;
-    fn is_existing_folder_empty(&self, location: &Path) -> AppResult<bool> {
-        let entries = self.list_first_level_dir(location)?;
-        Ok(entries.is_empty())
+    fn copy_file(&self, from: &Path, to: &Path) -> AppIoResult;
+    fn copy_dir(&self, from: &Path, to: &Path) -> AppIoResult;
+    fn ensure_dir(&self, location: &Path) -> AppIoResult;
+    fn try_exits(&self, location: &Path) -> AppIoResult<bool>;
+    fn list_first_level_dir(&self, location: &Path) -> AppIoResult<Vec<PathBuf>>;
+    fn delete_whole_folder(&self, location: &Path) -> AppIoResult;
+    fn all_nodes_at(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>>;
+    fn write_file_to(&self, location: &Path, content: &str) -> AppIoResult;
+
+    fn no_filled_folder_there(&self, location: &Path) -> AppIoResult<bool> {
+        let exits = self.try_exits(location)?;
+        if exits {
+            let entries = self.list_first_level_dir(location)?;
+            Ok(entries.is_empty())
+        } else {
+            Ok(true)
+        }
     }
-    fn all_nodes_at(&self, location: &Path) -> AppResult<Vec<FileNode>>;
+
+    fn write_node(&self, loaded: LoadedNode) -> AppIoResult {
+        match loaded {
+            LoadedNode::File { path, content } => self.write_file_to(&path, &content),
+            LoadedNode::Folder { path } => self.ensure_dir(&path),
+        }
+    }
 }

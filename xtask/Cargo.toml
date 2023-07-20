@@ -1,0 +1,15 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+simplelog = { workspace = true }
+serde = { workspace = true }
+ron = "0.8.0"
+crust_boot_you = { path = "../" }

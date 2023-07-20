@@ -5,9 +5,11 @@ pub use dev_path_provider::DevPathProvider;
 mod test_path_provider;
 #[cfg(test)]
 pub use test_path_provider::TestPathProvider;
+
 pub fn get_root_dev() -> PathBuf {
     std::env::temp_dir().join(constants::dev::TMP_ROOT)
 }
+
 #[cfg_attr(test, automock)]
 pub trait PathProvider {
     fn data(&self) -> PathResult;

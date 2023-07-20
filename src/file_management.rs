@@ -4,12 +4,14 @@ use anyhow::Context;
 
 use crate::prelude::*;
 
-pub use file_node::FileNode;
-pub use read_source_target_node::{AugementedeTargetNode, ReadTargetNode};
+pub use file_node::FileNodeMeta;
+pub use loaded_node::LoadedNode;
+pub use os_io_error::AppIoError;
 pub use source_target_node::SourceTargetNode;
 
 mod file_node;
-mod read_source_target_node;
+mod loaded_node;
+mod os_io_error;
 mod source_target_node;
 
 #[derive(Debug)]
@@ -20,7 +22,7 @@ pub enum FileKind {
 }
 
 impl TryFrom<FileType> for FileKind {
-    type Error = AppError;
+    type Error = AppIoError;
     fn try_from(value: FileType) -> Result<Self, Self::Error> {
         let os_file_type = value;
         if os_file_type.is_dir() {
@@ -30,7 +32,10 @@ impl TryFrom<FileType> for FileKind {
         } else if os_file_type.is_symlink() {
             Ok(FileKind::Symlink)
         } else {
-            Err(anyhow!("File type {:?} is not supported", os_file_type))
+            Err(AppIoError::Custom(format!(
+                "File type {:?} is not supported",
+                os_file_type
+            )))
         }
     }
 }
@@ -40,7 +45,9 @@ pub fn detect_file_kind(path: &Path) -> AppResult<FileKind> {
         .with_context(|| format!("Could extract meta data from {:?}", path))?;
 
     let os_file_type = file_meta.file_type();
-    os_file_type.try_into()
+    os_file_type
+        .try_into()
+        .context("Could not detect file type")
 }
 
 pub fn construct_file_target_path(
