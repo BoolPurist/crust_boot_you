@@ -83,7 +83,6 @@ impl FileManipulator for OsFileManipulator {
     }
 
     fn delete_whole_folder(&self, location: &Path) -> AppIoResult {
-        dbg!(location);
         std::fs::remove_dir_all(location)?;
         info!("Deleted folder with all its content at {:?}", location);
         Ok(())

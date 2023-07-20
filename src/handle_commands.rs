@@ -37,7 +37,6 @@ fn handle_delete_template(
     name: &NotEmptyText,
 ) -> ReturnToUser {
     let path_to_delete = path_provider.specific_entry_template(name)?;
-    dbg!(&path_to_delete);
     match file_manipulator.delete_whole_folder(&path_to_delete) {
         Ok(_) => {
             let message = success_delete_msg(&name);

@@ -1,7 +1,7 @@
 use colored::Colorize;
 use once_cell::sync::Lazy;
 use std::path::Path;
-const PROJECT_ROOT: &str = env!("CARGO_MANIFEST_DIR");
+pub const PROJECT_ROOT: &str = env!("CARGO_MANIFEST_DIR");
 
 pub static DRY_LABEL: Lazy<String> = Lazy::new(|| "DRY:".blue().to_string());
 pub static SUCCESS_LABEL: Lazy<String> = Lazy::new(|| "SUCCESS:".green().to_string());
