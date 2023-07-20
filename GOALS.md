@@ -1,9 +1,5 @@
 # Features
 
-### 0.1.2
-
-- Delete template by give name
-
 ### 0.1.3
 
 - Make places in files markable as placeholders which are filled during creation

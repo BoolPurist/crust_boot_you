@@ -13,7 +13,9 @@ CWD: current working directory
 
 ### Added 
 
-- Added dry option. If true writing operation are not executed and only the write would-be steps are described .
+- Added dry option. If true writing operation are not executed and only the write would-be steps are described.
+- Subcommand to delete a template. 
+
 ### Changed 
 
 - CWD is tmp/crust_you_boot during development mode
