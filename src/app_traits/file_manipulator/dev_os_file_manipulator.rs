@@ -3,6 +3,7 @@ use crate::{app_traits::path_provider::get_root_dev, file_management::FileNodeMe
 use super::OsFileManipulator;
 #[derive(Debug)]
 pub struct DevOsFileManipulator {
+    init_system: Option<PathBuf>,
     allowed_root: PathBuf,
     os_impl: OsFileManipulator,
 }
@@ -10,19 +11,38 @@ pub struct DevOsFileManipulator {
 impl Default for DevOsFileManipulator {
     fn default() -> Self {
         Self {
+            init_system: None,
             allowed_root: get_root_dev(),
             os_impl: Default::default(),
         }
     }
-}
+} 
 
 impl DevOsFileManipulator {
     pub fn new(allowed_root: &Path) -> Self {
         Self {
+            init_system: None, 
             allowed_root: allowed_root.to_path_buf(),
             os_impl: OsFileManipulator,
         }
     }
+
+    pub fn init_system(mut self, init_system: PathBuf) -> Self {
+        self.init_system = Some(init_system);
+        self
+    }
+    
+    pub fn init_copy_to(&self, to: &Path) -> AppResult {
+       match &self.init_system {
+         None => panic!("There is not init system to load from !"),
+         Some(from) => {
+                self.panic_if_outside_root(to);
+                self.os_impl.copy_dir(&from, to)?;
+            }
+       };
+        
+       Ok(())
+    } 
 
     fn check_to_and_from(&self, from: &Path, to: &Path) {
         self.panic_if_outside_root(from);

@@ -10,6 +10,4 @@ clap = { workspace = true }
 anyhow = { workspace = true }
 log = { workspace = true }
 simplelog = { workspace = true }
-serde = { workspace = true }
-ron = "0.8.0"
 crust_boot_you = { path = "../" }

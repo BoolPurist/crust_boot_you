@@ -19,7 +19,7 @@ impl PathProvider for DevPathProvider {
     }
 
     fn cwd(&self) -> PathResult {
-        let cwd = super::get_root_dev().join(constants::dev::TMP_CWD_FOLDE);
+        let cwd = super::get_root_dev();
         info!("Using temp folder as cwd !");
         info!("Cwd: {:?}", &cwd);
         Ok(cwd)

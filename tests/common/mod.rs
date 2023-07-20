@@ -28,7 +28,7 @@ const FOR_TEST_DIR_ASSERT: &str = "for_test_dir_assert";
 const TEST_DATA_SETUPS: &str = "test_data_setups";
 
 static DATA_TEST_ROOT: Lazy<PathBuf> =
-    Lazy::new(|| constants::PROJECT_ROOT_PATH.join(TEST_DATA_SETUPS));
+    Lazy::new(|| Path::new(constants::project_root()).join(TEST_DATA_SETUPS));
 static DATA_APP_TEST_ROOT: Lazy<PathBuf> = Lazy::new(|| DATA_TEST_ROOT.join(APP_TEST_CASES));
 static DATA_TEST_DIR_ASSERT: Lazy<PathBuf> = Lazy::new(|| DATA_TEST_ROOT.join(FOR_TEST_DIR_ASSERT));
 
