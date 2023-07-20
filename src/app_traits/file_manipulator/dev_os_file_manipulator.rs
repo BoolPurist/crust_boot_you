@@ -39,9 +39,9 @@ impl FileManipulator for DevOsFileManipulator {
         self.os_impl.list_first_level_dir(location)
     }
 
-    fn all_nodes_at(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>> {
+    fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>> {
         panic_if_outside_tmp(location);
-        self.os_impl.all_nodes_at(location)
+        self.os_impl.all_nodes_inside(location)
     }
 
     fn delete_whole_folder(&self, location: &Path) -> AppIoResult {

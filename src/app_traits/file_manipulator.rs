@@ -32,7 +32,7 @@ pub trait FileManipulator {
     fn try_exits(&self, location: &Path) -> AppIoResult<bool>;
     fn list_first_level_dir(&self, location: &Path) -> AppIoResult<Vec<PathBuf>>;
     fn delete_whole_folder(&self, location: &Path) -> AppIoResult;
-    fn all_nodes_at(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>>;
+    fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>>;
     fn write_file_to(&self, location: &Path, content: &str) -> AppIoResult;
 
     fn no_filled_folder_there(&self, location: &Path) -> AppIoResult<bool> {

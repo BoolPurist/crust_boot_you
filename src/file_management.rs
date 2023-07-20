@@ -1,7 +1,5 @@
 use std::{fs::FileType, path::Path};
 
-use anyhow::Context;
-
 use crate::prelude::*;
 
 pub use file_node::FileNodeMeta;
@@ -38,16 +36,6 @@ impl TryFrom<FileType> for FileKind {
             )))
         }
     }
-}
-
-pub fn requires_as_folder(location: &Path) -> AppIoResult {
-    let is_root_a_folder = detect_file_kind(location)
-        .map(|file_t| file_t == FileKind::Folder)
-        .unwrap_or(false);
-    if !is_root_a_folder {
-        return Err(AppIoError::custom(format!("{:?} is not folder", location)));
-    }
-    Ok(())
 }
 
 pub fn detect_file_kind(path: &Path) -> AppIoResult<FileKind> {

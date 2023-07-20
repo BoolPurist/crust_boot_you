@@ -6,7 +6,7 @@ use std::{
 use fs_extra::dir::CopyOptions;
 
 use crate::{
-    file_management::{self, FileKind, FileNodeMeta},
+    file_management::{FileKind, FileNodeMeta},
     prelude::*,
 };
 
@@ -23,9 +23,6 @@ impl FileManipulator for OsFileManipulator {
     }
 
     fn copy_dir(&self, from: &Path, to: &Path) -> AppIoResult {
-        file_management::requires_as_folder(from)?;
-        file_management::requires_as_folder(to)?;
-
         _ = fs_extra::dir::copy(
             from,
             to,
@@ -36,8 +33,6 @@ impl FileManipulator for OsFileManipulator {
     }
 
     fn ensure_dir(&self, location: &Path) -> AppIoResult {
-        file_management::requires_as_folder(location)?;
-
         std::fs::create_dir_all(location)?;
         debug!("Ensured that folder {:?} exits", location);
         Ok(())
@@ -49,8 +44,6 @@ impl FileManipulator for OsFileManipulator {
     }
 
     fn list_first_level_dir(&self, location: &Path) -> AppIoResult<Vec<PathBuf>> {
-        file_management::requires_as_folder(location)?;
-
         let mut directories: Vec<PathBuf> = Vec::new();
         for entry in std::fs::read_dir(location)? {
             let next = entry?;
@@ -64,9 +57,7 @@ impl FileManipulator for OsFileManipulator {
         Ok(directories)
     }
 
-    fn all_nodes_at(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>> {
-        file_management::requires_as_folder(location)?;
-
+    fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>> {
         let mut to_return: Vec<FileNodeMeta> = Vec::new();
         let mut buffer: VecDeque<FileNodeMeta> = Default::default();
         walk_level_of(location, &mut buffer)?;
@@ -92,7 +83,6 @@ impl FileManipulator for OsFileManipulator {
     }
 
     fn delete_whole_folder(&self, location: &Path) -> AppIoResult {
-        file_management::requires_as_folder(location)?;
         std::fs::remove_dir_all(location)?;
         info!("Deleted folder with all its content at {:?}", location);
         Ok(())

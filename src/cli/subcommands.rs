@@ -6,6 +6,8 @@ mod load_template_arg;
 mod save_template;
 mod template_cli_arg;
 
+use crate::NotEmptyText;
+
 use super::AbsoluteExistingPath;
 pub use load_template_arg::LoadTemplateArg;
 pub use save_template::SaveTemplateCli;
@@ -17,8 +19,10 @@ pub enum SubCommands {
     SaveTemplate(SaveTemplateCli),
     #[clap(alias = "l")]
     LoadTemplate(LoadTemplateArg),
-    #[clap(alias = "lt")]
+    #[clap(alias = "tl")]
     ListTemplate,
+    #[clap(alias = "d")]
+    DeleteTemplate { name: NotEmptyText },
 }
 
 fn check_if_exits(input: &str) -> Result<AbsoluteExistingPath, String> {

@@ -38,8 +38,8 @@ impl FileManipulator for DryFileManipulator {
         self.os_imp.list_first_level_dir(location)
     }
 
-    fn all_nodes_at(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>> {
-        self.os_imp.all_nodes_at(location)
+    fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>> {
+        self.os_imp.all_nodes_inside(location)
     }
 
     fn delete_whole_folder(&self, location: &Path) -> AppIoResult {

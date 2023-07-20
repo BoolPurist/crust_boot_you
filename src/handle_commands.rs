@@ -19,7 +19,43 @@ pub fn handle(
             handle_save_template(path_provider, file_manipulator, args)
         }
         SubCommands::ListTemplate => handle_list_template(path_provider, file_manipulator),
+        SubCommands::DeleteTemplate { name } => {
+            handle_delete_template(path_provider, file_manipulator, &name)
+        }
     }
+}
+
+fn handle_delete_template(
+    path_provider: impl PathProvider,
+    file_manipulator: impl FileManipulator,
+    name: &NotEmptyText,
+) -> ReturnToUser {
+    let path_to_delete = path_provider.specific_entry_template_files(name)?;
+    match file_manipulator.delete_whole_folder(&path_to_delete) {
+        Ok(_) => {
+            let message = success_delete_msg(&name);
+            Ok(message)
+        }
+        Err(AppIoError::NotFound) => bail!(error_delete_msg_not_found(name)),
+        Err(error) => bail!(error_delet_msg_other_err(name, error)),
+    }
+}
+
+fn success_delete_msg(name: &NotEmptyText) -> String {
+    format!("Template ({}) was deleted.", name.as_ref())
+}
+fn error_delete_msg_not_found(name: &NotEmptyText) -> String {
+    format!(
+        "There is no template to be deleted with the name ({}).",
+        name
+    )
+}
+
+fn error_delet_msg_other_err(name: &NotEmptyText, error: AppIoError) -> String {
+    format!(
+        "Could not delete template ({}) because of an error.\n{}",
+        name, error
+    )
 }
 
 fn handle_list_template(
@@ -62,8 +98,13 @@ fn handle_load_template(
         _ => (),
     }
 
-    let cwd = path_provider.cwd()?;
-    file_manipulator.copy_dir(&path_to_template, &cwd)?;
+    let cwd = path_provider
+        .cwd()
+        .context("Can not access current working directory. No target to copy to")?;
+
+    file_manipulator
+        .copy_dir(&path_to_template, &cwd)
+        .with_context(|| format!("Failed to copy from {:?} to {:?}", path_to_template, cwd))?;
 
     Ok(format!(
         "Folder {:?} filled with content from Template ({})",
@@ -180,7 +221,7 @@ fn save_template(
 mod testing {
     use super::*;
     use pretty_assertions::assert_eq;
-    use std::path::PathBuf;
+    use std::{io, path::PathBuf};
 
     use crate::{
         app_traits::{
@@ -408,5 +449,56 @@ mod testing {
         let output = handle_list_template(paths, files).unwrap();
         let expected_ouput = format!("{}\nrust\npython\n", constants::TITLE_LIST_RESULT);
         assert_eq!(expected_ouput, output);
+    }
+
+    fn setup_act_assert_delete(
+        expected_delete_return: AppIoResult,
+        given_name: NotEmptyText,
+    ) -> ReturnToUser {
+        let mut path_provider = MockPathProvider::default();
+
+        let mut file_manipulator = MockFileManipulator::default();
+
+        let expected_template_path = PathBuf::from("/some/data").join(given_name.as_ref());
+        let expected_target_path = expected_template_path.clone();
+        let expected_name = given_name.clone();
+        path_provider
+            .expect_specific_entry_template_files()
+            .times(1)
+            .withf(move |actual_name| *actual_name == expected_name)
+            .return_once(|_| Ok(expected_template_path));
+        file_manipulator
+            .expect_delete_whole_folder()
+            .withf(move |actual_target_folder| actual_target_folder == expected_target_path)
+            .return_once(move |_| expected_delete_return);
+        handle_delete_template(path_provider, file_manipulator, &given_name)
+    }
+
+    #[test]
+    fn delete_template() {
+        let given_name = NotEmptyText::new("to_delete".to_string()).unwrap();
+        let expected_message = format!("Template ({}) was deleted.", given_name.as_ref());
+        let message = setup_act_assert_delete(Ok(()), given_name).unwrap();
+        assert_eq!(expected_message, message);
+    }
+    #[test]
+    fn delete_err_if_no_template() {
+        let given_name = NotEmptyText::new("not_there".to_string()).unwrap();
+        let expected_message = error_delete_msg_not_found(&given_name);
+        let message = setup_act_assert_delete(Err(AppIoError::NotFound), given_name).unwrap_err();
+        assert_eq!(expected_message, message.to_string());
+    }
+    #[test]
+    fn delete_some_other_err() {
+        let given_name = NotEmptyText::new("not_there".to_string()).unwrap();
+
+        let error = io::Error::new(io::ErrorKind::Other, "some error").into();
+        let expected_message = error_delet_msg_other_err(&given_name, error);
+        let message = setup_act_assert_delete(
+            Err(io::Error::new(io::ErrorKind::Other, "some error").into()),
+            given_name,
+        )
+        .unwrap_err();
+        assert_eq!(expected_message, message.to_string());
     }
 }
