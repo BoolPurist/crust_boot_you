@@ -100,7 +100,7 @@ fn handle_save_template(
 fn save_template(
     path_provider: impl PathProvider,
     file_manipulator: impl FileManipulator,
-    on_detect_file_kind: impl Fn(&Path) -> AppResult<FileKind>,
+    on_detect_file_kind: impl Fn(&Path) -> AppIoResult<FileKind>,
     name: &NotEmptyText,
     source_path: impl AsRef<Path>,
 ) -> ReturnToUser {
@@ -284,7 +284,7 @@ mod testing {
     #[test]
     fn may_not_manipulate_files_if_no_detect_file_kind() {
         let name: NotEmptyText = NotEmptyText::new("Some_Name".to_owned()).unwrap();
-        let on_detect_file_kind = |_: &_| Err(anyhow!(""));
+        let on_detect_file_kind = |_: &_| Err(AppIoError::custom(""));
         let source_path = PathBuf::from("some/source");
 
         let path_fetcher = MockPathProvider::default();

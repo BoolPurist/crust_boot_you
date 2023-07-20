@@ -14,7 +14,7 @@ mod loaded_node;
 mod os_io_error;
 mod source_target_node;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum FileKind {
     File,
     Folder,
@@ -40,14 +40,21 @@ impl TryFrom<FileType> for FileKind {
     }
 }
 
-pub fn detect_file_kind(path: &Path) -> AppResult<FileKind> {
-    let file_meta = std::fs::metadata(path)
-        .with_context(|| format!("Could extract meta data from {:?}", path))?;
+pub fn requires_as_folder(location: &Path) -> AppIoResult {
+    let is_root_a_folder = detect_file_kind(location)
+        .map(|file_t| file_t == FileKind::Folder)
+        .unwrap_or(false);
+    if !is_root_a_folder {
+        return Err(AppIoError::custom(format!("{:?} is not folder", location)));
+    }
+    Ok(())
+}
+
+pub fn detect_file_kind(path: &Path) -> AppIoResult<FileKind> {
+    let file_meta = std::fs::metadata(path)?;
 
     let os_file_type = file_meta.file_type();
-    os_file_type
-        .try_into()
-        .context("Could not detect file type")
+    os_file_type.try_into()
 }
 
 pub fn construct_file_target_path(

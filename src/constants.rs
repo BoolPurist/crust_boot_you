@@ -1,7 +1,10 @@
+use colored::Colorize;
 use once_cell::sync::Lazy;
 use std::path::Path;
 const PROJECT_ROOT: &str = env!("CARGO_MANIFEST_DIR");
 
+pub static DRY_LABEL: Lazy<String> = Lazy::new(|| "DRY:".blue().to_string());
+pub static SUCCESS_LABEL: Lazy<String> = Lazy::new(|| "SUCCESS:".green().to_string());
 pub static PROJECT_ROOT_PATH: Lazy<&Path> = Lazy::new(|| Path::new(PROJECT_ROOT));
 
 pub const TEMPLATES_FOLDER: &str = "templates";

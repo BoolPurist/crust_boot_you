@@ -22,4 +22,8 @@ impl FileNodeMeta {
     pub fn source_path(&self) -> &Path {
         self.source_path.as_path()
     }
+
+    pub fn node_type(&self) -> &FileKind {
+        &self.node_type
+    }
 }
