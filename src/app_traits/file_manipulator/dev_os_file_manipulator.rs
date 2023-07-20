@@ -16,12 +16,12 @@ impl Default for DevOsFileManipulator {
             os_impl: Default::default(),
         }
     }
-} 
+}
 
 impl DevOsFileManipulator {
     pub fn new(allowed_root: &Path) -> Self {
         Self {
-            init_system: None, 
+            init_system: None,
             allowed_root: allowed_root.to_path_buf(),
             os_impl: OsFileManipulator,
         }
@@ -31,30 +31,30 @@ impl DevOsFileManipulator {
         self.init_system = Some(init_system);
         self
     }
-    
+
     pub fn init_copy_to(&self, to: &Path) -> AppResult {
-       match &self.init_system {
-         None => panic!("There is not init system to load from !"),
-         Some(from) => {
+        match &self.init_system {
+            None => panic!("There is not init system to load from !"),
+            Some(from) => {
                 self.panic_if_outside_root(to);
-                self.os_impl.copy_dir(&from, to)?;
+                self.os_impl.copy_dir(from, to)
             }
-       };
-        
-       Ok(())
-    } 
+        }?;
+
+        Ok(())
+    }
 
     fn check_to_and_from(&self, from: &Path, to: &Path) {
         self.panic_if_outside_root(from);
         self.panic_if_outside_root(to);
     }
-    
+
     fn panic_if_outside_root(&self, path: &Path) {
         let root = &self.allowed_root;
         if !path.starts_with(root) {
             panic!(
             "Path {:?} is outside of temp folder root {:?}.\n This is not allowed during development",
-            path, root 
+            path, root
         );
         }
     }

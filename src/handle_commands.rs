@@ -19,14 +19,14 @@ pub fn handle(
 ) -> ReturnToUser {
     match args.sub_commands() {
         SubCommands::LoadTemplate(args) => {
-            handle_load_template(path_provider, file_manipulator, &args)
+            handle_load_template(path_provider, file_manipulator, args)
         }
         SubCommands::SaveTemplate(args) => {
             handle_save_template(path_provider, file_manipulator, args)
         }
         SubCommands::ListTemplate => handle_list_template(path_provider, file_manipulator),
         SubCommands::DeleteTemplate { name } => {
-            handle_delete_template(path_provider, file_manipulator, &name)
+            handle_delete_template(path_provider, file_manipulator, name)
         }
     }
 }
@@ -39,7 +39,7 @@ fn handle_delete_template(
     let path_to_delete = path_provider.specific_entry_template(name)?;
     match file_manipulator.delete_whole_folder(&path_to_delete) {
         Ok(_) => {
-            let message = success_delete_msg(&name);
+            let message = success_delete_msg(name);
             Ok(message)
         }
         Err(AppIoError::NotFound) => bail!(error_delete_msg_not_found(name)),
@@ -203,7 +203,7 @@ fn save_template(
             "Copying from source path {:?} to target path {:?}",
             source_path, target_path,
         );
-        file_manipulator.copy_dir(source_path, &target_path)?;
+        file_manipulator.copy_dir(source_path, target_path)?;
         Ok(())
     }
 

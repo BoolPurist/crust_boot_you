@@ -57,9 +57,6 @@ fn handle_result_from_command(output: AppResult<String>, args: &AppCliEntry) -> 
 
 fn is_rust_backtrace_on() -> bool {
     std::env::var("RUST_BACKTRACE")
-        .map(|var| match var.as_str() {
-            "1" | "full" => true,
-            _ => false,
-        })
+        .map(|var| matches!(var.as_str(), "1" | "full"))
         .unwrap_or(false)
 }
