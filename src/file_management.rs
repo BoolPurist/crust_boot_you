@@ -57,13 +57,3 @@ pub fn construct_file_target_path(
     let file_name = &Path::new(file_name);
     Ok(ensured_template_folder.join(file_name))
 }
-
-pub fn ensure_target_template_folder(
-    path_provider: &impl PathProvider,
-    file_manipulator: &impl FileManipulator,
-    template_name: &NotEmptyText,
-) -> PathResult {
-    let specific_template_folder = path_provider.specific_entry_template_files(template_name)?;
-    file_manipulator.ensure_dir(&specific_template_folder)?;
-    Ok(specific_template_folder)
-}

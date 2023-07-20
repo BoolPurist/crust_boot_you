@@ -6,6 +6,12 @@ use crate::{
 };
 use std::path::Path;
 
+#[cfg(test)]
+mod testing_handling_of_commands;
+fn save_err_already_created_template(name: &NotEmptyText) -> String {
+    format!("Template with the name ({}) is already created", name)
+}
+
 pub fn handle(
     path_provider: impl PathProvider,
     file_manipulator: impl FileManipulator,
@@ -30,7 +36,8 @@ fn handle_delete_template(
     file_manipulator: impl FileManipulator,
     name: &NotEmptyText,
 ) -> ReturnToUser {
-    let path_to_delete = path_provider.specific_entry_template_files(name)?;
+    let path_to_delete = path_provider.specific_entry_template(name)?;
+    dbg!(&path_to_delete);
     match file_manipulator.delete_whole_folder(&path_to_delete) {
         Ok(_) => {
             let message = success_delete_msg(&name);
@@ -128,6 +135,12 @@ fn handle_save_template(
     )
 }
 
+fn success_save_msg(name: &NotEmptyText, file_kind: &str, source_path: &Path) -> String {
+    format!(
+        "Created template with name ({}) from the {} {:?}",
+        name, file_kind, source_path,
+    )
+}
 /// Creates tempate with its file inside of data folde of app.
 /// Note: If executed for already saved template folder then file may be overriden in the template
 /// by new files with the same name
@@ -149,15 +162,26 @@ fn save_template(
     let (source_path, template_name) = (source_path.as_ref(), name);
     info!("Copying from {:?}", source_path);
 
+    {
+        let template_path = path_provider.specific_entry_template(template_name)?;
+
+        let exits = file_manipulator.try_exits(&template_path)?;
+        if exits {
+            bail!(save_err_already_created_template(template_name));
+        }
+    }
+
     let file_type = on_detect_file_kind(source_path)?;
+
+    let path_to_target_files = path_provider.specific_entry_template_files(template_name)?;
 
     let file_kind = match file_type {
         FileKind::File => {
-            handle_file(path_provider, file_manipulator, template_name, source_path)?;
+            handle_file(file_manipulator, &path_to_target_files, source_path)?;
             "file"
         }
         FileKind::Folder => {
-            handle_dir(path_provider, file_manipulator, template_name, source_path)?;
+            handle_dir(file_manipulator, &path_to_target_files, source_path)?;
             "folder"
         }
         FileKind::Symlink => {
@@ -165,25 +189,17 @@ fn save_template(
         }
     };
 
-    let msg_to_user = format!(
-        "Created template with name ({}) from the {} {:?}",
-        name, file_kind, source_path,
-    );
+    let msg_to_user = success_save_msg(name, file_kind, source_path);
 
     return Ok(msg_to_user);
 
     fn handle_dir(
-        path_provider: impl PathProvider,
         file_manipulator: impl FileManipulator,
-        template_name: &NotEmptyText,
+        target_path: &Path,
         source_path: &Path,
     ) -> AppResult {
         debug!("Detected {:?} as folder", source_path);
-        let target_path = file_management::ensure_target_template_folder(
-            &path_provider,
-            &file_manipulator,
-            template_name,
-        )?;
+        file_manipulator.ensure_dir(target_path)?;
         debug!(
             "Copying from source path {:?} to target path {:?}",
             source_path, target_path,
@@ -193,312 +209,19 @@ fn save_template(
     }
 
     fn handle_file(
-        path_provider: impl PathProvider,
         file_manipulator: impl FileManipulator,
-        template_name: &NotEmptyText,
+        template_path: &Path,
         source_path: &Path,
     ) -> AppResult {
         debug!("Detected {:?} as file", source_path);
-        let ensured_template_folder = file_management::ensure_target_template_folder(
-            &path_provider,
-            &file_manipulator,
-            template_name,
-        )?;
+        file_manipulator.ensure_dir(template_path)?;
 
-        let target_path =
-            file_management::construct_file_target_path(source_path, &ensured_template_folder)?;
+        let target_path = file_management::construct_file_target_path(source_path, template_path)?;
         debug!(
             "Copying from source path {:?} to target path {:?}",
             source_path, target_path,
         );
         file_manipulator.copy_file(source_path, &target_path)?;
         Ok(())
-    }
-}
-
-#[cfg(test)]
-
-mod testing {
-    use super::*;
-    use pretty_assertions::assert_eq;
-    use std::{io, path::PathBuf};
-
-    use crate::{
-        app_traits::{
-            file_manipulator::MockFileManipulator,
-            path_provider::{MockPathProvider, TestPathProvider},
-        },
-        cli::InitKind,
-    };
-
-    #[test]
-    fn create_template_from_one_file() {
-        let data_folder = PathBuf::from("user").join("data");
-        let name: NotEmptyText = NotEmptyText::new("Some_Name".to_owned()).unwrap();
-        let on_detect_file_kind = |_: &_| Ok(FileKind::File);
-        let source_path = PathBuf::from("some/source");
-        let paths =
-            TestPathProvider::new(data_folder.clone(), PathBuf::from("a"), PathBuf::from("a"));
-        let expected_ensured_template_folder = paths.specific_entry_template_files(&name).unwrap();
-        let expected_target_folder = expected_ensured_template_folder.join("source");
-        let expected_error_message =
-            "Created template with name (Some_Name) from the file \"some/source\"".to_string();
-
-        let file_manipulator = {
-            let mut file_manipulator = MockFileManipulator::default();
-            file_manipulator
-                .expect_ensure_dir()
-                .times(1)
-                .withf(move |param| param == expected_ensured_template_folder)
-                .returning(|_| Ok(()));
-
-            let expected_source_path = source_path.clone();
-            file_manipulator
-                .expect_copy_file()
-                .times(1)
-                .withf(move |actual_source_path, actual_target_folder| {
-                    actual_source_path == expected_source_path
-                        && actual_target_folder == expected_target_folder
-                })
-                .returning(|_, _| Ok(()));
-
-            file_manipulator
-        };
-
-        let output = save_template(
-            paths,
-            file_manipulator,
-            on_detect_file_kind,
-            &name,
-            &source_path,
-        )
-        .unwrap();
-
-        assert_eq!(expected_error_message, output);
-    }
-    #[test]
-    fn create_template_from_folder() {
-        let data_folder = PathBuf::from("user").join("data");
-        let name: NotEmptyText = NotEmptyText::new("Some_Name".to_owned()).unwrap();
-        let on_detect_file_kind = |_: &_| Ok(FileKind::Folder);
-        let source_path = PathBuf::from("some/source");
-        let expected_error_message =
-            "Created template with name (Some_Name) from the folder \"some/source\"".to_string();
-
-        let paths =
-            TestPathProvider::new(data_folder.clone(), PathBuf::from("a"), PathBuf::from("a"));
-        let expected_ensured_template_folder = paths.specific_entry_template_files(&name).unwrap();
-        let expected_target_folder = expected_ensured_template_folder.clone();
-
-        let file_manipulator = {
-            let mut file_manipulator = MockFileManipulator::default();
-            file_manipulator
-                .expect_ensure_dir()
-                .times(1)
-                .withf(move |param| param == expected_ensured_template_folder)
-                .returning(|_| Ok(()));
-
-            let expected_source_path = source_path.clone();
-            file_manipulator
-                .expect_copy_dir()
-                .times(1)
-                .withf(move |actual_source_path, actual_target_folder| {
-                    actual_source_path == expected_source_path
-                        && actual_target_folder == expected_target_folder
-                })
-                .returning(|_, _| Ok(()));
-
-            file_manipulator
-        };
-
-        let output = save_template(
-            paths,
-            file_manipulator,
-            on_detect_file_kind,
-            &name,
-            &source_path,
-        )
-        .unwrap();
-
-        assert_eq!(expected_error_message, output);
-    }
-    #[test]
-    fn may_not_manipulate_files_if_no_detect_file_kind() {
-        let name: NotEmptyText = NotEmptyText::new("Some_Name".to_owned()).unwrap();
-        let on_detect_file_kind = |_: &_| Err(AppIoError::custom(""));
-        let source_path = PathBuf::from("some/source");
-
-        let path_fetcher = MockPathProvider::default();
-
-        let file_manipulator = MockFileManipulator::default();
-
-        save_template(
-            path_fetcher,
-            file_manipulator,
-            on_detect_file_kind,
-            &name,
-            &source_path,
-        )
-        .unwrap_err();
-    }
-
-    #[test]
-    fn load_err_bail_for_source_path_not_querable() {
-        let data_folder = PathBuf::from("/some/data");
-        let paths = TestPathProvider::new(
-            data_folder.clone(),
-            data_folder.clone(),
-            data_folder.clone(),
-        );
-        let name = NotEmptyText::new("I am not ther".to_string()).unwrap();
-        let assumed_template_entry_path = paths.specific_entry_template_files(&name).unwrap();
-        let mut files = MockFileManipulator::default();
-
-        files
-            .expect_try_exits()
-            .times(1)
-            .withf(move |to_check| to_check == assumed_template_entry_path)
-            .returning(|_| Err(AppIoError::custom("a")));
-        let args = LoadTemplateArg::new(name, InitKind::default());
-        handle_load_template(paths, files, &args).unwrap_err();
-    }
-
-    #[test]
-    fn load_err_bail_for_source_path_does_not_exits() {
-        let data_folder = PathBuf::from("/some/data");
-        let paths = TestPathProvider::new(
-            data_folder.clone(),
-            data_folder.clone(),
-            data_folder.clone(),
-        );
-        let name = NotEmptyText::new("I am not ther".to_string()).unwrap();
-        let mut files = MockFileManipulator::default();
-        let assumed_template_entry_path = paths.specific_entry_template_files(&name).unwrap();
-
-        files
-            .expect_try_exits()
-            .times(1)
-            .withf(move |to_check| to_check == assumed_template_entry_path)
-            .returning(|_| Ok(false));
-        let args = LoadTemplateArg::new(name, InitKind::default());
-        handle_load_template(paths, files, &args).unwrap_err();
-    }
-
-    #[test]
-    fn load_success_copy_template_to_source_path() {
-        let data_folder = PathBuf::from("/some/data");
-        let cwd = PathBuf::from("/coding/rust");
-        let paths = TestPathProvider::new(data_folder.clone(), data_folder.clone(), cwd.clone());
-        let name = NotEmptyText::new("AAA".to_string()).unwrap();
-        let assumed_template_entry_path = paths.specific_entry_template_files(&name).unwrap();
-        let expected_ensured_template_folder = assumed_template_entry_path.clone();
-
-        // Mocking
-        let mut files = MockFileManipulator::default();
-        files
-            .expect_try_exits()
-            .times(1)
-            .withf(move |to_check| to_check == assumed_template_entry_path)
-            .returning(|_| Ok(true));
-        let expected_target_location = cwd.clone();
-        files
-            .expect_copy_dir()
-            .times(1)
-            .withf(move |actual_source_path, actual_target_path| {
-                actual_source_path == expected_ensured_template_folder
-                    && actual_target_path == expected_target_location
-            })
-            .returning(|_, _| Ok(()));
-
-        // Act
-        let args = LoadTemplateArg::new(name.clone(), InitKind::default());
-        let output = handle_load_template(paths, files, &args).unwrap();
-
-        // Assert
-        let expected_output = format!(
-            "Folder {:?} filled with content from Template ({})",
-            cwd, name
-        );
-        assert_eq!(expected_output, output);
-    }
-
-    #[test]
-    fn list_should_return_all_templates() {
-        let mut paths = MockPathProvider::default();
-        let expected_template_entry = PathBuf::from("some/all_templates");
-        paths
-            .expect_general_template_entry()
-            .times(1)
-            .returning(|| Ok(PathBuf::from("some/all_templates")));
-        let mut files = MockFileManipulator::default();
-
-        let expected_ensure_template_entry = expected_template_entry.clone();
-        files
-            .expect_ensure_dir()
-            .times(1)
-            .withf(move |actual_template_entry| {
-                actual_template_entry == expected_ensure_template_entry
-            })
-            .returning(|_| Ok(()));
-        files
-            .expect_list_first_level_dir()
-            .times(1)
-            .withf(move |actual_listing_path| actual_listing_path == expected_template_entry)
-            .returning(|_| Ok(vec![PathBuf::from("rust"), PathBuf::from("python")]));
-
-        let output = handle_list_template(paths, files).unwrap();
-        let expected_ouput = format!("{}\nrust\npython\n", constants::TITLE_LIST_RESULT);
-        assert_eq!(expected_ouput, output);
-    }
-
-    fn setup_act_assert_delete(
-        expected_delete_return: AppIoResult,
-        given_name: NotEmptyText,
-    ) -> ReturnToUser {
-        let mut path_provider = MockPathProvider::default();
-
-        let mut file_manipulator = MockFileManipulator::default();
-
-        let expected_template_path = PathBuf::from("/some/data").join(given_name.as_ref());
-        let expected_target_path = expected_template_path.clone();
-        let expected_name = given_name.clone();
-        path_provider
-            .expect_specific_entry_template_files()
-            .times(1)
-            .withf(move |actual_name| *actual_name == expected_name)
-            .return_once(|_| Ok(expected_template_path));
-        file_manipulator
-            .expect_delete_whole_folder()
-            .withf(move |actual_target_folder| actual_target_folder == expected_target_path)
-            .return_once(move |_| expected_delete_return);
-        handle_delete_template(path_provider, file_manipulator, &given_name)
-    }
-
-    #[test]
-    fn delete_template() {
-        let given_name = NotEmptyText::new("to_delete".to_string()).unwrap();
-        let expected_message = format!("Template ({}) was deleted.", given_name.as_ref());
-        let message = setup_act_assert_delete(Ok(()), given_name).unwrap();
-        assert_eq!(expected_message, message);
-    }
-    #[test]
-    fn delete_err_if_no_template() {
-        let given_name = NotEmptyText::new("not_there".to_string()).unwrap();
-        let expected_message = error_delete_msg_not_found(&given_name);
-        let message = setup_act_assert_delete(Err(AppIoError::NotFound), given_name).unwrap_err();
-        assert_eq!(expected_message, message.to_string());
-    }
-    #[test]
-    fn delete_some_other_err() {
-        let given_name = NotEmptyText::new("not_there".to_string()).unwrap();
-
-        let error = io::Error::new(io::ErrorKind::Other, "some error").into();
-        let expected_message = error_delet_msg_other_err(&given_name, error);
-        let message = setup_act_assert_delete(
-            Err(io::Error::new(io::ErrorKind::Other, "some error").into()),
-            given_name,
-        )
-        .unwrap_err();
-        assert_eq!(expected_message, message.to_string());
     }
 }

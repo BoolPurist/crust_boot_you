@@ -27,9 +27,14 @@ pub trait PathProvider {
     }
 
     fn specific_entry_template_files(&self, template_name: &NotEmptyText) -> PathResult {
+        let named = self.specific_entry_template(template_name)?;
+        Ok(named.join(constants::FILES_FOLDER))
+    }
+
+    fn specific_entry_template(&self, template_name: &NotEmptyText) -> PathResult {
         let general_template_entry = self.general_template_entry()?;
         let named = general_template_entry.join(template_name.as_ref());
-        Ok(named.join(constants::FILES_FOLDER))
+        Ok(named)
     }
 
     fn template_meta(&self, template_name: &NotEmptyText) -> PathResult {
