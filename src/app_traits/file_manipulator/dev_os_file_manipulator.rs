@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{file_management::FileNode, prelude::*};
 
 use super::{panic_if_outside_tmp, OsFileManipulator};
 #[derive(Debug, Default)]
@@ -37,5 +37,10 @@ impl FileManipulator for DevOsFileManipulator {
     fn list_first_level_dir(&self, location: &Path) -> AppResult<Vec<PathBuf>> {
         panic_if_outside_tmp(location);
         self.os_impl.list_first_level_dir(location)
+    }
+
+    fn all_nodes_at(&self, location: &Path) -> AppResult<Vec<FileNode>> {
+        panic_if_outside_tmp(location);
+        self.os_impl.all_nodes_at(location)
     }
 }

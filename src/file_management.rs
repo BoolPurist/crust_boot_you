@@ -1,12 +1,38 @@
-use std::path::Path;
+use std::{fs::FileType, path::Path};
 
 use anyhow::Context;
 
 use crate::prelude::*;
 
+pub use file_node::FileNode;
+pub use read_source_target_node::{AugementedeTargetNode, ReadTargetNode};
+pub use source_target_node::SourceTargetNode;
+
+mod file_node;
+mod read_source_target_node;
+mod source_target_node;
+
+#[derive(Debug)]
 pub enum FileKind {
     File,
     Folder,
+    Symlink,
+}
+
+impl TryFrom<FileType> for FileKind {
+    type Error = AppError;
+    fn try_from(value: FileType) -> Result<Self, Self::Error> {
+        let os_file_type = value;
+        if os_file_type.is_dir() {
+            Ok(FileKind::Folder)
+        } else if os_file_type.is_file() {
+            Ok(FileKind::File)
+        } else if os_file_type.is_symlink() {
+            Ok(FileKind::Symlink)
+        } else {
+            Err(anyhow!("File type {:?} is not supported", os_file_type))
+        }
+    }
 }
 
 pub fn detect_file_kind(path: &Path) -> AppResult<FileKind> {
@@ -14,13 +40,7 @@ pub fn detect_file_kind(path: &Path) -> AppResult<FileKind> {
         .with_context(|| format!("Could extract meta data from {:?}", path))?;
 
     let os_file_type = file_meta.file_type();
-    if os_file_type.is_dir() {
-        Ok(FileKind::Folder)
-    } else if os_file_type.is_file() {
-        Ok(FileKind::File)
-    } else {
-        Err(anyhow!("File type {:?} is not supported", os_file_type))
-    }
+    os_file_type.try_into()
 }
 
 pub fn construct_file_target_path(

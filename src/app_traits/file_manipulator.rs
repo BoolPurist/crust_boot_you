@@ -6,7 +6,7 @@ mod dev_os_file_manipulator;
 mod dry_file_manipulator;
 mod os_file_manipulator;
 
-use crate::prelude::*;
+use crate::{file_management::FileNode, prelude::*};
 use std::path::{Path, PathBuf};
 
 use super::path_provider::get_root_dev;
@@ -28,4 +28,9 @@ pub trait FileManipulator {
     fn ensure_dir(&self, location: &Path) -> AppResult;
     fn try_exits(&self, location: &Path) -> AppResult<bool>;
     fn list_first_level_dir(&self, location: &Path) -> AppResult<Vec<PathBuf>>;
+    fn is_existing_folder_empty(&self, location: &Path) -> AppResult<bool> {
+        let entries = self.list_first_level_dir(location)?;
+        Ok(entries.is_empty())
+    }
+    fn all_nodes_at(&self, location: &Path) -> AppResult<Vec<FileNode>>;
 }

@@ -1,0 +1,22 @@
+use std::path::{Path, PathBuf};
+
+use super::FileKind;
+
+#[derive(Debug)]
+pub struct FileNode {
+    node_type: FileKind,
+    source_path: PathBuf,
+}
+
+impl FileNode {
+    pub fn new(node_type: FileKind, source_path: PathBuf) -> Self {
+        Self {
+            node_type,
+            source_path,
+        }
+    }
+
+    pub fn source_path(&self) -> &Path {
+        self.source_path.as_path()
+    }
+}

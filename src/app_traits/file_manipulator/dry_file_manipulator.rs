@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{file_management::FileNode, prelude::*};
 
 use super::OsFileManipulator;
 #[derive(Default)]
@@ -36,5 +36,9 @@ impl FileManipulator for DryFileManipulator {
 
     fn list_first_level_dir(&self, location: &Path) -> AppResult<Vec<PathBuf>> {
         self.os_imp.list_first_level_dir(location)
+    }
+
+    fn all_nodes_at(&self, location: &Path) -> AppResult<Vec<FileNode>> {
+        self.os_imp.all_nodes_at(location)
     }
 }

@@ -93,7 +93,7 @@ fn handle_save_template(
 ///
 /// # Errors
 ///
-/// - If template folder could be generated
+/// - If template folder not could be generated
 /// - If file type of source path could be detected. Example: source path is a symlink
 /// - If the copy process was not successful.
 ///
@@ -118,6 +118,9 @@ fn save_template(
         FileKind::Folder => {
             handle_dir(path_provider, file_manipulator, template_name, source_path)?;
             "folder"
+        }
+        FileKind::Symlink => {
+            bail!("A symlink as a base for a template is not valid !")
         }
     };
 
@@ -385,6 +388,7 @@ mod testing {
             .times(1)
             .returning(|| Ok(PathBuf::from("some/all_templates")));
         let mut files = MockFileManipulator::default();
+
         let expected_ensure_template_entry = expected_template_entry.clone();
         files
             .expect_ensure_dir()
