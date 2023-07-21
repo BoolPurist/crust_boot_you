@@ -38,12 +38,39 @@ pub trait PathProvider {
     }
 
     fn template_meta(&self, template_name: &NotEmptyText) -> PathResult {
-        let specific_template_entry = self.specific_entry_template_files(template_name)?;
+        let specific_template_entry = self.specific_entry_template(template_name)?;
         Ok(specific_template_entry.join(constants::TEMPLATE_META_FILE_NAME))
     }
 
     fn dictionary(&self) -> PathResult {
         let config = self.config()?;
         Ok(config.join(constants::DICTIONARY_FILE))
+    }
+}
+
+#[cfg(test)]
+mod testing {
+    use super::*;
+
+    #[test]
+    fn derive_all_other_paths() {
+        let path_provider = TestPathProvider::clone_from("data", "config", "cwd");
+        let template_a = NotEmptyText::new_clone_panic("A");
+        let template_b = NotEmptyText::new_clone_panic("B");
+        let actual = [
+            path_provider.cwd(),
+            path_provider.config(),
+            path_provider.data(),
+            path_provider.scripts(),
+            path_provider.general_template_entry(),
+            path_provider.dictionary(),
+            path_provider.specific_entry_template(&template_a),
+            path_provider.specific_entry_template_files(&template_a),
+            path_provider.template_meta(&template_a),
+            path_provider.specific_entry_template(&template_b),
+            path_provider.specific_entry_template_files(&template_b),
+        ]
+        .map(|path| path.unwrap());
+        insta::assert_debug_snapshot!(actual);
     }
 }

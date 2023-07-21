@@ -1,0 +1,18 @@
+---
+source: src/app_traits/path_provider.rs
+assertion_line: 74
+expression: actual
+---
+[
+    "cwd",
+    "config",
+    "data",
+    "data/scripts",
+    "data/templates",
+    "config/dict.toml",
+    "data/templates/A",
+    "data/templates/A/files",
+    "data/templates/A/meta_data.json",
+    "data/templates/B",
+    "data/templates/B/files",
+]
