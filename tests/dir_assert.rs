@@ -8,7 +8,7 @@ mod common;
 fn assert_if_equals_on_one_file() {
     let (actual, expected) = actual_expected!();
     let output = assert_folders(&actual, &expected).unwrap();
-    assert_eq!(DirAssert::Equal, output);
+    assert!(DirAssert::Equal == output, "\n{}\n", output);
 }
 
 #[named]
@@ -21,6 +21,7 @@ fn assert_if_detect_more_actual_file() {
         "Actual folder shoud have had one more file"
     );
 }
+
 #[named]
 #[test]
 fn assert_if_detect_more_expected_file() {
@@ -31,6 +32,7 @@ fn assert_if_detect_more_expected_file() {
         "Actual folder shoud have had one more file"
     );
 }
+
 #[named]
 #[test]
 fn assert_if_detect_different_paths() {
@@ -46,6 +48,7 @@ fn assert_if_detect_different_type() {
     let output = assert_folders(&actual, &expected).unwrap();
     assert!(matches!(output, DirAssert::DifferentFileType(..)));
 }
+
 #[named]
 #[test]
 fn assert_if_detect_different_content() {

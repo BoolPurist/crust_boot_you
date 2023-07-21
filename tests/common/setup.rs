@@ -41,7 +41,7 @@ impl TestSetup {
 
     pub fn assert_with_expected(&self) {
         let result = assert_folders(&self.path_to_temp, &self.expected).unwrap();
-        assert_eq!(DirAssert::Equal, result, "Actual result: {:?}", result);
+        assert!(DirAssert::Equal == result, "{}", result);
     }
 
     pub fn path_to_temp(&self) -> &Path {

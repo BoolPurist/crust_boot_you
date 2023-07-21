@@ -44,7 +44,7 @@ impl PathProvider for DevPathProvider {
     fn cwd(&self) -> PathResult {
         let cwd = &self.cwd;
         if !self.has_set_cwd.get() {
-            std::env::set_current_dir(&cwd).unwrap_or_else(|_| {
+            std::env::set_current_dir(cwd).unwrap_or_else(|_| {
                 panic!("Failed to set CWD.\nCwd at {:?} does not exist.", &cwd)
             });
             self.has_set_cwd.set(true);

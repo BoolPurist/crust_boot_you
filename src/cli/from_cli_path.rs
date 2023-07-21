@@ -35,7 +35,7 @@ impl AbsoluteExistingPath {
             let absolute = path.absolutize_virtually(cwd)?;
             match absolute.try_exists() {
                 Ok(true) => Ok(Self(absolute.to_path_buf())),
-                Ok(false) => return_not_found(&path),
+                Ok(false) => return_not_found(path),
                 Err(error) => panic!(
                     "During development can not determine path {:?} exits.\nError: {:?}",
                     path, error

@@ -1,11 +1,13 @@
 #![allow(dead_code)]
 use std::fs::FileType;
 
+mod display;
 use crust_boot_you::prelude::*;
 
 pub type DifferentPaths = (PathBuf, PathBuf);
 pub type DifferentType = (FileType, FileType);
 
+pub type DifferntContent = (String, String);
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum DirAssert {
     Equal,
@@ -13,7 +15,7 @@ pub enum DirAssert {
     ExpectedMore(PathBuf),
     DifferentPaths(DifferentPaths),
     DifferentFileType(DifferentPaths, DifferentType),
-    DifferentContent(DifferentPaths),
+    DifferentContent(DifferentPaths, DifferntContent),
 }
 
 use itertools::EitherOrBoth::{Both, Left, Right};
@@ -51,14 +53,17 @@ pub fn assert_folders(actual: &Path, expected: &Path) -> AppResult<DirAssert> {
                 }
 
                 if actual_type.is_file() {
+                    use std::fs::{read, read_to_string};
                     let (actual_content, expected_content) =
-                        (std::fs::read(actual_path)?, std::fs::read(expected_path)?);
+                        (read(actual_path)?, read(expected_path)?);
 
                     if actual_content != expected_content {
-                        return Ok(DirAssert::DifferentContent(paths_as_errors(
-                            rel_actual_path,
-                            rel_expected_path,
-                        )));
+                        let (left, right) =
+                            (read_to_string(actual_path)?, read_to_string(expected_path)?);
+                        return Ok(DirAssert::DifferentContent(
+                            paths_as_errors(rel_actual_path, rel_expected_path),
+                            (left, right),
+                        ));
                     }
                 }
             }
