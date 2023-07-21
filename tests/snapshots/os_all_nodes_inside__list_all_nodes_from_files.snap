@@ -1,0 +1,18 @@
+---
+source: tests/os_all_nodes_inside.rs
+expression: output
+---
+[
+    FileNodeMeta {
+        node_type: File,
+        source_path: "exe.bin",
+    },
+    FileNodeMeta {
+        node_type: File,
+        source_path: "2.txt",
+    },
+    FileNodeMeta {
+        node_type: File,
+        source_path: "1.txt",
+    },
+]

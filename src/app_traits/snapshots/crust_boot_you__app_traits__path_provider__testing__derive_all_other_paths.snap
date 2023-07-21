@@ -1,6 +1,5 @@
 ---
 source: src/app_traits/path_provider.rs
-assertion_line: 74
 expression: actual
 ---
 [

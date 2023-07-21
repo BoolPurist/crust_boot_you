@@ -12,7 +12,7 @@ mod loaded_node;
 mod os_io_error;
 mod source_target_node;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum FileKind {
     File,
     Folder,

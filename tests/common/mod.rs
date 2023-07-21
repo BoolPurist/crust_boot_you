@@ -33,16 +33,38 @@ static DATA_APP_TEST_ROOT: Lazy<PathBuf> = Lazy::new(|| DATA_TEST_ROOT.join(APP_
 static DATA_TEST_DIR_ASSERT: Lazy<PathBuf> = Lazy::new(|| DATA_TEST_ROOT.join(FOR_TEST_DIR_ASSERT));
 
 pub fn get_actual_expected_diff_dir_assert(name: &Path) -> (PathBuf, PathBuf) {
-    (
-        DATA_TEST_ROOT
-            .join(name)
-            .join(ACTUAL)
-            .canonicalize()
-            .expect("Actual folder does not exist at {:?}"),
-        DATA_TEST_ROOT
-            .join(name)
-            .join(EXPECTED)
-            .canonicalize()
-            .expect("Expected folder does not exist"),
-    )
+    let (actual, exepect) = (
+        DATA_TEST_ROOT.join(name).join(ACTUAL),
+        DATA_TEST_ROOT.join(name).join(EXPECTED),
+    );
+    return (
+        actual.canonicalize().unwrap_or_else(|_| {
+            panic!(
+                "Actual folder does not exist at\n{:?}\n{}",
+                actual,
+                hint_err_msg(name, ACTUAL)
+            )
+        }),
+        exepect.canonicalize().unwrap_or_else(|_| {
+            panic!(
+                "Expected folder does not exist at\n{:?}\n{}",
+                exepect,
+                hint_err_msg(name, EXPECTED)
+            )
+        }),
+    );
+
+    fn hint_err_msg(name: &Path, input_name: &str) -> String {
+        let help = name
+            .to_string_lossy()
+            .split(std::path::MAIN_SEPARATOR_STR)
+            .chain(std::iter::once(input_name))
+            .map(|to_string| to_string.to_string())
+            .collect::<Vec<String>>()
+            .join(" -> ");
+        format!(
+            "Create the follwing folders {} under {:?}",
+            help, *DATA_TEST_ROOT
+        )
+    }
 }

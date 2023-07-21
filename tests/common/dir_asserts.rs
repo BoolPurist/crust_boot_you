@@ -22,8 +22,8 @@ use walkdir::WalkDir;
 
 pub fn assert_folders(actual: &Path, expected: &Path) -> AppResult<DirAssert> {
     let (actual_root, exepected_root) = (actual, expected);
-    let actual = WalkDir::new(actual);
-    let expected = WalkDir::new(expected);
+    let actual = WalkDir::new(actual).sort_by_file_name();
+    let expected = WalkDir::new(expected).sort_by_file_name();
     for actual_expected in actual.into_iter().zip_longest(expected) {
         match actual_expected {
             Both(actual, expected) => {

@@ -1,0 +1,42 @@
+---
+source: tests/os_all_nodes_inside.rs
+expression: striped
+---
+[
+    FileNodeMeta {
+        node_type: File,
+        source_path: "hello.txt",
+    },
+    FileNodeMeta {
+        node_type: File,
+        source_path: "test.txt",
+    },
+    FileNodeMeta {
+        node_type: Folder,
+        source_path: "111",
+    },
+    FileNodeMeta {
+        node_type: Folder,
+        source_path: "ccc",
+    },
+    FileNodeMeta {
+        node_type: Folder,
+        source_path: "abc",
+    },
+    FileNodeMeta {
+        node_type: File,
+        source_path: "111/inner_111.txt",
+    },
+    FileNodeMeta {
+        node_type: Folder,
+        source_path: "111/abc",
+    },
+    FileNodeMeta {
+        node_type: File,
+        source_path: "abc/inner.ctx",
+    },
+    FileNodeMeta {
+        node_type: File,
+        source_path: "111/abc/inner_inner.txt",
+    },
+]

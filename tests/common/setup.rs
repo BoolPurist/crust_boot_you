@@ -15,6 +15,8 @@ pub struct TestSetup {
 impl TestSetup {
     pub fn new(actual_expected: (PathBuf, PathBuf)) -> Self {
         let (actual, expected) = actual_expected;
+        dbg!(&actual);
+        dbg!(&expected);
         let temp_file = TempDir::new().unwrap();
         let path_to_temp = temp_file.path().to_path_buf();
         let os_mani = DevOsFileManipulator::new(&path_to_temp).init_system(actual.to_path_buf());

@@ -11,7 +11,7 @@ pub mod app_traits;
 pub mod not_empty_text;
 pub use not_empty_text::NotEmptyText;
 pub mod constants;
-mod file_management;
+pub mod file_management;
 pub mod handle_commands;
 pub mod logging;
 pub mod prelude;
