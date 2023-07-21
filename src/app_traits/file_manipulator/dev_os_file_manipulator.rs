@@ -50,17 +50,14 @@ impl DevOsFileManipulator {
     }
 
     fn panic_if_outside_root(&self, path: &Path) {
-        use path_clean::PathClean;
-
+        use path_absolutize::*;
         let root = &self.allowed_root;
-        let absolute_patth = path.clean();
-
-        if !absolute_patth.starts_with(root) {
+        path.absolutize_virtually(root).unwrap_or_else(|_| {
             panic!(
                 "Path {:?} is outside of temp folder root {:?}.\n This is not allowed during development",
                 path, root
             );
-        }
+        });
     }
 }
 

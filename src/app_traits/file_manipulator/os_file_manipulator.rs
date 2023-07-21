@@ -50,7 +50,7 @@ impl FileManipulator for OsFileManipulator {
             let path = next.path();
             match next.file_type() {
                 Ok(file_type) if file_type.is_dir() => directories.push(path),
-                Ok(_file) => debug!("File/Symlink {:?} not listed as template", path),
+                Ok(_file) => debug!("File|Symlink {:?} not listed as template", path),
                 Err(error) => warn!("Could not determine type of {:?}.\nError: {}", path, error),
             }
         }

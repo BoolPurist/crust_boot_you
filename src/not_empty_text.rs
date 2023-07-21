@@ -1,8 +1,7 @@
-use serde::{Deserialize, Serialize};
 use std::{fmt::Display, str::FromStr};
 
 use crate::prelude::*;
-#[derive(Debug, Clone, Deserialize, Serialize, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct NotEmptyText(String);
 
 impl NotEmptyText {

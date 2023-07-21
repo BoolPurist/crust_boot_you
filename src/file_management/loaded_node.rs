@@ -1,7 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use serde::{Deserialize, Serialize};
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Clone)]
 pub enum LoadedNode {
     Folder { path: PathBuf },
     File { path: PathBuf, content: String },
