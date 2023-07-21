@@ -1,4 +1,4 @@
-use crate::{app_traits::path_provider::get_root_dev, file_management::FileNodeMeta, prelude::*};
+use crate::{app_traits::path_provider::get_root_dev, file_management::NodeEntryMeta, prelude::*};
 
 use super::OsFileManipulator;
 #[derive(Debug)]
@@ -54,7 +54,8 @@ impl DevOsFileManipulator {
 
         let root = &self.allowed_root;
         let absolute_patth = path.clean();
-        if !path.starts_with(absolute_patth) {
+
+        if !absolute_patth.starts_with(root) {
             panic!(
                 "Path {:?} is outside of temp folder root {:?}.\n This is not allowed during development",
                 path, root
@@ -89,7 +90,7 @@ impl FileManipulator for DevOsFileManipulator {
         self.os_impl.list_first_level_dir(location)
     }
 
-    fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>> {
+    fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<NodeEntryMeta>> {
         self.panic_if_outside_root(location);
         self.os_impl.all_nodes_inside(location)
     }

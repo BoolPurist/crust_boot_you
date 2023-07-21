@@ -1,8 +1,6 @@
-use std::path::PathBuf;
-
 use crate::common::dir_asserts::DirAssert;
 use common::dir_asserts::assert_folders;
-use common::named;
+use common::prelude::*;
 mod common;
 
 #[named]

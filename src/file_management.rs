@@ -2,13 +2,13 @@ use std::{fs::FileType, path::Path};
 
 use crate::prelude::*;
 
-pub use file_node::FileNodeMeta;
 pub use loaded_node::LoadedNode;
+pub use node_entry_meta::NodeEntryMeta;
 pub use os_io_error::AppIoError;
 pub use source_target_node::SourceTargetNode;
 
-mod file_node;
 mod loaded_node;
+mod node_entry_meta;
 mod os_io_error;
 mod source_target_node;
 

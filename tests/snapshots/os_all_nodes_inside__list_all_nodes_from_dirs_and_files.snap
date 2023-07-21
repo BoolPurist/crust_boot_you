@@ -3,39 +3,39 @@ source: tests/os_all_nodes_inside.rs
 expression: striped
 ---
 [
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: File,
         source_path: "hello.txt",
     },
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: File,
         source_path: "test.txt",
     },
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: Folder,
         source_path: "111",
     },
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: Folder,
         source_path: "ccc",
     },
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: Folder,
         source_path: "abc",
     },
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: File,
         source_path: "111/inner_111.txt",
     },
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: Folder,
         source_path: "111/abc",
     },
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: File,
         source_path: "abc/inner.ctx",
     },
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: File,
         source_path: "111/abc/inner_inner.txt",
     },

@@ -8,6 +8,11 @@ pub use setup::TestSetup;
 mod setup;
 
 pub use ::function_name::named;
+pub mod prelude {
+    pub use super::setup::TestSetup;
+    pub use ::function_name::named;
+    pub use crust_boot_you::prelude::*;
+}
 
 #[macro_export]
 macro_rules! actual_expected {
@@ -67,4 +72,17 @@ pub fn get_actual_expected_diff_dir_assert(name: &Path) -> (PathBuf, PathBuf) {
             help, *DATA_TEST_ROOT
         )
     }
+}
+
+pub fn strip_away_changing_temp_prefix(
+    prefix: &Path,
+    to_strip: &[impl AsRef<Path>],
+) -> Vec<PathBuf> {
+    to_strip
+        .iter()
+        .map(|to_strip| {
+            let new_path = to_strip.as_ref().strip_prefix(prefix).unwrap().to_owned();
+            new_path
+        })
+        .collect()
 }

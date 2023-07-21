@@ -1,9 +1,5 @@
+use common::prelude::*;
 mod common;
-
-use common::named;
-use crust_boot_you::prelude::FileManipulator;
-
-use crate::common::TestSetup;
 
 #[named]
 #[test]

@@ -1,17 +1,17 @@
 ---
 source: tests/os_all_nodes_inside.rs
-expression: output
+expression: striped
 ---
 [
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: File,
         source_path: "exe.bin",
     },
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: File,
         source_path: "2.txt",
     },
-    FileNodeMeta {
+    NodeEntryMeta {
         node_type: File,
         source_path: "1.txt",
     },

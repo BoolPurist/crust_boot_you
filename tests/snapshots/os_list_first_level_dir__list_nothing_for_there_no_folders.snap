@@ -1,0 +1,5 @@
+---
+source: tests/os_list_first_level_dir.rs
+expression: actual_stripped
+---
+[]

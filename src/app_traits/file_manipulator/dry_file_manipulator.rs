@@ -1,4 +1,4 @@
-use crate::{file_management::FileNodeMeta, prelude::*};
+use crate::{file_management::NodeEntryMeta, prelude::*};
 
 use super::OsFileManipulator;
 #[derive(Default)]
@@ -38,7 +38,7 @@ impl FileManipulator for DryFileManipulator {
         self.os_imp.list_first_level_dir(location)
     }
 
-    fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>> {
+    fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<NodeEntryMeta>> {
         self.os_imp.all_nodes_inside(location)
     }
 

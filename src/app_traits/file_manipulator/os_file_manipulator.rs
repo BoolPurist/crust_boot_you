@@ -6,7 +6,7 @@ use std::{
 use fs_extra::dir::CopyOptions;
 
 use crate::{
-    file_management::{FileKind, FileNodeMeta},
+    file_management::{FileKind, NodeEntryMeta},
     prelude::*,
 };
 
@@ -57,9 +57,9 @@ impl FileManipulator for OsFileManipulator {
         Ok(directories)
     }
 
-    fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<FileNodeMeta>> {
-        let mut to_return: Vec<FileNodeMeta> = Vec::new();
-        let mut buffer: VecDeque<FileNodeMeta> = Default::default();
+    fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<NodeEntryMeta>> {
+        let mut to_return: Vec<NodeEntryMeta> = Vec::new();
+        let mut buffer: VecDeque<NodeEntryMeta> = Default::default();
         walk_level_of(location, &mut buffer)?;
         while let Some(next) = buffer.pop_front() {
             if *next.node_type() == FileKind::Folder {
@@ -70,12 +70,12 @@ impl FileManipulator for OsFileManipulator {
 
         return Ok(to_return);
 
-        fn walk_level_of(path: &Path, buffer: &mut VecDeque<FileNodeMeta>) -> AppIoResult {
+        fn walk_level_of(path: &Path, buffer: &mut VecDeque<NodeEntryMeta>) -> AppIoResult {
             for entry in std::fs::read_dir(path)? {
                 let next = entry?;
                 let file_kind: FileKind = next.file_type()?.try_into()?;
                 let path = next.path();
-                let file_node = FileNodeMeta::new(file_kind, path);
+                let file_node = NodeEntryMeta::new(file_kind, path);
                 buffer.push_back(file_node);
             }
             Ok(())
