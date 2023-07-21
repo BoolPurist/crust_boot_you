@@ -1,0 +1,8 @@
+---
+source: tests/list_templates.rs
+expression: result
+---
+List of all templates:
+b  "/[TMP_ROOT]/data/templates/b"
+a  "/[TMP_ROOT]/data/templates/a"
+

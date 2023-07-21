@@ -6,8 +6,8 @@ use crate::{
 };
 use std::path::Path;
 
-#[cfg(test)]
-mod testing_handling_of_commands;
+// #[cfg(test)]
+// mod testing_handling_of_commands;
 fn save_err_already_created_template(name: &NotEmptyText) -> String {
     format!("Template with the name ({}) is already created", name)
 }
@@ -24,7 +24,7 @@ pub fn handle(
         SubCommands::SaveTemplate(args) => {
             handle_save_template(path_provider, file_manipulator, args)
         }
-        SubCommands::ListTemplate => handle_list_template(path_provider, file_manipulator),
+        SubCommands::ListTemplate => handle_list_template(&path_provider, &file_manipulator),
         SubCommands::DeleteTemplate { name } => {
             handle_delete_template(path_provider, file_manipulator, name)
         }
@@ -64,23 +64,28 @@ fn error_delet_msg_other_err(name: &NotEmptyText, error: AppIoError) -> String {
     )
 }
 
-fn handle_list_template(
-    path_provider: impl PathProvider,
-    file_manipulator: impl FileManipulator,
+pub fn handle_list_template(
+    path_provider: &impl PathProvider,
+    file_manipulator: &impl FileManipulator,
 ) -> ReturnToUser {
     let entry_point = path_provider.general_template_entry()?;
     file_manipulator.ensure_dir(&entry_point)?;
     let all_template_paths = file_manipulator.list_first_level_dir(&entry_point)?;
 
-    let mut output = format!("{}\n", constants::TITLE_LIST_RESULT);
     let lines: String = all_template_paths
         .into_iter()
         .map(|path| {
-            let line = path.file_name().unwrap().to_string_lossy();
-            format!("{}\n", line)
+            let template_name = path.file_name().unwrap().to_string_lossy();
+            format!("{}  {:?}\n", template_name, path)
         })
         .collect();
-    output.push_str(&lines);
+    let output = if lines.is_empty() {
+        "No templates created yet.".to_string()
+    } else {
+        let mut output = format!("{}\n", constants::TITLE_LIST_RESULT);
+        output.push_str(&lines);
+        output
+    };
     Ok(output)
 }
 

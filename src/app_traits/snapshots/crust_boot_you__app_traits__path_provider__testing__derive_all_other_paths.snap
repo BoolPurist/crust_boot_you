@@ -3,15 +3,15 @@ source: src/app_traits/path_provider.rs
 expression: actual
 ---
 [
-    "cwd",
-    "config",
-    "data",
-    "data/scripts",
-    "data/templates",
-    "config/dict.toml",
-    "data/templates/A",
-    "data/templates/A/files",
-    "data/templates/A/meta_data.json",
-    "data/templates/B",
-    "data/templates/B/files",
+    "root/cwd",
+    "root/config",
+    "root/data",
+    "root/data/scripts",
+    "root/data/templates",
+    "root/config/dict.toml",
+    "root/data/templates/A",
+    "root/data/templates/A/files",
+    "root/data/templates/A/meta_data.json",
+    "root/data/templates/B",
+    "root/data/templates/B/files",
 ]

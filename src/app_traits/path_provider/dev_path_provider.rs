@@ -1,5 +1,3 @@
-use std::cell::Cell;
-
 use crate::prelude::*;
 
 use super::{PathProvider, PathResult};
@@ -8,7 +6,6 @@ use super::{PathProvider, PathResult};
 pub struct DevPathProvider {
     cwd: PathBuf,
     root: PathBuf,
-    has_set_cwd: Cell<bool>,
 }
 
 impl DevPathProvider {
@@ -23,7 +20,6 @@ impl Default for DevPathProvider {
         Self {
             root: root.clone(),
             cwd: root.join(constants::dev::TMP_CWD_FOLDE),
-            has_set_cwd: Cell::new(false),
         }
     }
 }
@@ -43,12 +39,6 @@ impl PathProvider for DevPathProvider {
 
     fn cwd(&self) -> PathResult {
         let cwd = &self.cwd;
-        if !self.has_set_cwd.get() {
-            std::env::set_current_dir(cwd).unwrap_or_else(|_| {
-                panic!("Failed to set CWD.\nCwd at {:?} does not exist.", &cwd)
-            });
-            self.has_set_cwd.set(true);
-        }
         info!("Using some temp folder as cwd !");
         info!("Set Cwd to: {:?}", &cwd);
         Ok(cwd.clone())

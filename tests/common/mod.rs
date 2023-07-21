@@ -8,12 +8,14 @@ pub use setup::TestSetup;
 mod setup;
 
 pub use ::function_name::named;
+
+#[cfg(test)]
 pub mod prelude {
     pub use super::setup::TestSetup;
     pub use ::function_name::named;
+    pub use crust_boot_you::app_traits::path_provider::TestPathProvider;
     pub use crust_boot_you::prelude::*;
 }
-
 #[macro_export]
 macro_rules! actual_expected {
     // `()` indicates that the macro takes no argument.
@@ -22,6 +24,16 @@ macro_rules! actual_expected {
         let function_name = function_name!();
         let passing = std::path::Path::new(file_name).join(function_name);
         crate::common::get_actual_expected_diff_dir_assert(&passing)
+    }};
+}
+#[macro_export]
+macro_rules! actual {
+    // `()` indicates that the macro takes no argument.
+    () => {{
+        let file_name = std::path::Path::new(file!()).file_stem().unwrap();
+        let function_name = function_name!();
+        let passing = std::path::Path::new(file_name).join(function_name);
+        crate::common::get_actual_diff_dir_assert(&passing)
     }};
 }
 
@@ -37,27 +49,40 @@ static DATA_TEST_ROOT: Lazy<PathBuf> =
 static DATA_APP_TEST_ROOT: Lazy<PathBuf> = Lazy::new(|| DATA_TEST_ROOT.join(APP_TEST_CASES));
 static DATA_TEST_DIR_ASSERT: Lazy<PathBuf> = Lazy::new(|| DATA_TEST_ROOT.join(FOR_TEST_DIR_ASSERT));
 
+pub fn get_actual_diff_dir_assert(name: &Path) -> PathBuf {
+    get_diff_dir_assert(name, ACTUAL)
+}
+
 pub fn get_actual_expected_diff_dir_assert(name: &Path) -> (PathBuf, PathBuf) {
-    let (actual, exepect) = (
-        DATA_TEST_ROOT.join(name).join(ACTUAL),
-        DATA_TEST_ROOT.join(name).join(EXPECTED),
-    );
-    return (
-        actual.canonicalize().unwrap_or_else(|_| {
-            panic!(
-                "Actual folder does not exist at\n{:?}\n{}",
-                actual,
-                hint_err_msg(name, ACTUAL)
-            )
-        }),
-        exepect.canonicalize().unwrap_or_else(|_| {
-            panic!(
-                "Expected folder does not exist at\n{:?}\n{}",
-                exepect,
-                hint_err_msg(name, EXPECTED)
-            )
-        }),
-    );
+    (
+        get_diff_dir_assert(name, ACTUAL),
+        get_diff_dir_assert(name, EXPECTED),
+    )
+}
+
+pub fn strip_away_changing_temp_prefix(
+    prefix: &Path,
+    to_strip: &[impl AsRef<Path>],
+) -> Vec<PathBuf> {
+    to_strip
+        .iter()
+        .map(|to_strip| {
+            let new_path = to_strip.as_ref().strip_prefix(prefix).unwrap().to_owned();
+            new_path
+        })
+        .collect()
+}
+
+fn get_diff_dir_assert(name: &Path, base: &str) -> PathBuf {
+    let given = DATA_TEST_ROOT.join(name).join(base);
+
+    return given.canonicalize().unwrap_or_else(|_| {
+        panic!(
+            "Actual folder does not exist at\n{:?}\n{}",
+            given,
+            hint_err_msg(name, base)
+        )
+    });
 
     fn hint_err_msg(name: &Path, input_name: &str) -> String {
         let help = name
@@ -72,17 +97,4 @@ pub fn get_actual_expected_diff_dir_assert(name: &Path) -> (PathBuf, PathBuf) {
             help, *DATA_TEST_ROOT
         )
     }
-}
-
-pub fn strip_away_changing_temp_prefix(
-    prefix: &Path,
-    to_strip: &[impl AsRef<Path>],
-) -> Vec<PathBuf> {
-    to_strip
-        .iter()
-        .map(|to_strip| {
-            let new_path = to_strip.as_ref().strip_prefix(prefix).unwrap().to_owned();
-            new_path
-        })
-        .collect()
 }

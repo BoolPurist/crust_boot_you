@@ -16,6 +16,7 @@ pub mod handle_commands;
 pub mod logging;
 pub mod prelude;
 pub use app_traits::path_provider::DevPathProvider;
+pub use app_traits::path_provider::TestPathProvider;
 pub use cli::AppCliEntry;
 pub use cli::SubCommands;
 pub use file_management::LoadedNode;

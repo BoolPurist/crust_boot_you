@@ -1,9 +1,7 @@
 use crate::{prelude::*, NotEmptyText};
 mod dev_path_provider;
 pub use dev_path_provider::DevPathProvider;
-#[cfg(test)]
 mod test_path_provider;
-#[cfg(test)]
 pub use test_path_provider::TestPathProvider;
 
 pub fn get_root_dev() -> PathBuf {
@@ -54,7 +52,7 @@ mod testing {
 
     #[test]
     fn derive_all_other_paths() {
-        let path_provider = TestPathProvider::clone_from("data", "config", "cwd");
+        let path_provider = TestPathProvider::clone_from("root", "data", "config", "cwd");
         let template_a = NotEmptyText::new_clone_panic("A");
         let template_b = NotEmptyText::new_clone_panic("B");
         let actual = [

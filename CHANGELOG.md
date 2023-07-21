@@ -18,6 +18,8 @@ CWD: current working directory
 
 ### Changed 
 
+- Paths to templates folder are shown along with their names.
+- If no templates are created so far, user is told no templates were created yet
 - CWD is tmp/crust_you_boot during development mode
 
 ## 0.1.1 - 2023.07.19
