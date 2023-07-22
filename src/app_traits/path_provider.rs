@@ -8,10 +8,13 @@ pub fn get_root_dev() -> PathBuf {
     std::env::temp_dir().join(constants::dev::TMP_ROOT)
 }
 
+pub fn get_root_default_cwd() -> PathBuf {
+    get_root_dev().join(constants::dev::TMP_CWD_FOLDER)
+}
+
 pub trait PathProvider {
     fn data(&self) -> PathResult;
     fn config(&self) -> PathResult;
-    fn cwd(&self) -> PathResult;
 
     fn scripts(&self) -> PathResult {
         let data = self.data()?;
@@ -51,11 +54,10 @@ mod testing {
 
     #[test]
     fn derive_all_other_paths() {
-        let path_provider = TestPathProvider::clone_from("root", "data", "config", "cwd");
+        let path_provider = TestPathProvider::clone_from("root", "data", "config");
         let template_a = ValidTemplateName::new_clone_panic("A");
         let template_b = ValidTemplateName::new_clone_panic("B");
         let actual = [
-            path_provider.cwd(),
             path_provider.config(),
             path_provider.data(),
             path_provider.scripts(),

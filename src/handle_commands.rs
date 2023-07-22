@@ -108,7 +108,7 @@ fn handle_load_template(
         _ => (),
     }
 
-    let cwd = path_provider
+    let cwd = file_manipulator
         .cwd()
         .context("Can not access current working directory. No target to copy to")?;
 

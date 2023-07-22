@@ -9,6 +9,7 @@ pub mod cli;
 
 pub mod app_traits;
 pub mod valid_template_name;
+use app_traits::path_resolver::DevPathResolver;
 pub use valid_template_name::ValidTemplateName;
 pub mod constants;
 pub mod file_management;
@@ -21,6 +22,16 @@ pub use cli::AppCliEntry;
 pub use cli::SubCommands;
 pub use file_management::LoadedNode;
 
+#[cfg(any(debug_assertions, test))]
+type UsedPathResolver = DevPathResolver;
+#[cfg(not(any(debug_assertions, test)))]
+type UsedPathResolver = OsPathResolver;
+#[cfg(not(any(debug_assertions, test)))]
+use app_traits::path_resolver::OsPathResolver;
+
+pub fn create_path_resolver() -> UsedPathResolver {
+    UsedPathResolver::default()
+}
 pub fn print_dry(to_print: &str) {
     println!("{} {}", *constants::DRY_LABEL, to_print);
 }

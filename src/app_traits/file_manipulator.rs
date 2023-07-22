@@ -14,14 +14,24 @@ use crate::{
 use std::path::{Path, PathBuf};
 
 pub trait FileManipulator {
+    type Resolver: PathResolver;
+
+    fn cwd(&self) -> AppIoResult<PathBuf>;
     fn copy_file(&self, from: &Path, to: &Path) -> AppIoResult;
     fn copy_dir(&self, from: &Path, to: &Path) -> AppIoResult;
     fn ensure_dir(&self, location: &Path) -> AppIoResult;
-    fn try_exits(&self, location: &Path) -> AppIoResult<bool>;
     fn list_first_level_dir(&self, location: &Path) -> AppIoResult<Vec<PathBuf>>;
     fn delete_whole_folder(&self, location: &Path) -> AppIoResult;
     fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<NodeEntryMeta>>;
     fn write_file_to(&self, location: &Path, content: &str) -> AppIoResult;
+    fn resolver(&self) -> &Self::Resolver;
+
+    fn root(&self) -> &Path {
+        self.resolver().root()
+    }
+    fn try_exits(&self, location: &Path) -> AppIoResult<bool> {
+        self.resolver().try_exits(location)
+    }
 
     fn no_filled_folder_there(&self, location: &Path) -> AppIoResult<bool> {
         let exits = self.try_exits(location)?;

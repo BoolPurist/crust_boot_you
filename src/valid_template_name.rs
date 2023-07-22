@@ -16,6 +16,7 @@ impl ValidTemplateName {
             Ok(Self(to_validate))
         }
     }
+
     pub fn clone_from(input: &str) -> AppResult<Self> {
         Self::new(input.to_string())
     }

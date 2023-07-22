@@ -3,7 +3,6 @@ source: src/app_traits/path_provider.rs
 expression: actual
 ---
 [
-    "root/cwd",
     "root/config",
     "root/data",
     "root/data/scripts",

@@ -27,5 +27,6 @@ pub enum SubCommands {
 
 fn check_if_exits(input: &str) -> Result<AbsoluteExistingPath, String> {
     let path: PathBuf = input.into();
-    AbsoluteExistingPath::new(path).map_err(|error| error.to_string())
+    let resolver = crate::create_path_resolver();
+    AbsoluteExistingPath::new(path, &resolver).map_err(|error| error.to_string())
 }

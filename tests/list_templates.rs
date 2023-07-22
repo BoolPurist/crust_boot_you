@@ -8,7 +8,7 @@ use crust_boot_you::handle_commands;
 fn list_avaiable_templates() {
     let setup = TestSetup::only_actual(actual!());
 
-    let test_paths = TestPathProvider::clone_from(setup.path_to_temp(), "data", "config", "cwd");
+    let test_paths = TestPathProvider::clone_from(setup.path_to_temp(), "data", "config");
 
     let result = handle_commands::handle_list_template(&test_paths, setup.os_mani()).unwrap();
     setup.assert_with_expected();
@@ -26,7 +26,7 @@ fn list_avaiable_templates() {
 fn list_template_no_template() {
     let setup = TestSetup::only_actual(actual!());
 
-    let test_paths = TestPathProvider::clone_from(setup.path_to_temp(), "data", "config", "cwd");
+    let test_paths = TestPathProvider::clone_from(setup.path_to_temp(), "data", "config");
 
     let result = handle_commands::handle_list_template(&test_paths, setup.os_mani()).unwrap();
     setup.assert_with_expected();

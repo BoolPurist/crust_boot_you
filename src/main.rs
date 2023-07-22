@@ -14,12 +14,14 @@ use crust_boot_you::AppCliEntry;
 use std::process::ExitCode;
 
 fn main() -> ExitCode {
+    let is_in_debug = cfg!(debug_assertions);
+
     logging::init();
 
     let args = AppCliEntry::parse();
     debug!("Cli arguments are parsed.");
 
-    let (is_in_debug, is_in_dry) = (cfg!(debug_assertions), args.dry());
+    let is_in_dry = args.dry();
     let output = match (is_in_debug, is_in_dry) {
         (true, true) => handle_commands::handle(
             DevPathProvider::default(),

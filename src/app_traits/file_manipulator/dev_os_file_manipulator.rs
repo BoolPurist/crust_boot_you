@@ -1,29 +1,40 @@
-use crate::{app_traits::path_provider::get_root_dev, file_management::NodeEntryMeta, prelude::*};
+use crate::{
+    app_traits::{
+        path_provider::{self},
+        path_resolver::DevPathResolver,
+    },
+    file_management::NodeEntryMeta,
+    prelude::*,
+};
 
 use super::OsFileManipulator;
 #[derive(Debug)]
 pub struct DevOsFileManipulator {
     init_system: Option<PathBuf>,
-    allowed_root: PathBuf,
     os_impl: OsFileManipulator,
+    cwd: PathBuf,
+    resolver: DevPathResolver,
 }
 
 impl Default for DevOsFileManipulator {
     fn default() -> Self {
         Self {
             init_system: None,
-            allowed_root: get_root_dev(),
+            cwd: path_provider::get_root_default_cwd(),
             os_impl: Default::default(),
+            resolver: Default::default(),
         }
     }
 }
 
 impl DevOsFileManipulator {
     pub fn new(allowed_root: &Path) -> Self {
+        let (cwd, for_resolver) = (allowed_root.to_path_buf(), allowed_root.to_path_buf());
         Self {
             init_system: None,
-            allowed_root: allowed_root.to_path_buf(),
-            os_impl: OsFileManipulator,
+            cwd,
+            os_impl: OsFileManipulator::default(),
+            resolver: DevPathResolver::new(for_resolver),
         }
     }
 
@@ -51,7 +62,7 @@ impl DevOsFileManipulator {
 
     fn panic_if_outside_root(&self, path: &Path) {
         use path_absolutize::*;
-        let root = &self.allowed_root;
+        let root = self.resolver().root();
         path.absolutize_virtually(root).unwrap_or_else(|_| {
             panic!(
                 "Path {:?} is outside of temp folder root {:?}.\n This is not allowed during development",
@@ -62,6 +73,8 @@ impl DevOsFileManipulator {
 }
 
 impl FileManipulator for DevOsFileManipulator {
+    type Resolver = DevPathResolver;
+
     fn copy_file(&self, from: &Path, to: &Path) -> AppIoResult {
         self.check_to_and_from(from, to);
         self.os_impl.copy_file(from, to)
@@ -100,5 +113,13 @@ impl FileManipulator for DevOsFileManipulator {
     fn write_file_to(&self, location: &Path, content: &str) -> AppIoResult {
         self.panic_if_outside_root(location);
         self.os_impl.write_file_to(location, content)
+    }
+
+    fn resolver(&self) -> &Self::Resolver {
+        &self.resolver
+    }
+
+    fn cwd(&self) -> AppIoResult<PathBuf> {
+        Ok(self.cwd.to_path_buf())
     }
 }

@@ -40,7 +40,6 @@ impl TestSetup {
             TempDir::new().unwrap()
         };
         let path_to_temp = temp_file.path().to_path_buf();
-        dbg!(&path_to_temp);
         let os_mani = DevOsFileManipulator::new(&path_to_temp).init_system(actual.to_path_buf());
         // Use the raw real file manipulator to copy outside the temp folder
         // Actual is outside the temp folder.

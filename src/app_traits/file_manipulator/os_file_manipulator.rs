@@ -6,6 +6,7 @@ use std::{
 use fs_extra::dir::CopyOptions;
 
 use crate::{
+    app_traits::path_resolver::OsPathResolver,
     file_management::{FileKind, NodeEntryMeta},
     prelude::*,
 };
@@ -13,9 +14,13 @@ use crate::{
 use super::FileManipulator;
 
 #[derive(Default, Debug)]
-pub struct OsFileManipulator;
+pub struct OsFileManipulator {
+    resolver: OsPathResolver,
+}
 
 impl FileManipulator for OsFileManipulator {
+    type Resolver = OsPathResolver;
+
     fn copy_file(&self, from: &Path, to: &Path) -> AppIoResult {
         std::fs::copy(from, to)?;
         debug!("Copied file {:?} to {:?}", from, to);
@@ -36,11 +41,6 @@ impl FileManipulator for OsFileManipulator {
         std::fs::create_dir_all(location)?;
         debug!("Ensured that folder {:?} exits", location);
         Ok(())
-    }
-
-    fn try_exits(&self, location: &Path) -> AppIoResult<bool> {
-        let exits = location.try_exists()?;
-        Ok(exits)
     }
 
     fn list_first_level_dir(&self, location: &Path) -> AppIoResult<Vec<PathBuf>> {
@@ -95,5 +95,14 @@ impl FileManipulator for OsFileManipulator {
         );
         std::fs::write(location, content)?;
         Ok(())
+    }
+
+    fn resolver(&self) -> &Self::Resolver {
+        &self.resolver
+    }
+
+    fn cwd(&self) -> AppIoResult<PathBuf> {
+        let path = std::env::current_dir()?;
+        Ok(path)
     }
 }

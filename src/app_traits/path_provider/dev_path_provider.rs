@@ -4,7 +4,6 @@ use super::{PathProvider, PathResult};
 
 #[derive(Debug)]
 pub struct DevPathProvider {
-    cwd: PathBuf,
     root: PathBuf,
 }
 
@@ -17,10 +16,7 @@ impl DevPathProvider {
 impl Default for DevPathProvider {
     fn default() -> Self {
         let root = super::get_root_dev();
-        Self {
-            root: root.clone(),
-            cwd: root.join(constants::dev::TMP_CWD_FOLDE),
-        }
+        Self { root: root.clone() }
     }
 }
 
@@ -35,12 +31,5 @@ impl PathProvider for DevPathProvider {
         let config = self.root.join(constants::dev::CONFIG_FOLDER);
         debug!("Config folder {:?}", config);
         Ok(config)
-    }
-
-    fn cwd(&self) -> PathResult {
-        let cwd = &self.cwd;
-        info!("Using some temp folder as cwd !");
-        info!("Set Cwd to: {:?}", &cwd);
-        Ok(cwd.clone())
     }
 }
