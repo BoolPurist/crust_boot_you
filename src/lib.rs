@@ -8,8 +8,8 @@ extern crate thiserror;
 pub mod cli;
 
 pub mod app_traits;
-pub mod not_empty_text;
-pub use not_empty_text::ValidTemplateName;
+pub mod valid_template_name;
+pub use valid_template_name::ValidTemplateName;
 pub mod constants;
 pub mod file_management;
 pub mod handle_commands;
