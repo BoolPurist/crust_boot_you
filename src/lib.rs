@@ -9,7 +9,7 @@ pub mod cli;
 
 pub mod app_traits;
 pub mod not_empty_text;
-pub use not_empty_text::NotEmptyText;
+pub use not_empty_text::ValidTemplateName;
 pub mod constants;
 pub mod file_management;
 pub mod handle_commands;

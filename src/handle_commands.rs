@@ -2,13 +2,13 @@ use crate::{
     cli::{LoadTemplateArg, SaveTemplateCli},
     file_management::{self, FileKind},
     prelude::*,
-    AppCliEntry, NotEmptyText, SubCommands,
+    AppCliEntry, ValidTemplateName, SubCommands,
 };
 use std::path::Path;
 
 // #[cfg(test)]
 // mod testing_handling_of_commands;
-fn save_err_already_created_template(name: &NotEmptyText) -> String {
+fn save_err_already_created_template(name: &ValidTemplateName) -> String {
     format!("Template with the name ({}) is already created", name)
 }
 
@@ -34,7 +34,7 @@ pub fn handle(
 fn handle_delete_template(
     path_provider: impl PathProvider,
     file_manipulator: impl FileManipulator,
-    name: &NotEmptyText,
+    name: &ValidTemplateName,
 ) -> ReturnToUser {
     let path_to_delete = path_provider.specific_entry_template(name)?;
     match file_manipulator.delete_whole_folder(&path_to_delete) {
@@ -47,17 +47,17 @@ fn handle_delete_template(
     }
 }
 
-fn success_delete_msg(name: &NotEmptyText) -> String {
+fn success_delete_msg(name: &ValidTemplateName) -> String {
     format!("Template ({}) was deleted.", name.as_ref())
 }
-fn error_delete_msg_not_found(name: &NotEmptyText) -> String {
+fn error_delete_msg_not_found(name: &ValidTemplateName) -> String {
     format!(
         "There is no template to be deleted with the name ({}).",
         name
     )
 }
 
-fn error_delet_msg_other_err(name: &NotEmptyText, error: AppIoError) -> String {
+fn error_delet_msg_other_err(name: &ValidTemplateName, error: AppIoError) -> String {
     format!(
         "Could not delete template ({}) because of an error.\n{}",
         name, error
@@ -86,6 +86,7 @@ pub fn handle_list_template(
         output.push_str(&lines);
         output
     };
+
     Ok(output)
 }
 
@@ -139,7 +140,7 @@ fn handle_save_template(
     )
 }
 
-fn success_save_msg(name: &NotEmptyText, file_kind: &str, source_path: &Path) -> String {
+fn success_save_msg(name: &ValidTemplateName, file_kind: &str, source_path: &Path) -> String {
     format!(
         "Created template with name ({}) from the {} {:?}",
         name, file_kind, source_path,
@@ -159,7 +160,7 @@ fn save_template(
     path_provider: impl PathProvider,
     file_manipulator: impl FileManipulator,
     on_detect_file_kind: impl Fn(&Path) -> AppIoResult<FileKind>,
-    name: &NotEmptyText,
+    name: &ValidTemplateName,
     source_path: impl AsRef<Path>,
 ) -> ReturnToUser {
     debug!("Handling subcommand: {:?}", "SaveTemplate");

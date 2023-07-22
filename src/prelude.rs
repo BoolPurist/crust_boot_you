@@ -14,7 +14,7 @@ pub type AppIoResult<T = ()> = Result<T, AppIoError>;
 pub use crate::app_traits::file_manipulator::FileManipulator;
 pub use crate::app_traits::path_provider::PathProvider;
 pub use crate::file_management::AppIoError;
-pub use crate::NotEmptyText;
+pub use crate::ValidTemplateName;
 pub use std::path::{Path, PathBuf};
 
 #[cfg(test)]

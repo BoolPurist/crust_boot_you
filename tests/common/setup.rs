@@ -9,7 +9,7 @@ pub struct TestSetup {
     temp_file: TempDir,
     path_to_temp: PathBuf,
     only_actual: bool,
-    name: Option<NotEmptyText>,
+    name: Option<ValidTemplateName>,
     actual: PathBuf,
     expected: PathBuf,
     os_mani: DevOsFileManipulator,
@@ -26,7 +26,7 @@ impl TestSetup {
     }
 
     fn init_create(
-        name: Option<NotEmptyText>,
+        name: Option<ValidTemplateName>,
         actual: PathBuf,
         expected: PathBuf,
         only_actual: bool,

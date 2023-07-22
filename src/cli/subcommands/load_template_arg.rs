@@ -6,7 +6,7 @@ use crate::prelude::*;
 use const_format::formatcp;
 #[derive(Debug, Args)]
 pub struct LoadTemplateArg {
-    name: NotEmptyText,
+    name: ValidTemplateName,
     #[arg(long, short, env = "CRUST_BOOT_YOU_INIT_KIND", default_value_t = InitKind::OnlyEmpty, help = help_text_for_init_kind())]
     with: InitKind,
 }
@@ -31,7 +31,7 @@ const fn help_text_for_init_kind() -> &'static str {
 }
 
 impl LoadTemplateArg {
-    pub fn new(name: NotEmptyText, with: InitKind) -> Self {
+    pub fn new(name: ValidTemplateName, with: InitKind) -> Self {
         Self { name, with }
     }
 
@@ -39,7 +39,7 @@ impl LoadTemplateArg {
         self.with
     }
 
-    pub fn name(&self) -> &NotEmptyText {
+    pub fn name(&self) -> &ValidTemplateName {
         &self.name
     }
 }
