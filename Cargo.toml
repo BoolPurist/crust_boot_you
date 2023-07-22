@@ -32,7 +32,6 @@ function_name = "0.3.0"
 insta = { version = "1.31.0", features = ["json", "filters"] }
 itertools = "0.11.0"
 map-macro = "0.2.6"
-mockall = "0.11.4"
 walkdir = "2.3.3"
 pretty_assertions = "1.4.0"
 tempfile = "3.6.0"

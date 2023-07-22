@@ -13,7 +13,6 @@ use crate::{
 
 use std::path::{Path, PathBuf};
 
-#[cfg_attr(test, automock)]
 pub trait FileManipulator {
     fn copy_file(&self, from: &Path, to: &Path) -> AppIoResult;
     fn copy_dir(&self, from: &Path, to: &Path) -> AppIoResult;

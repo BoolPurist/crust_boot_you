@@ -16,6 +16,3 @@ pub use crate::app_traits::path_provider::PathProvider;
 pub use crate::file_management::AppIoError;
 pub use crate::ValidTemplateName;
 pub use std::path::{Path, PathBuf};
-
-#[cfg(test)]
-pub use mockall::automock;

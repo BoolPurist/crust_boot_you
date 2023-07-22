@@ -2,12 +2,10 @@ use crate::{
     cli::{LoadTemplateArg, SaveTemplateCli},
     file_management::{self, FileKind},
     prelude::*,
-    AppCliEntry, ValidTemplateName, SubCommands,
+    AppCliEntry, SubCommands, ValidTemplateName,
 };
 use std::path::Path;
 
-// #[cfg(test)]
-// mod testing_handling_of_commands;
 fn save_err_already_created_template(name: &ValidTemplateName) -> String {
     format!("Template with the name ({}) is already created", name)
 }
