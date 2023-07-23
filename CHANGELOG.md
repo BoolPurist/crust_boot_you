@@ -18,6 +18,7 @@ CWD: current working directory
 
 ### Changed 
 
+- load-template: By default folder as CWD are not populated by template if it is not empty.
 - Paths to templates folder are shown along with their names.
 - If no templates are created so far, user is told no templates were created yet
 - CWD is tmp/crust_you_boot during development mode
