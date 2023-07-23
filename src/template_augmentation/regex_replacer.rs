@@ -1,52 +1,67 @@
-#![allow(dead_code)]
 use crate::prelude::*;
-/// TODO: dead_code
-use std::{borrow::Cow, cell::RefCell, rc::Rc};
+use std::borrow::Cow;
 
 use once_cell::sync::Lazy;
 use regex::{Regex, Replacer};
 
 use super::{
     augmentation_error::AugmentationError, console_fetcher::ConsoleFetcher,
-    template_extractation::TemplateExtractation, AugementRepository,
+    template_extractation::TemplateExtractation, AugementRepository, TemplateAugmentor,
 };
 
 fn build_regex_template() -> Regex {
     Regex::new(r#"\{\{(?<value>[^\{]*)\}\}"#).unwrap()
 }
 
-static REGEX_TMPLATE: Lazy<Regex> = Lazy::new(build_regex_template);
+static REGEX_TEMPLATE: Lazy<Regex> = Lazy::new(build_regex_template);
 
-pub struct TemplateReplacer<'a, CF> {
-    respo_store: &'a mut AugementRepository<CF>,
-    found_error: Rc<RefCell<Option<AugmentationError>>>,
+pub struct RegexTemplateAugmentor<CF> {
+    cache: AugementRepository<CF>,
 }
 
-impl<'a, CF: ConsoleFetcher> TemplateReplacer<'a, CF> {
-    pub fn try_replace<'s>(
-        regex: &Regex,
-        input: &'s str,
-        respo_store: &'a mut AugementRepository<CF>,
-    ) -> Result<Cow<'s, str>, AugmentationError> {
-        let found_error = Rc::new(RefCell::new(None));
+impl<CF> RegexTemplateAugmentor<CF> {
+    pub fn new(cache: AugementRepository<CF>) -> Self {
+        Self { cache }
+    }
+}
+
+impl<CF> TemplateAugmentor for RegexTemplateAugmentor<CF>
+where
+    CF: ConsoleFetcher,
+{
+    fn try_replace<'a>(&mut self, input: &'a str) -> Result<Cow<'a, str>, AugmentationError> {
+        let mut found_error = None;
         let output = {
-            let self_r = Self {
-                respo_store,
-                found_error: Rc::clone(&found_error),
-            };
-            let output = regex.replace_all(input, self_r);
+            let replacer = RegexReplacer::new(&mut self.cache, &mut found_error);
+            let output = REGEX_TEMPLATE.replace_all(input, replacer);
             output
         };
 
-        let may_error = found_error.borrow();
-        match &*may_error {
+        match found_error {
             Some(error) => Err(error.clone()),
             None => Ok(output),
         }
     }
 }
 
-impl<'a, CF: ConsoleFetcher> Replacer for TemplateReplacer<'a, CF> {
+pub struct RegexReplacer<'a, CF> {
+    respo_store: &'a mut AugementRepository<CF>,
+    found_error: &'a mut Option<AugmentationError>,
+}
+
+impl<'a, CF> RegexReplacer<'a, CF> {
+    pub fn new(
+        respo_store: &'a mut AugementRepository<CF>,
+        found_error: &'a mut Option<AugmentationError>,
+    ) -> Self {
+        Self {
+            respo_store,
+            found_error,
+        }
+    }
+}
+
+impl<'a, CF: ConsoleFetcher> Replacer for RegexReplacer<'a, CF> {
     fn replace_append(&mut self, caps: &regex::Captures<'_>, dst: &mut String) {
         let extraction = {
             let value = &caps["value"];
@@ -55,13 +70,13 @@ impl<'a, CF: ConsoleFetcher> Replacer for TemplateReplacer<'a, CF> {
             TemplateExtractation::FromConsole { key, default_value }
         };
 
-        let mut may_error = self.found_error.borrow_mut();
-        if may_error.is_none() {
+        let found_error = &mut self.found_error;
+        if found_error.is_none() {
             match self.respo_store.augment(&extraction) {
                 Ok(value) => dst.push_str(value),
                 Err(error) => {
                     insert_original(caps, dst);
-                    *may_error = Some(error)
+                    **found_error = Some(error)
                 }
             }
         } else {
@@ -84,7 +99,7 @@ mod testing {
     #[test]
     fn regex_extract_one_value() {
         let input = "aa aaa {{value to get}} aaa";
-        let actual = REGEX_TMPLATE.captures(input).unwrap();
+        let actual = REGEX_TEMPLATE.captures(input).unwrap();
         let actual_extracted = &actual["value"];
         assert_eq!("value to get", actual_extracted);
     }
@@ -97,8 +112,9 @@ mod testing {
         };
         let test_augmenter = TestConsoleFetcher::new(map);
 
-        let mut respo = AugementRepository::new(test_augmenter);
-        let actual = TemplateReplacer::try_replace(&REGEX_TMPLATE, &input, &mut respo).unwrap();
+        let respo = AugementRepository::new(test_augmenter);
+        let mut regex_augmentor = RegexTemplateAugmentor::new(respo);
+        let actual = regex_augmentor.try_replace(&input).unwrap();
 
         assert_eq!("aa aaa YYY XXX  ", actual);
     }
@@ -111,13 +127,13 @@ mod testing {
         };
         let test_augmenter = TestConsoleFetcher::new(map);
 
-        let mut respo = AugementRepository::new(test_augmenter);
-        let replacer =
-            TemplateReplacer::try_replace(&REGEX_TMPLATE, &input, &mut respo).unwrap_err();
+        let respo = AugementRepository::new(test_augmenter);
+        let mut regex_augmentor = RegexTemplateAugmentor::new(respo);
+        let actual = regex_augmentor.try_replace(&input).unwrap_err();
 
         assert_eq!(
             AugmentationError::NoValueAndDefaultConsole(String::from("!!")),
-            replacer,
+            actual,
         );
     }
     #[test]
@@ -129,8 +145,9 @@ mod testing {
         };
         let test_augmenter = TestConsoleFetcher::new(map);
 
-        let mut respo = AugementRepository::new(test_augmenter);
-        let actual = TemplateReplacer::try_replace(&REGEX_TMPLATE, &input, &mut respo).unwrap();
+        let respo = AugementRepository::new(test_augmenter);
+        let mut regex_augmentor = RegexTemplateAugmentor::new(respo);
+        let actual = regex_augmentor.try_replace(&input).unwrap();
 
         assert_eq!("aa aaa YYY A B ", actual);
     }
@@ -144,8 +161,9 @@ mod testing {
         };
         let test_augmenter = TestConsoleFetcher::new(map);
 
-        let mut respo = AugementRepository::new(test_augmenter);
-        let actual = TemplateReplacer::try_replace(&REGEX_TMPLATE, &input, &mut respo).unwrap();
+        let respo = AugementRepository::new(test_augmenter);
+        let mut regex_augmentor = RegexTemplateAugmentor::new(respo);
+        let actual = regex_augmentor.try_replace(&input).unwrap();
 
         assert_eq!("aa aaa YYY XXX XXX ", actual);
     }

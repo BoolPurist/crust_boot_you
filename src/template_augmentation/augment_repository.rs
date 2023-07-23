@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-/// TODO: dead_code
 use std::collections::HashMap;
 
 use super::{
@@ -87,6 +85,7 @@ mod testing {
         );
     }
 
+    #[test]
     fn default_no_key_found() {
         let does_not_matter = String::new();
         let map = hash_map! {
