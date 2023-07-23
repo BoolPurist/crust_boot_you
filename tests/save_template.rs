@@ -20,3 +20,21 @@ fn save_file_new_template() {
 
     setup.assert_with_expected();
 }
+
+#[test]
+#[named]
+fn save_folder_as_template() {
+    let setup = TestSetup::new(actual_expected!());
+
+    let given_name = ValidTemplateName::new("some hello project".to_string()).unwrap();
+    let given_path =
+        AbsoluteExistingPath::new(PathBuf::from("lang/go"), setup.path_resolver()).unwrap();
+    let arguments = SaveTemplateCli::new(given_name, given_path);
+    let output =
+        handle_commands::handle_save_template(setup.path_provider(), setup.os_mani(), &arguments)
+            .expect("Should be successful in this test case");
+
+    setup.assert_with_expected();
+
+    insta::with_settings!({ filters => insta_utils::filter_random_tmp_folder_name() }, { insta::assert_display_snapshot!(output) });
+}

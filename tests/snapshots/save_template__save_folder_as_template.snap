@@ -1,0 +1,5 @@
+---
+source: tests/save_template.rs
+expression: output
+---
+Created template with name (some hello project) from the folder "/[TMP_ROOT]/lang/go"
