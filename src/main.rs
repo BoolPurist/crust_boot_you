@@ -24,13 +24,13 @@ fn main() -> ExitCode {
     let is_in_dry = args.dry();
     let output = match (is_in_debug, is_in_dry) {
         (true, true) => handle_commands::handle(
-            DevPathProvider::default(),
-            DryFileManipulator::default(),
+            &DevPathProvider::default(),
+            &DryFileManipulator::default(),
             &args,
         ),
         (true, false) => handle_commands::handle(
-            DevPathProvider::default(),
-            DevOsFileManipulator::default(),
+            &DevPathProvider::default(),
+            &DevOsFileManipulator::default(),
             &args,
         ),
         (false, _) => todo!("Not implemented for production"),

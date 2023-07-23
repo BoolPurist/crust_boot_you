@@ -1,4 +1,8 @@
-use crust_boot_you::{app_traits::file_manipulator::DevOsFileManipulator, prelude::*};
+use crust_boot_you::{
+    app_traits::{file_manipulator::DevOsFileManipulator, path_resolver::DevPathResolver},
+    prelude::*,
+    DevPathProvider,
+};
 use tempfile::{Builder, TempDir};
 
 use crate::common::dir_asserts::DirAssert;
@@ -7,12 +11,12 @@ use super::dir_asserts::assert_folders;
 
 pub struct TestSetup {
     temp_file: TempDir,
-    path_to_temp: PathBuf,
     only_actual: bool,
-    name: Option<ValidTemplateName>,
     actual: PathBuf,
     expected: PathBuf,
     os_mani: DevOsFileManipulator,
+    path_resolver: DevPathResolver,
+    path_provider: DevPathProvider,
 }
 
 impl TestSetup {
@@ -49,14 +53,19 @@ impl TestSetup {
                 actual, &path_to_temp, error,
             )
         });
+        let temp_path = temp_file.path();
+        let (dev_resolver, dev_provider) = (
+            DevPathResolver::new(temp_path.to_path_buf()),
+            DevPathProvider::new(temp_path.to_path_buf()),
+        );
         Self {
             // From this point on there is no reason to anything outside the temp folder
             // this file manipulator will prevent any access/write outside temp folder
             os_mani,
-            name: None,
             temp_file,
             only_actual,
-            path_to_temp,
+            path_resolver: dev_resolver,
+            path_provider: dev_provider,
             actual,
             expected,
         }
@@ -64,18 +73,26 @@ impl TestSetup {
 
     pub fn assert_with_expected(&self) {
         let result = if self.only_actual {
-            assert_folders(&self.path_to_temp, &self.actual).unwrap()
+            assert_folders(self.path_to_temp(), &self.actual).unwrap()
         } else {
-            assert_folders(&self.path_to_temp, &self.expected).unwrap()
+            assert_folders(self.path_to_temp(), &self.expected).unwrap()
         };
         assert!(DirAssert::Equal == result, "{}", result);
     }
 
     pub fn path_to_temp(&self) -> &Path {
-        self.path_to_temp.as_path()
+        self.temp_file.path()
     }
 
     pub fn os_mani(&self) -> &DevOsFileManipulator {
         &self.os_mani
+    }
+
+    pub fn path_resolver(&self) -> &DevPathResolver {
+        &self.path_resolver
+    }
+
+    pub fn path_provider(&self) -> &DevPathProvider {
+        &self.path_provider
     }
 }

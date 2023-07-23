@@ -7,7 +7,6 @@ pub use from_cli_path::AbsoluteExistingPath;
 pub use init_kind::InitKind;
 pub use subcommands::LoadTemplateArg;
 pub use subcommands::SaveTemplateCli;
-pub use subcommands::TemplateCliArg;
 
 mod from_cli_path;
 

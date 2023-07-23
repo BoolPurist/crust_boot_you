@@ -11,8 +11,8 @@ fn save_err_already_created_template(name: &ValidTemplateName) -> String {
 }
 
 pub fn handle(
-    path_provider: impl PathProvider,
-    file_manipulator: impl FileManipulator,
+    path_provider: &impl PathProvider,
+    file_manipulator: &impl FileManipulator,
     args: &AppCliEntry,
 ) -> ReturnToUser {
     match args.sub_commands() {
@@ -22,7 +22,7 @@ pub fn handle(
         SubCommands::SaveTemplate(args) => {
             handle_save_template(path_provider, file_manipulator, args)
         }
-        SubCommands::ListTemplate => handle_list_template(&path_provider, &file_manipulator),
+        SubCommands::ListTemplate => handle_list_template(path_provider, file_manipulator),
         SubCommands::DeleteTemplate { name } => {
             handle_delete_template(path_provider, file_manipulator, name)
         }
@@ -30,8 +30,8 @@ pub fn handle(
 }
 
 fn handle_delete_template(
-    path_provider: impl PathProvider,
-    file_manipulator: impl FileManipulator,
+    path_provider: &impl PathProvider,
+    file_manipulator: &impl FileManipulator,
     name: &ValidTemplateName,
 ) -> ReturnToUser {
     let path_to_delete = path_provider.specific_entry_template(name)?;
@@ -89,8 +89,8 @@ pub fn handle_list_template(
 }
 
 fn handle_load_template(
-    path_provider: impl PathProvider,
-    file_manipulator: impl FileManipulator,
+    path_provider: &impl PathProvider,
+    file_manipulator: &impl FileManipulator,
     load_args: &LoadTemplateArg,
 ) -> ReturnToUser {
     debug!("Handling subcommand: {:?}", "LoadTemplate");
@@ -123,12 +123,11 @@ fn handle_load_template(
 }
 
 pub fn handle_save_template(
-    path_provider: impl PathProvider,
-    file_manipulator: impl FileManipulator,
+    path_provider: &impl PathProvider,
+    file_manipulator: &impl FileManipulator,
     from_cli: &SaveTemplateCli,
 ) -> ReturnToUser {
-    let arguments = from_cli.arguments();
-    let (name, path) = (arguments.name(), arguments.path());
+    let (name, path) = (from_cli.name(), from_cli.path());
     save_template(
         path_provider,
         file_manipulator,
@@ -155,8 +154,8 @@ fn success_save_msg(name: &ValidTemplateName, file_kind: &str, source_path: &Pat
 /// - If the copy process was not successful.
 ///
 fn save_template(
-    path_provider: impl PathProvider,
-    file_manipulator: impl FileManipulator,
+    path_provider: &impl PathProvider,
+    file_manipulator: &impl FileManipulator,
     on_detect_file_kind: impl Fn(&Path) -> AppIoResult<FileKind>,
     name: &ValidTemplateName,
     source_path: impl AsRef<Path>,
@@ -197,7 +196,7 @@ fn save_template(
     return Ok(msg_to_user);
 
     fn handle_dir(
-        file_manipulator: impl FileManipulator,
+        file_manipulator: &impl FileManipulator,
         target_path: &Path,
         source_path: &Path,
     ) -> AppResult {
@@ -212,7 +211,7 @@ fn save_template(
     }
 
     fn handle_file(
-        file_manipulator: impl FileManipulator,
+        file_manipulator: &impl FileManipulator,
         template_path: &Path,
         source_path: &Path,
     ) -> AppResult {

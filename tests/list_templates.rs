@@ -10,9 +10,8 @@ use crate::common::insta_utils;
 fn list_avaiable_templates() {
     let setup = TestSetup::only_actual(actual!());
 
-    let test_paths = TestPathProvider::clone_from(setup.path_to_temp(), "data", "config");
-
-    let result = handle_commands::handle_list_template(&test_paths, setup.os_mani()).unwrap();
+    let result =
+        handle_commands::handle_list_template(setup.path_provider(), setup.os_mani()).unwrap();
     setup.assert_with_expected();
 
     insta::with_settings!({filters => insta_utils::filter_random_tmp_folder_name()},
