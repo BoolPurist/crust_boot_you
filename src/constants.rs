@@ -20,6 +20,7 @@ pub const INIT_KIND_ONLY_EMPTY: &str = "only_empty";
 pub const INIT_KIND_NO_NAME_CONFLICT: &str = "no_name_conflict";
 pub const INIT_KIND_OVERRIDE: &str = "override";
 pub const INIT_KIND_PURGE: &str = "purge";
+pub const SEPERATOR_BETWEEN_DEFAULT_AND_VALUE: char = '?';
 
 pub mod dev {
     pub const TMP_ROOT: &str = "crust_boot_you_tmp";

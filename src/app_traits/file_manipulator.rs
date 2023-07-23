@@ -37,7 +37,8 @@ pub trait FileManipulator {
         let exits = self.try_exits(location)?;
         if exits {
             let entries = self.list_first_level_dir(location)?;
-            Ok(entries.is_empty())
+            dbg!(&entries);
+            Ok(!entries.is_empty())
         } else {
             Ok(true)
         }

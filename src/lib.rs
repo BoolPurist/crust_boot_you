@@ -5,9 +5,13 @@ extern crate log;
 #[macro_use]
 extern crate thiserror;
 
-pub mod cli;
+#[cfg(test)]
+#[macro_use]
+extern crate map_macro;
 
 pub mod app_traits;
+pub mod cli;
+pub mod template_augmentation;
 pub mod valid_template_name;
 use app_traits::path_resolver::DevPathResolver;
 pub use valid_template_name::ValidTemplateName;

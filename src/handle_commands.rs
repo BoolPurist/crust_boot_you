@@ -126,9 +126,8 @@ pub fn handle_load_template(
             .cwd()
             .context("Can not access current working directory. No target to copy to")?;
 
-        let is_not_empty = file_manipulator.no_filled_folder_there(&cwd)?;
-        dbg!(is_not_empty);
-        if is_not_empty {
+        let is_empty = file_manipulator.all_nodes_inside(&cwd)?.is_empty();
+        if !is_empty {
             bail!(
                 "Folder is not empty at {:?}. This is an error for init kind OnlyEmpty.",
                 cwd

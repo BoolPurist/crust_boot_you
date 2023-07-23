@@ -55,7 +55,7 @@ impl FileManipulator for DryFileManipulator {
     }
 
     fn resolver(&self) -> &Self::Resolver {
-        &self.os_imp.resolver()
+        self.os_imp.resolver()
     }
 
     fn cwd(&self) -> AppIoResult<PathBuf> {

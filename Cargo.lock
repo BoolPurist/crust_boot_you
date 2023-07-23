@@ -237,6 +237,7 @@ dependencies = [
  "once_cell",
  "path-absolutize",
  "pretty_assertions",
+ "regex",
  "simplelog",
  "tempfile",
  "thiserror",
