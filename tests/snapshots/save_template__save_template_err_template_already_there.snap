@@ -1,0 +1,5 @@
+---
+source: tests/save_template.rs
+expression: output
+---
+Template with the name (already_there) is already created
