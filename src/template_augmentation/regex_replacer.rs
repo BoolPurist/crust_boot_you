@@ -2,7 +2,7 @@ use crate::prelude::*;
 use std::borrow::Cow;
 
 use once_cell::sync::Lazy;
-use regex::{Regex, Replacer};
+use regex::Regex;
 
 use super::{
     augmentation_error::AugmentationError, console_fetcher::ConsoleFetcher,
@@ -10,7 +10,8 @@ use super::{
 };
 
 fn build_regex_template() -> Regex {
-    Regex::new(r#"\{\{(?<value>[^\{]*)\}\}"#).unwrap()
+    Regex::new(r#"\{\{(?<value>[^\{]*)\}\}"#)
+        .expect("Incorrect regex matcher for a key to be replaced within a template")
 }
 
 static REGEX_TEMPLATE: Lazy<Regex> = Lazy::new(build_regex_template);
@@ -19,7 +20,7 @@ pub struct RegexTemplateAugmentor<CF> {
     cache: AugementRepository<CF>,
 }
 
-impl<CF> RegexTemplateAugmentor<CF> {
+impl<CF: ConsoleFetcher> RegexTemplateAugmentor<CF> {
     pub fn new(cache: AugementRepository<CF>) -> Self {
         Self { cache }
     }
@@ -30,62 +31,33 @@ where
     CF: ConsoleFetcher,
 {
     fn try_replace<'a>(&mut self, input: &'a str) -> Result<Cow<'a, str>, AugmentationError> {
-        let mut found_error = None;
-        let output = {
-            let replacer = RegexReplacer::new(&mut self.cache, &mut found_error);
-            let output = REGEX_TEMPLATE.replace_all(input, replacer);
-            output
-        };
+        let mut expansion_happened = false;
+        let mut expanded = String::with_capacity(input.len());
+        let mut last_match = 0;
 
-        match found_error {
-            Some(error) => Err(error.clone()),
-            None => Ok(output),
+        for found in REGEX_TEMPLATE.captures_iter(input) {
+            expansion_happened = true;
+
+            let matched_range = found.get(0).unwrap();
+            expanded.push_str(&input[last_match..matched_range.start()]);
+
+            let extraction = {
+                let value = &found["value"];
+                let mut splited = value.split(constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE);
+                let (key, default_value) = (splited.next().unwrap(), splited.next());
+                TemplateExtractation::FromConsole { key, default_value }
+            };
+            let replacement = self.cache.augment(&extraction)?;
+            expanded.push_str(replacement);
+
+            last_match = matched_range.end();
         }
-    }
-}
 
-pub struct RegexReplacer<'a, CF> {
-    respo_store: &'a mut AugementRepository<CF>,
-    found_error: &'a mut Option<AugmentationError>,
-}
-
-impl<'a, CF> RegexReplacer<'a, CF> {
-    pub fn new(
-        respo_store: &'a mut AugementRepository<CF>,
-        found_error: &'a mut Option<AugmentationError>,
-    ) -> Self {
-        Self {
-            respo_store,
-            found_error,
-        }
-    }
-}
-
-impl<'a, CF: ConsoleFetcher> Replacer for RegexReplacer<'a, CF> {
-    fn replace_append(&mut self, caps: &regex::Captures<'_>, dst: &mut String) {
-        let extraction = {
-            let value = &caps["value"];
-            let mut splited = value.split(constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE);
-            let (key, default_value) = (splited.next().unwrap(), splited.next());
-            TemplateExtractation::FromConsole { key, default_value }
-        };
-
-        let found_error = &mut self.found_error;
-        if found_error.is_none() {
-            match self.respo_store.augment(&extraction) {
-                Ok(value) => dst.push_str(value),
-                Err(error) => {
-                    insert_original(caps, dst);
-                    **found_error = Some(error)
-                }
-            }
+        if expansion_happened {
+            expanded.push_str(&input[last_match..]);
+            Ok(Cow::Owned(expanded))
         } else {
-            insert_original(caps, dst);
-        }
-
-        fn insert_original(caps: &regex::Captures<'_>, dst: &mut String) {
-            let original = caps.get(0).unwrap();
-            dst.push_str(original.as_str());
+            Ok(Cow::Borrowed(input))
         }
     }
 }

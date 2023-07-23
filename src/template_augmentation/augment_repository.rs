@@ -18,7 +18,10 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
         }
     }
 
-    pub fn augment<'a>(&'a mut self, extract: &'a TemplateExtractation) -> AugmentationResult<'a> {
+    pub fn augment<'a>(
+        &'a mut self,
+        extract: &'a TemplateExtractation<'a>,
+    ) -> AugmentationResult<'a> {
         let value = match extract {
             TemplateExtractation::FromConsole { key, default_value } => {
                 if self.console_map.get(*key).is_none() {
