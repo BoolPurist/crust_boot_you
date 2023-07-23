@@ -1,0 +1,5 @@
+---
+source: tests/delete_template.rs
+expression: output
+---
+There is no template to be deleted with the name (to delete).
