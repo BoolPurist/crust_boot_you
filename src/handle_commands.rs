@@ -122,7 +122,7 @@ fn handle_load_template(
     ))
 }
 
-fn handle_save_template(
+pub fn handle_save_template(
     path_provider: impl PathProvider,
     file_manipulator: impl FileManipulator,
     from_cli: &SaveTemplateCli,

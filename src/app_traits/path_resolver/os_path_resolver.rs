@@ -11,7 +11,7 @@ impl PathResolver for OsPathResolver {
     }
 
     fn root(&self) -> &Path {
-        Path::new("/")
+        Path::new(std::path::MAIN_SEPARATOR_STR)
     }
     fn absolute<'a>(&self, path: &'a Path) -> AppIoResult<std::borrow::Cow<'a, Path>> {
         use path_absolutize::Absolutize;

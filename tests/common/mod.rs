@@ -5,6 +5,7 @@ use once_cell::sync::Lazy;
 
 pub mod dir_asserts;
 pub use setup::TestSetup;
+pub mod insta_utils;
 mod setup;
 
 pub use ::function_name::named;
@@ -16,9 +17,9 @@ pub mod prelude {
     pub use crust_boot_you::app_traits::path_provider::TestPathProvider;
     pub use crust_boot_you::prelude::*;
 }
+
 #[macro_export]
 macro_rules! actual_expected {
-    // `()` indicates that the macro takes no argument.
     () => {{
         let file_name = std::path::Path::new(file!()).file_stem().unwrap();
         let function_name = function_name!();
@@ -26,9 +27,9 @@ macro_rules! actual_expected {
         crate::common::get_actual_expected_diff_dir_assert(&passing)
     }};
 }
+
 #[macro_export]
 macro_rules! actual {
-    // `()` indicates that the macro takes no argument.
     () => {{
         let file_name = std::path::Path::new(file!()).file_stem().unwrap();
         let function_name = function_name!();

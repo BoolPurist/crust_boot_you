@@ -7,6 +7,11 @@ pub struct SaveTemplateCli {
     #[command(flatten)]
     arguments: TemplateCliArg,
 }
+impl From<TemplateCliArg> for SaveTemplateCli {
+    fn from(value: TemplateCliArg) -> Self {
+        Self { arguments: value }
+    }
+}
 
 impl SaveTemplateCli {
     pub fn arguments(&self) -> &TemplateCliArg {

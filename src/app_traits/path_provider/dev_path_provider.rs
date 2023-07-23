@@ -8,6 +8,10 @@ pub struct DevPathProvider {
 }
 
 impl DevPathProvider {
+    pub fn new(root: PathBuf) -> Self {
+        Self { root }
+    }
+
     pub fn root(&self) -> &Path {
         self.root.as_path()
     }

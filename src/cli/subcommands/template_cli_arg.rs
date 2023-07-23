@@ -12,6 +12,10 @@ pub struct TemplateCliArg {
 }
 
 impl TemplateCliArg {
+    pub fn new(name: ValidTemplateName, path: AbsoluteExistingPath) -> Self {
+        Self { name, path }
+    }
+
     pub fn path(&self) -> &AbsoluteExistingPath {
         &self.path
     }

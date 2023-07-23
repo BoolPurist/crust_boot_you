@@ -1,0 +1,5 @@
+---
+source: tests/save_template.rs
+expression: output
+---
+Created template with name (a) from the file "/[TMP_ROOT]/new.txt"
