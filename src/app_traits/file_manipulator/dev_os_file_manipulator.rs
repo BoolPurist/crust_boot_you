@@ -70,6 +70,10 @@ impl DevOsFileManipulator {
             );
         });
     }
+
+    pub fn set_cwd(&mut self, cwd: PathBuf) {
+        self.cwd = cwd;
+    }
 }
 
 impl FileManipulator for DevOsFileManipulator {

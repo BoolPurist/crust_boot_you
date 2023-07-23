@@ -3,12 +3,14 @@ use crust_boot_you::{
     prelude::*,
     DevPathProvider,
 };
-use tempfile::{Builder, TempDir};
+use tempfile::TempDir;
 
 use crate::common::dir_asserts::DirAssert;
 
 use super::dir_asserts::assert_folders;
 
+mod test_setup_builder;
+pub use test_setup_builder::TestSetupBuilder;
 pub struct TestSetup {
     temp_file: TempDir,
     only_actual: bool,
@@ -22,27 +24,15 @@ pub struct TestSetup {
 impl TestSetup {
     pub fn new(actual_expected: (PathBuf, PathBuf)) -> Self {
         let (actual, expected) = actual_expected;
-        Self::init_create(None, actual, expected, false)
+        Self::init_create(actual, expected, false)
     }
 
     pub fn only_actual(actual: PathBuf) -> Self {
-        Self::init_create(None, actual.clone(), actual, true)
+        Self::init_create(actual.clone(), actual, true)
     }
 
-    fn init_create(
-        name: Option<ValidTemplateName>,
-        actual: PathBuf,
-        expected: PathBuf,
-        only_actual: bool,
-    ) -> Self {
-        let temp_file = if let Some(name) = name {
-            Builder::new()
-                .suffix("")
-                .tempdir_in(std::env::temp_dir().join(name.as_ref()))
-                .unwrap()
-        } else {
-            TempDir::new().unwrap()
-        };
+    fn init_create(actual: PathBuf, expected: PathBuf, only_actual: bool) -> Self {
+        let temp_file = TempDir::new().unwrap();
         let path_to_temp = temp_file.path().to_path_buf();
         let os_mani = DevOsFileManipulator::new(&path_to_temp).init_system(actual.to_path_buf());
         // Use the raw real file manipulator to copy outside the temp folder

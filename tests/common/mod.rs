@@ -13,9 +13,20 @@ pub use ::function_name::named;
 #[cfg(test)]
 pub mod prelude {
     pub use super::setup::TestSetup;
+    pub use super::setup::TestSetupBuilder;
     pub use ::function_name::named;
     pub use crust_boot_you::app_traits::path_provider::TestPathProvider;
     pub use crust_boot_you::prelude::*;
+}
+
+#[macro_export]
+macro_rules! insta_display_filter_random_tmp {
+    ($result:expr) => {{
+        insta::with_settings!(
+            {filters => common::insta_utils::filter_random_tmp_folder_name()},
+            {insta::assert_display_snapshot!($result) }
+        );
+    }};
 }
 
 #[macro_export]

@@ -88,7 +88,7 @@ pub fn handle_list_template(
     Ok(output)
 }
 
-fn handle_load_template(
+pub fn handle_load_template(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
     load_args: &LoadTemplateArg,

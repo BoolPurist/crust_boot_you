@@ -36,6 +36,7 @@ fn delete_err_on_non_existing_template() {
         &given_name,
     )
     .expect_err("Should be an error in this test case");
+
     setup.assert_with_expected();
     insta::assert_display_snapshot!(output);
 }
