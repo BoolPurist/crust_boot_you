@@ -29,7 +29,7 @@ pub fn handle(
     }
 }
 
-fn handle_delete_template(
+pub fn handle_delete_template(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
     name: &ValidTemplateName,
