@@ -33,3 +33,13 @@ impl AppCliEntry {
         }
     }
 }
+#[cfg(test)]
+mod testing {
+    use super::*;
+
+    #[test]
+    fn verify_cli() {
+        use clap::CommandFactory;
+        AppCliEntry::command().debug_assert()
+    }
+}
