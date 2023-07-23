@@ -22,3 +22,20 @@ fn copy_at_target() {
 
     insta_display_filter_random_tmp!(output);
 }
+#[test]
+#[named]
+fn copy_err_cwd_not_empty() {
+    let setup = TestSetupBuilder::new(actual_expected!())
+        .suffix_cwd(PathBuf::from("cwd").join("not_empty"))
+        .build();
+
+    let to_copy_from = ValidTemplateName::new("a".to_string()).unwrap();
+    let init_kind = InitKind::OnlyEmpty;
+    let arg = LoadTemplateArg::new(to_copy_from, init_kind);
+    let output =
+        handle_commands::handle_load_template(setup.path_provider(), setup.os_mani(), &arg)
+            .unwrap_err();
+
+    insta_display_filter_random_tmp!(output);
+    setup.assert_with_expected();
+}

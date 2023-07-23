@@ -1,0 +1,5 @@
+---
+source: tests/copy_template_into.rs
+expression: output
+---
+Folder is not empty at "/[TMP_ROOT]/cwd/not_empty". This is an error for init kind OnlyEmpty

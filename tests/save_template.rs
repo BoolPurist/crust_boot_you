@@ -1,5 +1,4 @@
 mod common;
-use common::insta_utils;
 use common::prelude::*;
 use crust_boot_you::cli::{AbsoluteExistingPath, SaveTemplateCli};
 use crust_boot_you::handle_commands;
@@ -16,7 +15,7 @@ fn save_file_new_template() {
     let output =
         handle_commands::handle_save_template(setup.path_provider(), setup.os_mani(), &arguments)
             .expect("Should be successful in this test case");
-    insta::with_settings!({ filters => insta_utils::filter_random_tmp_folder_name() }, { insta::assert_display_snapshot!(output) });
+    insta_display_filter_random_tmp!(output);
 
     setup.assert_with_expected();
 }
@@ -36,7 +35,7 @@ fn save_folder_as_template() {
 
     setup.assert_with_expected();
 
-    insta::with_settings!({ filters => insta_utils::filter_random_tmp_folder_name() }, { insta::assert_display_snapshot!(output) });
+    insta_display_filter_random_tmp!(output);
 }
 
 #[test]

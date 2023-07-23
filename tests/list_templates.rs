@@ -3,8 +3,6 @@ mod common;
 
 use crust_boot_you::handle_commands;
 
-use crate::common::insta_utils;
-
 #[named]
 #[test]
 fn list_avaiable_templates() {
@@ -14,10 +12,7 @@ fn list_avaiable_templates() {
         handle_commands::handle_list_template(setup.path_provider(), setup.os_mani()).unwrap();
     setup.assert_with_expected();
 
-    insta::with_settings!({filters => insta_utils::filter_random_tmp_folder_name()},
-    {
-        insta::assert_display_snapshot!(result);
-    });
+    insta_display_filter_random_tmp!(result);
 }
 
 #[named]

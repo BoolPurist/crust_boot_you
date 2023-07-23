@@ -1,5 +1,5 @@
 use crate::{
-    cli::{LoadTemplateArg, SaveTemplateCli},
+    cli::{InitKind, LoadTemplateArg, SaveTemplateCli},
     file_management::{self, FileKind},
     prelude::*,
     AppCliEntry, SubCommands, ValidTemplateName,
@@ -94,7 +94,7 @@ pub fn handle_load_template(
     load_args: &LoadTemplateArg,
 ) -> ReturnToUser {
     debug!("Handling subcommand: {:?}", "LoadTemplate");
-    let (name, _init_kind) = (load_args.name(), load_args.with());
+    let (name, init_kind) = (load_args.name(), load_args.with());
 
     let path_to_template = path_provider.specific_entry_template_files(name)?;
 
@@ -108,18 +108,34 @@ pub fn handle_load_template(
         _ => (),
     }
 
-    let cwd = file_manipulator
-        .cwd()
-        .context("Can not access current working directory. No target to copy to")?;
-
+    let cwd = try_return_valid_target(file_manipulator, init_kind)?;
     file_manipulator
         .copy_dir(&path_to_template, &cwd)
         .with_context(|| format!("Failed to copy from {:?} to {:?}", path_to_template, cwd))?;
 
-    Ok(format!(
+    return Ok(format!(
         "Folder {:?} filled with content from Template ({})",
         cwd, name
-    ))
+    ));
+
+    fn try_return_valid_target(
+        file_manipulator: &impl FileManipulator,
+        _init_kind: InitKind,
+    ) -> AppResult<PathBuf> {
+        let cwd = file_manipulator
+            .cwd()
+            .context("Can not access current working directory. No target to copy to")?;
+
+        let is_not_empty = file_manipulator.no_filled_folder_there(&cwd)?;
+        dbg!(is_not_empty);
+        if is_not_empty {
+            bail!(
+                "Folder is not empty at {:?}. This is an error for init kind OnlyEmpty.",
+                cwd
+            );
+        }
+        Ok(cwd)
+    }
 }
 
 pub fn handle_save_template(
