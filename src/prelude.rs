@@ -32,12 +32,8 @@ pub mod testing {
     #[macro_export]
     macro_rules! from_ron_input_file {
         ($input:literal) => {{
-            let path = const_format::concatcp!(
-                TEST_INPUT_FOLDER_NAME,
-                std::path::MAIN_SEPARATOR_STR,
-                $input
-            );
-            ron::from_str(load_str!(path)).expect(concat!($input, "is not in a valid format"))
+            ron::from_str(include_str!(concat!("test_input/", $input)))
+                .expect(concat!($input, "is not in a valid format"))
         }};
     }
     pub use from_ron_input_file;

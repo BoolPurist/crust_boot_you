@@ -11,9 +11,6 @@ extern crate thiserror;
 #[cfg(test)]
 #[macro_use]
 extern crate map_macro;
-#[cfg(test)]
-#[macro_use]
-extern crate load_file;
 
 pub mod app_traits;
 pub mod cli;

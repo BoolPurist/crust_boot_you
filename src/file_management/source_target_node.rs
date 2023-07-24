@@ -28,7 +28,7 @@ impl SourceTargetNode {
         self.target.as_path()
     }
     pub fn node_type(&self) -> FileKind {
-        self.source_node.node_type().clone()
+        *self.source_node.node_type()
     }
 
     pub fn opt_many_from_many_sources(

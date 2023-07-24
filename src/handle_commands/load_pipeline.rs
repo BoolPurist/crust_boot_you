@@ -8,6 +8,8 @@ use crate::{
     prelude::*,
 };
 
+type NodeId<'a> = (&'a Path, FileKind);
+
 #[derive(Debug)]
 #[cfg_attr(test, derive(Serialize, Deserialize))]
 pub enum InitAction {
@@ -36,13 +38,12 @@ pub fn determine_init_action(
         }
         InitKind::NoNameConflicts => {
             let templates = all_templates_paths(template_source, write_target, on_query_template)?;
-            let target: Vec<(&Path, FileKind)> = templates
+            let target: Vec<NodeId> = templates
                 .iter()
                 .map(|next| (next.target_path(), next.node_type()))
                 .collect();
 
-            let nodes_write_target: Vec<(&Path, FileKind)> =
-                many_node_metas_to_ids(&nodes_write_target);
+            let nodes_write_target: Vec<NodeId> = many_node_metas_to_ids(&nodes_write_target);
 
             let to_return = match has_name_conflicts(&target, &nodes_write_target) {
                 None => InitAction::NoConflict(templates),
@@ -83,7 +84,6 @@ pub fn determine_init_action(
     }
 }
 
-type NodeId<'a> = (&'a Path, FileKind);
 fn produce_set_from_paths<'a>(for_set: &'a [NodeId<'a>]) -> Option<HashSet<NodeId<'a>>> {
     let mut to_return: HashSet<NodeId<'a>> = Default::default();
 
@@ -98,11 +98,11 @@ fn produce_set_from_paths<'a>(for_set: &'a [NodeId<'a>]) -> Option<HashSet<NodeI
 fn has_name_conflicts<'a>(
     source: &'a [NodeId<'a>],
     target: &'a [NodeId<'a>],
-) -> Option<(&'a Path, FileKind)> {
+) -> Option<NodeId<'a>> {
     let source_set = produce_set_from_paths(source)?;
     let target_set = produce_set_from_paths(target)?;
     let mut no_interection = source_set.intersection(&target_set);
-    no_interection.next().map(|first| *first)
+    no_interection.next().copied()
 }
 
 fn many_node_metas_to_ids(many: &[NodeEntryMeta]) -> Vec<NodeId> {
