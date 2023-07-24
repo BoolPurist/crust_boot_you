@@ -1,0 +1,26 @@
+TestInputDetermineAction(
+    write_target: [
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/root/target/a",
+        ),
+        NodeEntryMeta(
+            node_type: Folder,
+            source_path: "/root/source/a/b",
+        ),
+    ],
+    return_by_on_query_target: [
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/root/target/a/bb",
+        ),
+        NodeEntryMeta(
+            node_type: Folder,
+            source_path: "/root/target/z",
+        ),
+        NodeEntryMeta(
+            node_type: Folder,
+            source_path: "/root/target/xz",
+        ),
+    ]   
+)

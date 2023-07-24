@@ -1,0 +1,20 @@
+---
+source: src/handle_commands/load_pipeline.rs
+expression: actual
+---
+Purge([
+  SourceTargetNode(
+    source_node: NodeEntryMeta(
+      node_type: File,
+      source_path: "/some/source/a",
+    ),
+    target: "/some/target/a",
+  ),
+  SourceTargetNode(
+    source_node: NodeEntryMeta(
+      node_type: File,
+      source_path: "/some/source/b",
+    ),
+    target: "/some/target/b",
+  ),
+])

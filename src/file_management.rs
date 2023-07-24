@@ -12,7 +12,8 @@ mod node_entry_meta;
 mod os_io_error;
 mod source_target_node;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[cfg_attr(test, derive(Serialize, Deserialize, PartialOrd, Ord))]
 pub enum FileKind {
     File,
     Folder,

@@ -1,4 +1,7 @@
 #[macro_use]
+pub mod prelude;
+
+#[macro_use]
 extern crate anyhow;
 #[macro_use]
 extern crate log;
@@ -8,6 +11,9 @@ extern crate thiserror;
 #[cfg(test)]
 #[macro_use]
 extern crate map_macro;
+#[cfg(test)]
+#[macro_use]
+extern crate load_file;
 
 pub mod app_traits;
 pub mod cli;
@@ -19,7 +25,6 @@ pub mod constants;
 pub mod file_management;
 pub mod handle_commands;
 pub mod logging;
-pub mod prelude;
 pub use app_traits::path_provider::DevPathProvider;
 pub use app_traits::path_provider::TestPathProvider;
 pub use cli::AppCliEntry;

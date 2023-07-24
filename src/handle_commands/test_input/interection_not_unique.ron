@@ -1,0 +1,38 @@
+(
+    [
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/some/target/z",
+        ),
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/some/target/b",
+        ),
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/some/target/c",
+        ),
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/some/target/cccc/zzz",
+        ),
+    ],
+    [
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/some/target/z",
+        ),
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/some/target/cc",
+        ),
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/some/target/ee",
+        ),
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/some/target/c/zzz",
+        ),
+    ]
+ )

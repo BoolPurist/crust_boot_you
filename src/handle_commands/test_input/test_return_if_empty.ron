@@ -1,0 +1,19 @@
+TestInputDetermineAction(
+    template_source: "/some/source",
+    write_target: "/some/target",
+    content_of_write_target: [],
+    content_of_template_folder: [
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/some/source/a",
+        ),
+        NodeEntryMeta(
+            node_type: File,
+            source_path: "/some/source/b",
+        ),
+        NodeEntryMeta(
+            node_type: Folder,
+            source_path: "/some/source/aaa/ccc",
+        ),
+    ]   
+)

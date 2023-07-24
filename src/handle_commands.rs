@@ -10,6 +10,8 @@ fn save_err_already_created_template(name: &ValidTemplateName) -> String {
     format!("Template with the name ({}) is already created", name)
 }
 
+mod load_pipeline;
+
 pub fn handle(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
