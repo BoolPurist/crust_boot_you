@@ -8,22 +8,24 @@ use crust_boot_you::constants;
 use crust_boot_you::handle_commands;
 use crust_boot_you::logging;
 use crust_boot_you::prelude::AppResult;
+use crust_boot_you::prelude::ReturnToUser;
 use crust_boot_you::template_augmentation::RegexTemplateAugmentor;
 use crust_boot_you::AppCliEntry;
 use std::process::ExitCode;
 
 fn main() -> ExitCode {
-    let is_in_debug = cfg!(debug_assertions);
-
     let args = AppCliEntry::parse();
+    let output = process_command(&args);
+    print_result(output, &args)
+}
 
-    let is_in_dry = args.dry();
+fn process_command(args: &AppCliEntry) -> ReturnToUser {
+    let is_debug = cfg!(debug_assertions);
+    let is_dry = args.dry();
     let mut augmentor = RegexTemplateAugmentor::default();
-
-    let output = match (is_in_debug, is_in_dry) {
+    let output = match (is_debug, is_dry) {
         (true, true) => {
-            let paths = DevPathProvider::default();
-            logging::init(&args, &paths);
+            let paths = dev_logger_init(args);
             handle_commands::handle(
                 &paths,
                 &DryFileManipulator::default(),
@@ -32,22 +34,27 @@ fn main() -> ExitCode {
             )
         }
         (true, false) => {
-            let paths = DevPathProvider::default();
-            logging::init(&args, &paths);
+            let paths = dev_logger_init(args);
             handle_commands::handle(
-                &DevPathProvider::default(),
+                &paths,
                 &DevOsFileManipulator::default(),
                 &mut augmentor,
                 &args,
             )
         }
         (false, _) => todo!("Not implemented for production"),
-    };
+    }?;
 
-    handle_result_from_command(output, &args)
+    return Ok(output);
+
+    fn dev_logger_init(args: &AppCliEntry) -> DevPathProvider {
+        let paths = DevPathProvider::default();
+        logging::init(&args, &paths);
+        paths
+    }
 }
 
-fn handle_result_from_command(output: AppResult<String>, args: &AppCliEntry) -> ExitCode {
+fn print_result(output: AppResult<String>, args: &AppCliEntry) -> ExitCode {
     return match output {
         Ok(success_message) => {
             if *args.dry() {
@@ -62,19 +69,19 @@ fn handle_result_from_command(output: AppResult<String>, args: &AppCliEntry) -> 
                 log::error!("{:?}", error_message);
             } else {
                 log::error!("{}", error_message);
-
-                let (loggin_in_term, logging_allowed) = (
-                    args.term_logging(),
-                    args.log_level()
-                        .map(|level| level != CliLogLevel::None)
-                        .unwrap_or(true),
-                );
-                match (*loggin_in_term, logging_allowed) {
-                    (false, _) => eprint_output(error_message.to_string()),
-                    (true, false) => eprint_output(error_message.to_string()),
-                    (true, true) => (),
-                }
             }
+            let (loggin_in_term, logging_allowed) = (
+                args.term_logging(),
+                args.log_level()
+                    .map(|level| level != CliLogLevel::None)
+                    .unwrap_or(true),
+            );
+            match (*loggin_in_term, logging_allowed) {
+                (false, _) => eprint_output(error_message.to_string()),
+                (true, false) => eprint_output(error_message.to_string()),
+                (true, true) => (),
+            }
+
             ExitCode::FAILURE
         }
     };

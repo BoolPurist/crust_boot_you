@@ -52,29 +52,26 @@ where
     CF: ConsoleFetcher,
 {
     fn try_replace<'a>(&mut self, input: &'a str) -> Result<Cow<'a, str>, AugmentationError> {
-        let mut expansion_happened = false;
-        let mut expanded = String::with_capacity(input.len());
-        let mut last_match = 0;
+        let mut captures = REGEX_TEMPLATE.captures_iter(input).peekable();
+        let needs_expansion = captures.peek().is_some();
+        if needs_expansion {
+            let mut expanded = String::with_capacity(input.len());
+            let mut last_match = 0;
+            for found in captures {
+                let matched_range = found.get(0).unwrap();
+                expanded.push_str(&input[last_match..matched_range.start()]);
 
-        for found in REGEX_TEMPLATE.captures_iter(input) {
-            expansion_happened = true;
+                let extraction = {
+                    let value = &found["value"];
+                    let mut splited = value.split(constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE);
+                    let (key, default_value) = (splited.next().unwrap(), splited.next());
+                    TemplateExtractation::FromConsole { key, default_value }
+                };
+                let replacement = self.cache.augment(&extraction)?;
+                expanded.push_str(replacement);
+                last_match = matched_range.end();
+            }
 
-            let matched_range = found.get(0).unwrap();
-            expanded.push_str(&input[last_match..matched_range.start()]);
-
-            let extraction = {
-                let value = &found["value"];
-                let mut splited = value.split(constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE);
-                let (key, default_value) = (splited.next().unwrap(), splited.next());
-                TemplateExtractation::FromConsole { key, default_value }
-            };
-            let replacement = self.cache.augment(&extraction)?;
-            expanded.push_str(replacement);
-
-            last_match = matched_range.end();
-        }
-
-        if expansion_happened {
             expanded.push_str(&input[last_match..]);
             Ok(Cow::Owned(expanded))
         } else {
