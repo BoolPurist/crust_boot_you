@@ -30,7 +30,7 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
                     debug_assert!(
                         may_new_value
                             .as_ref()
-                            .map(|no_trailing_newline| !no_trailing_newline.ends_with("\n"))
+                            .map(|no_trailing_newline| !no_trailing_newline.ends_with('\n'))
                             .unwrap_or(true),
                         "Read value should not have a new line at the end"
                     );

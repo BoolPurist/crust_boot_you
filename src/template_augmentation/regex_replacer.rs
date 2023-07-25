@@ -4,8 +4,8 @@ use std::borrow::Cow;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-use super::TestAugmentStore;
 use super::console_fetcher::TestConsoleFetcher;
+use super::TestAugmentStore;
 
 use super::{
     augmentation_error::AugmentationError,
@@ -27,7 +27,7 @@ pub struct RegexTemplateAugmentor<CF> {
 
 impl Default for RegexTemplateAugmentor<IoConsoleFetcher> {
     fn default() -> Self {
-        let console_fetcher = IoConsoleFetcher::default();
+        let console_fetcher = IoConsoleFetcher;
         let cache = AugementRepository::new(console_fetcher);
         Self::new(cache)
     }

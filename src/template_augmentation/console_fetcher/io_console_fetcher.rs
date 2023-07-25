@@ -26,7 +26,7 @@ impl ConsoleFetcher for IoConsoleFetcher {
         } else {
             Some(without_traling_noise.to_string())
         };
-        println!("");
+        println!();
         Ok(to_return)
     }
 }

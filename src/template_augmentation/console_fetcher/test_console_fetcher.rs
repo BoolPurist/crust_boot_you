@@ -9,10 +9,7 @@ pub struct TestConsoleFetcher {
 }
 
 impl ConsoleFetcher for TestConsoleFetcher {
-    fn fetch_from<'a>(
-        &self,
-        key: KeyExtact<'a>,
-    ) -> crate::template_augmentation::OptAugmentationResult {
+    fn fetch_from(&self, key: KeyExtact) -> crate::template_augmentation::OptAugmentationResult {
         let mut mut_store = self.store.borrow_mut();
 
         match mut_store.get_mut(key) {

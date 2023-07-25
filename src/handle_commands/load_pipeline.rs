@@ -35,7 +35,7 @@ pub fn init_project_with_template(
         file_manipulator.all_nodes_inside(path)
     })?;
     
-    return match action {
+    match action {
         InitAction::NotEmpty => bail!(
             "Aborted initialization of project. Reason: target location at {:?} is not empty. This is not allowed for init kind {}", 
             write_target, 
@@ -71,12 +71,12 @@ pub fn init_project_with_template(
             write_loaded_files(file_manipulator, &augmented)?;
             Ok(())
         }
-    };
+    }
 }
 
-fn write_loaded_files<'a>(
+fn write_loaded_files(
     file_manipulator: &impl FileManipulator,
-    to_write: &[AugmentedFile<'a>],
+    to_write: &[AugmentedFile],
 ) -> AppResult {
     info!("Write augmented files to the target location");
     for (content, path) in to_write {
@@ -109,7 +109,7 @@ fn augment_loaded_files<'a>(
 ) -> AppResult<Vec<AugmentedFile<'a>>> {
     info!("Augmenting loaded files from template folders. Replacing placeholders");
     to_augment
-        .into_iter()
+        .iter()
         .map(|next| {
             let augmented = augmentor.try_replace(next.content()).with_context(|| {
                 format!("Failed to augment file from ({:?}) for initializing the project", next.path())
