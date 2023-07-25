@@ -1,0 +1,16 @@
+---
+source: src/file_management/write_transactions.rs
+expression: actual
+---
+WriteTransactions(
+  files: [
+    FileToLoad("/a/target/ccc"),
+    FileToLoad("/a/target/aaaa/aa"),
+    FileToLoad("/a/target/zzz/z"),
+  ],
+  folders: [
+    DirToEnsure("/a/target/aaaa"),
+    DirToEnsure("/a/target/aaaa/aaa"),
+    DirToEnsure("/a/target/b"),
+  ],
+)

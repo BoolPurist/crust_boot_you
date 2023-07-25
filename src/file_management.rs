@@ -2,15 +2,14 @@ use std::{fs::FileType, path::Path};
 
 use crate::prelude::*;
 
-pub use loaded_node::LoadedNode;
 pub use node_entry_meta::NodeEntryMeta;
 pub use os_io_error::AppIoError;
 pub use source_target_node::SourceTargetNode;
 
-mod loaded_node;
 mod node_entry_meta;
 mod os_io_error;
 mod source_target_node;
+mod write_transactions;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 #[cfg_attr(test, derive(Serialize, Deserialize, PartialOrd, Ord))]

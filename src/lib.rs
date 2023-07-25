@@ -8,6 +8,9 @@ extern crate log;
 #[macro_use]
 extern crate thiserror;
 
+#[macro_use]
+extern crate derive_more;
+
 #[cfg(test)]
 #[macro_use]
 extern crate map_macro;
@@ -26,7 +29,6 @@ pub use app_traits::path_provider::DevPathProvider;
 pub use app_traits::path_provider::TestPathProvider;
 pub use cli::AppCliEntry;
 pub use cli::SubCommands;
-pub use file_management::LoadedNode;
 
 #[cfg(any(debug_assertions, test))]
 type UsedPathResolver = DevPathResolver;

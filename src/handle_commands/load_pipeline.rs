@@ -123,6 +123,7 @@ mod testing {
         content_of_write_target: Vec<NodeEntryMeta>,
         content_of_template_folder: Vec<NodeEntryMeta>,
     }
+
     #[test]
     fn test_produce_set_from_uniques_paths() {
         let input: Vec<NodeEntryMeta> = from_ron_input_file!("list_to_set_unique_paths.ron");

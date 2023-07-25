@@ -29,6 +29,14 @@ path-absolutize = "3.1.0"
 regex = "1.9.1"
 derive-getters = "0.3.0"
 derive-new = "0.5.9"
+derive_more = { version = "0.99.17", default-features = false, features = [
+  "from",
+  "into",
+  "display",
+  "as_ref",
+  "deref",
+  "into_iterator",
+] }
 
 [dev-dependencies]
 serde = { version = "1.0.175", features = ["derive"] }

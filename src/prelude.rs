@@ -3,9 +3,6 @@ use std::io;
 pub use crate::constants;
 pub use anyhow::Context;
 
-#[cfg(test)]
-pub use serde::{Deserialize, Serialize};
-
 pub use derive_getters::Getters;
 pub use derive_new::new;
 pub type IoResult<T = ()> = Result<T, io::Error>;
@@ -27,6 +24,7 @@ pub use std::path::{Path, PathBuf};
 pub use testing::*;
 #[cfg(test)]
 pub mod testing {
+    pub use serde::{Deserialize, Serialize};
 
     pub const TEST_INPUT_FOLDER_NAME: &str = "test_input";
     #[macro_export]

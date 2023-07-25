@@ -6,10 +6,7 @@ mod dev_os_file_manipulator;
 mod dry_file_manipulator;
 mod os_file_manipulator;
 
-use crate::{
-    file_management::{LoadedNode, NodeEntryMeta},
-    prelude::*,
-};
+use crate::{file_management::NodeEntryMeta, prelude::*};
 
 use std::path::{Path, PathBuf};
 
@@ -40,13 +37,6 @@ pub trait FileManipulator {
             Ok(!entries.is_empty())
         } else {
             Ok(true)
-        }
-    }
-
-    fn write_node(&self, loaded: LoadedNode) -> AppIoResult {
-        match loaded {
-            LoadedNode::File { path, content } => self.write_file_to(&path, &content),
-            LoadedNode::Folder { path } => self.ensure_dir(&path),
         }
     }
 }

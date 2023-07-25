@@ -31,6 +31,10 @@ impl SourceTargetNode {
         *self.source_node.node_type()
     }
 
+    pub fn into_target_path(self) -> PathBuf {
+        self.target
+    }
+
     pub fn opt_many_from_many_sources(
         prefix_source: &Path,
         prefix_target: &Path,
