@@ -7,6 +7,6 @@ pub enum AugmentationError {
         "No value was entered for the key {0} in the console. This key has not default value either."
     )]
     NoValueAndDefaultConsole(String),
-    #[error("Could read input from std in")]
-    StdInProblem,
+    #[error("{0}")]
+    StdInProblem(&'static str),
 }

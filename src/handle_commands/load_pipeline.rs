@@ -34,6 +34,7 @@ pub fn init_project_with_template(
     let action = determine_init_action(init_kind, write_target, template_source, |path| {
         file_manipulator.all_nodes_inside(path)
     })?;
+    
     return match action {
         InitAction::NotEmpty => bail!(
             "Aborted initialization of project. Reason: target location at {:?} is not empty. This is not allowed for init kind {}", 
@@ -58,7 +59,13 @@ pub fn init_project_with_template(
             let loaded = load_all_files(file_manipulator, files)?;
             let augmented = augment_loaded_files(augmentor, &loaded)?;
 
-            file_manipulator.delete_whole_folder(write_target)?;
+            info!("Deleting target folder before project initialization because of purge. Location {:?}", write_target);
+            file_manipulator.delete_whole_folder(write_target).with_context(|| {
+               format!("Purge: failed to wipe out target folder before project initialization. Location: {:?}.", write_target) 
+            })?;
+            file_manipulator.ensure_dir(write_target).with_context(|| {
+               format!("Purge: failed to create empty target folder after delteting it. Location: {:?}.", write_target) 
+            })?;
 
             ensure_folders(file_manipulator, &dirs)?;
             write_loaded_files(file_manipulator, &augmented)?;
@@ -71,8 +78,11 @@ fn write_loaded_files<'a>(
     file_manipulator: &impl FileManipulator,
     to_write: &[AugmentedFile<'a>],
 ) -> AppResult {
+    info!("Write augmented files to the target location");
     for (content, path) in to_write {
-        file_manipulator.write_file_to(path, content)?;
+        file_manipulator.write_file_to(path, content).with_context(|| {
+            format!("Failed to write file to location: {:?}", path)
+        })?;
     }
     Ok(())
 }
@@ -81,9 +91,15 @@ fn ensure_folders(
     file_manipulator: &impl FileManipulator,
     to_ensure: &[DirToEnsure],
 ) -> AppResult {
+    info!("Make sure all folders for project structure exits.");
+    
     for next in to_ensure {
-        file_manipulator.ensure_dir(next.target())?;
+        let target = next.target();
+        file_manipulator.ensure_dir(target).with_context(|| {
+            format!("Failed ensure the existence of folder at {:?} for initializing the project", target)
+        })?;
     }
+    
     Ok(())
 }
 
@@ -91,10 +107,13 @@ fn augment_loaded_files<'a>(
     augmentor: &'a mut impl TemplateAugmentor,
     to_augment: &'a [LoadedFile],
 ) -> AppResult<Vec<AugmentedFile<'a>>> {
+    info!("Augmenting loaded files from template folders. Replacing placeholders");
     to_augment
         .into_iter()
         .map(|next| {
-            let augmented = augmentor.try_replace(next.content())?;
+            let augmented = augmentor.try_replace(next.content()).with_context(|| {
+                format!("Failed to augment file from ({:?}) for initializing the project", next.path())
+            })?;
             Ok((augmented, next.path().as_path()))
         })
         .collect()
@@ -104,6 +123,7 @@ fn load_all_files(
     file_sys: &impl FileManipulator,
     to_load: impl IntoIterator<Item = FileToLoad>,
 ) -> AppResult<Vec<LoadedFile>> {
+    info!("Reading all files from the template folder.");
     to_load
         .into_iter()
         .map(|next_to_load| {
@@ -125,6 +145,8 @@ fn determine_init_action(
     template_source: &Path,
     on_query_template: impl Fn(&Path) -> AppIoResult<Vec<NodeEntryMeta>>,
 ) -> AppIoResult<InitAction> {
+    info!("Determine if target for project initialization is valid for init kind {}", init_kind);
+    
     let nodes_write_target = on_query_template(write_target)?;
     return match init_kind {
         InitKind::OnlyEmpty => {
@@ -133,6 +155,7 @@ fn determine_init_action(
             } else {
                 let templates =
                     all_templates_paths(template_source, write_target, on_query_template)?;
+                info!("Target folder is empty and is valid for project initialization.");
                 Ok(InitAction::NoConflict(templates))
             }
         }
@@ -146,7 +169,10 @@ fn determine_init_action(
             let nodes_write_target: Vec<NodeId> = many_node_metas_to_ids(&nodes_write_target);
 
             let to_return = match has_name_conflicts(&target, &nodes_write_target) {
-                None => InitAction::NoConflict(templates),
+                None => {
+                    info!("No name conflict detected. Initialization of project should not override any files.");
+                    InitAction::NoConflict(templates)
+                },
                 Some((conflict_path, _)) => InitAction::Conflict(conflict_path.to_path_buf()),
             };
 
@@ -154,10 +180,12 @@ fn determine_init_action(
         }
         InitKind::Override => {
             let templates = all_templates_paths(template_source, write_target, on_query_template)?;
+            info!("Initialization of project could override some files.");
             Ok(InitAction::NoConflict(templates))
         }
         InitKind::Purge => {
             let templates = all_templates_paths(template_source, write_target, on_query_template)?;
+            info!("Target folder is wiped out before the initialization of the project.");
             Ok(InitAction::Purge(templates))
         }
     };

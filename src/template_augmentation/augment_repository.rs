@@ -26,9 +26,23 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
             TemplateExtractation::FromConsole { key, default_value } => {
                 if self.console_map.get(*key).is_none() {
                     let may_new_value = self.console_fetcher.fetch_from(key)?;
+
+                    debug_assert!(
+                        may_new_value
+                            .as_ref()
+                            .map(|no_trailing_newline| !no_trailing_newline.ends_with("\n"))
+                            .unwrap_or(true),
+                        "Read value should not have a new line at the end"
+                    );
+
                     let new_value = match (may_new_value, default_value) {
                         (Some(new_value), _) => new_value,
-                        (None, Some(default_value)) => return Ok(default_value),
+                        (None, Some(default_value)) => {
+                            return {
+                                info!("Using default value ({}) for key ({})", key, default_value);
+                                Ok(default_value)
+                            }
+                        }
                         _ => {
                             return Err(AugmentationError::NoValueAndDefaultConsole(
                                 key.to_string(),
@@ -37,7 +51,12 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
                     };
                     self.console_map.insert(key.to_string(), new_value);
                 }
-                self.console_map.get(*key).unwrap()
+                self.console_map.get(*key).unwrap_or_else(|| {
+                    panic!(
+                        "Key ({}) should have been inserted anyway before returning it !",
+                        key
+                    )
+                })
             }
         };
 
