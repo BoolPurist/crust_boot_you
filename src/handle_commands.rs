@@ -104,7 +104,7 @@ pub fn handle_load_template(
     let path_to_template = path_provider.specific_entry_template_files(name)?;
 
     match file_manipulator.try_exits(path_to_template.as_path()) {
-        Ok(false) => bail!("No content for teamplate named {}, could be found", name),
+        Ok(false) => bail!("No template named ({}) could be found", name),
         Err(error) => bail!(
             "No content for teamplate named {}, could be found because of error:\n {}",
             name,

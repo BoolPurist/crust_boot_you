@@ -30,6 +30,9 @@ impl TestPathProvider {
 }
 
 impl PathProvider for TestPathProvider {
+    fn logger_file_location(&self) -> PathResult {
+        todo!();
+    }
     fn data(&self) -> PathResult {
         Ok(self.root.join(self.data.clone()))
     }

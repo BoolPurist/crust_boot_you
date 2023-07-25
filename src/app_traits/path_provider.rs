@@ -15,6 +15,7 @@ pub fn get_root_default_cwd() -> PathBuf {
 pub trait PathProvider {
     fn data(&self) -> PathResult;
     fn config(&self) -> PathResult;
+    fn logger_file_location(&self) -> PathResult;
 
     fn scripts(&self) -> PathResult {
         let data = self.data()?;

@@ -63,7 +63,7 @@ impl FileManipulator for DryFileManipulator {
     }
 
     fn read_file(&self, path: &Path) -> AppIoResult<String> {
-        crate::print_dry(&format!("Would write to {:?}", path));
-        Ok(String::new())
+        let content = self.os_imp.read_file(path)?;
+        Ok(content)
     }
 }

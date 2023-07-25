@@ -1,10 +1,17 @@
+use clap::ValueEnum;
 use std::{fmt::Display, str::FromStr};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum InitKind {
+    /// Only copies If there are no previous files/folder inside the target folder.
     OnlyEmpty,
+    /// Only copies If there are only previous files/folder.
     NoNameConflicts,
+    /// Previous files/folders are overridden.
+    /// if they have a name of File/Folder from content of template.
     Override,
+    /// All previous files/folders inside target folder are deleted
+    /// before content of template is copied into target.
     Purge,
 }
 
@@ -13,6 +20,7 @@ impl Default for InitKind {
         Self::OnlyEmpty
     }
 }
+
 use crate::constants::{
     INIT_KIND_NO_NAME_CONFLICT, INIT_KIND_ONLY_EMPTY, INIT_KIND_OVERRIDE, INIT_KIND_PURGE,
 };

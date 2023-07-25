@@ -1,11 +1,9 @@
-#[macro_use]
-extern crate log;
-
 use clap::Parser;
 use colored::*;
 use crust_boot_you::app_traits::file_manipulator::DevOsFileManipulator;
 use crust_boot_you::app_traits::file_manipulator::DryFileManipulator;
 use crust_boot_you::app_traits::path_provider::DevPathProvider;
+use crust_boot_you::cli::CliLogLevel;
 use crust_boot_you::constants;
 use crust_boot_you::handle_commands;
 use crust_boot_you::logging;
@@ -17,27 +15,32 @@ use std::process::ExitCode;
 fn main() -> ExitCode {
     let is_in_debug = cfg!(debug_assertions);
 
-    logging::init();
-
     let args = AppCliEntry::parse();
-    debug!("Cli arguments are parsed.");
 
     let is_in_dry = args.dry();
     let mut augmentor = RegexTemplateAugmentor::default();
 
     let output = match (is_in_debug, is_in_dry) {
-        (true, true) => handle_commands::handle(
-            &DevPathProvider::default(),
-            &DryFileManipulator::default(),
-            &mut augmentor,
-            &args,
-        ),
-        (true, false) => handle_commands::handle(
-            &DevPathProvider::default(),
-            &DevOsFileManipulator::default(),
-            &mut augmentor,
-            &args,
-        ),
+        (true, true) => {
+            let paths = DevPathProvider::default();
+            logging::init(&args, &paths);
+            handle_commands::handle(
+                &paths,
+                &DryFileManipulator::default(),
+                &mut augmentor,
+                &args,
+            )
+        }
+        (true, false) => {
+            let paths = DevPathProvider::default();
+            logging::init(&args, &paths);
+            handle_commands::handle(
+                &DevPathProvider::default(),
+                &DevOsFileManipulator::default(),
+                &mut augmentor,
+                &args,
+            )
+        }
         (false, _) => todo!("Not implemented for production"),
     };
 
@@ -45,9 +48,9 @@ fn main() -> ExitCode {
 }
 
 fn handle_result_from_command(output: AppResult<String>, args: &AppCliEntry) -> ExitCode {
-    match output {
+    return match output {
         Ok(success_message) => {
-            if args.dry() {
+            if *args.dry() {
                 crust_boot_you::print_dry(&success_message);
             } else {
                 println!("{}: {}", *constants::SUCCESS_LABEL, success_message);
@@ -56,13 +59,28 @@ fn handle_result_from_command(output: AppResult<String>, args: &AppCliEntry) -> 
         }
         Err(error_message) => {
             if is_rust_backtrace_on() {
-                eprintln!("{:?}", error_message);
+                log::error!("{:?}", error_message);
             } else {
-                let message_in_red = format!("Error: {}", error_message).red();
-                eprintln!("{}", message_in_red);
+                log::error!("{}", error_message);
+
+                let (loggin_in_term, logging_allowed) = (
+                    args.term_logging(),
+                    args.log_level()
+                        .map(|level| level != CliLogLevel::None)
+                        .unwrap_or(true),
+                );
+                match (*loggin_in_term, logging_allowed) {
+                    (false, _) => eprint_output(error_message.to_string()),
+                    (true, false) => eprint_output(error_message.to_string()),
+                    (true, true) => (),
+                }
             }
             ExitCode::FAILURE
         }
+    };
+
+    fn eprint_output(error_message: String) {
+        eprintln!("{}: {}", "Error".red(), error_message);
     }
 }
 

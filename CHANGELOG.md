@@ -13,6 +13,10 @@ CWD: current working directory
 
 ### Added 
 
+- Added option to let logger also print to terminal beside file logging.
+- Added option to set logging level.
+- Added option to supply logging filters which determine in which module logging is shown.
+- Added logging to text file.
 - Added dry option. If true writing operation are not executed and only the write would-be steps are described.
 - Subcommand to delete a template. 
 - Templating system. Placeholders in following form "{{<some_value>?<default_value>}}" are filled while initializing.
@@ -28,6 +32,9 @@ CWD: current working directory
 
 ### Changed 
 
+- By Default logging goes to text file instead of terminal. Terminal logging can be activated however.
+- By Default an error message is shown by logger except if logging would not happen.
+  Then is printed to stdout without the logger.
 - load-template: By default folder as CWD are not populated by template if it is not empty.
 - Paths to templates folder are shown along with their names.
 - If no templates are created so far, user is told no templates were created yet

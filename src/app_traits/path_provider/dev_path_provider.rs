@@ -36,4 +36,8 @@ impl PathProvider for DevPathProvider {
         debug!("Config folder {:?}", config);
         Ok(config)
     }
+
+    fn logger_file_location(&self) -> PathResult {
+        Ok(PathBuf::from(constants::project_root()).join(constants::dev::LOGGER_DEV_FILE))
+    }
 }

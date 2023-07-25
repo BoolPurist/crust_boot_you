@@ -23,6 +23,7 @@ pub const INIT_KIND_PURGE: &str = "purge";
 pub const SEPERATOR_BETWEEN_DEFAULT_AND_VALUE: char = '?';
 
 pub mod dev {
+    pub const LOGGER_DEV_FILE: &str = "dev.log";
     pub const TMP_ROOT: &str = "crust_boot_you_tmp";
     pub const TMP_CWD_FOLDER: &str = "CWD";
     pub const ENTRY_FOLDER: &str = ".dev_data";
