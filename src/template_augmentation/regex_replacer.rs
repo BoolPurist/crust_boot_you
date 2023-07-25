@@ -4,9 +4,14 @@ use std::borrow::Cow;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
+use super::TestAugmentStore;
+use super::console_fetcher::TestConsoleFetcher;
+
 use super::{
-    augmentation_error::AugmentationError, console_fetcher::ConsoleFetcher,
-    template_extractation::TemplateExtractation, AugementRepository, TemplateAugmentor,
+    augmentation_error::AugmentationError,
+    console_fetcher::{ConsoleFetcher, IoConsoleFetcher},
+    template_extractation::TemplateExtractation,
+    AugementRepository, TemplateAugmentor,
 };
 
 fn build_regex_template() -> Regex {
@@ -20,9 +25,25 @@ pub struct RegexTemplateAugmentor<CF> {
     cache: AugementRepository<CF>,
 }
 
+impl Default for RegexTemplateAugmentor<IoConsoleFetcher> {
+    fn default() -> Self {
+        let console_fetcher = IoConsoleFetcher::default();
+        let cache = AugementRepository::new(console_fetcher);
+        Self::new(cache)
+    }
+}
+
 impl<CF: ConsoleFetcher> RegexTemplateAugmentor<CF> {
     pub fn new(cache: AugementRepository<CF>) -> Self {
         Self { cache }
+    }
+}
+
+impl RegexTemplateAugmentor<TestConsoleFetcher> {
+    pub fn from_fake(map: TestAugmentStore) -> Self {
+        let fake_console_fetcher = TestConsoleFetcher::new(map);
+        let store = AugementRepository::new(fake_console_fetcher);
+        Self::new(store)
     }
 }
 

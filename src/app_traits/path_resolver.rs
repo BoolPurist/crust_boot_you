@@ -6,9 +6,7 @@ mod os_path_resolver;
 pub use dev_path_resolver::DevPathResolver;
 pub use os_path_resolver::OsPathResolver;
 
-#[cfg(test)]
 mod test_path_resolver;
-#[cfg(test)]
 pub use test_path_resolver::TestPathResolver;
 
 use crate::prelude::*;

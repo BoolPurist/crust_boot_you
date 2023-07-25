@@ -15,6 +15,16 @@ CWD: current working directory
 
 - Added dry option. If true writing operation are not executed and only the write would-be steps are described.
 - Subcommand to delete a template. 
+- Templating system. Placeholders in following form "{{<some_value>?<default_value>}}" are filled while initializing.
+  Values are asked by user in the terminal. If no value is provided then the default value is used instead.
+- Different modes for initializing a project (only_empty, no_name_conflict, override, purge)
+  - only_empty: Only copies If there are no previous files/folder inside the target folder.
+  - no_name_conflict: Only copies If there are only previous files/folder
+            which do not share a name of the files/folders from template's content.
+  - override: Previous files/folders are overridden
+            if they have a name of File/Folder from content of template.
+  - purge: All previous files/folders inside target folder are deleted
+            before content of template is copied into target.
 
 ### Changed 
 

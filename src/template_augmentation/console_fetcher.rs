@@ -1,8 +1,10 @@
 use super::{KeyExtact, OptAugmentationResult};
-#[cfg(test)]
+
 mod test_console_fetcher;
-#[cfg(test)]
 pub use test_console_fetcher::TestConsoleFetcher;
+
+mod console_fetcher;
+pub use console_fetcher::IoConsoleFetcher;
 
 pub trait ConsoleFetcher {
     fn fetch_from(&self, key: KeyExtact<'_>) -> OptAugmentationResult;

@@ -17,7 +17,7 @@ const fn help_text_for_init_kind() -> &'static str {
         {}: Only copies If there are no previous files/folder inside the target folder. 
         {}: Only copies If there are only previous files/folder 
             which do not share a name of the files/folders from template's content.
-        {}: Previous files/folders are overriden 
+        {}: Previous files/folders are overridden 
             if they have a name of File/Folder from content of template.
         {}: All previous files/folders inside target folder are deleted 
             before content of template is copied into target.

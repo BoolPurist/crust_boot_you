@@ -54,6 +54,14 @@ impl SourceTargetNode {
     }
 }
 
+impl From<SourceTargetNode> for (PathBuf, PathBuf) {
+    fn from(value: SourceTargetNode) -> Self {
+        let (source_path, _) = value.source_node.into();
+        let target_path = value.target;
+        (source_path, target_path)
+    }
+}
+
 #[cfg(test)]
 mod testing {
 

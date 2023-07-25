@@ -9,7 +9,7 @@ pub use source_target_node::SourceTargetNode;
 mod node_entry_meta;
 mod os_io_error;
 mod source_target_node;
-mod write_transactions;
+pub mod write_transactions;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 #[cfg_attr(test, derive(Serialize, Deserialize, PartialOrd, Ord))]

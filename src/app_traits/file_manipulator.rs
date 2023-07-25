@@ -22,6 +22,7 @@ pub trait FileManipulator {
     fn all_nodes_inside(&self, location: &Path) -> AppIoResult<Vec<NodeEntryMeta>>;
     fn write_file_to(&self, location: &Path, content: &str) -> AppIoResult;
     fn resolver(&self) -> &Self::Resolver;
+    fn read_file(&self, path: &Path) -> AppIoResult<String>;
 
     fn root(&self) -> &Path {
         self.resolver().root()

@@ -61,4 +61,9 @@ impl FileManipulator for DryFileManipulator {
     fn cwd(&self) -> AppIoResult<PathBuf> {
         self.os_imp.cwd()
     }
+
+    fn read_file(&self, path: &Path) -> AppIoResult<String> {
+        crate::print_dry(&format!("Would write to {:?}", path));
+        Ok(String::new())
+    }
 }

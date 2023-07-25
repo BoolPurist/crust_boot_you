@@ -1,14 +1,19 @@
 #![allow(dead_code)]
 /// TODO:DEAD_CODE
-use std::collections::HashSet;
+use std::{borrow::Cow, collections::HashSet};
 
 use crate::{
     cli::InitKind,
-    file_management::{FileKind, NodeEntryMeta, SourceTargetNode},
+    file_management::{
+        write_transactions::{DirToEnsure, FileToLoad, WriteTransactions},
+        FileKind, NodeEntryMeta, SourceTargetNode,
+    },
     prelude::*,
+    template_augmentation::TemplateAugmentor,
 };
 
 type NodeId<'a> = (&'a Path, FileKind);
+type AugmentedFile<'a> = (Cow<'a, str>, &'a Path);
 
 #[derive(Debug)]
 #[cfg_attr(test, derive(Serialize, Deserialize))]
@@ -19,7 +24,102 @@ pub enum InitAction {
     Purge(Vec<SourceTargetNode>),
 }
 
-pub fn determine_init_action(
+pub fn init_project_with_template(
+    file_manipulator: &impl FileManipulator,
+    augmentor: &mut impl TemplateAugmentor,
+    init_kind: InitKind,
+    write_target: &Path,
+    template_source: &Path,
+) -> AppResult<()> {
+    let action = determine_init_action(init_kind, write_target, template_source, |path| {
+        file_manipulator.all_nodes_inside(path)
+    })?;
+    return match action {
+        InitAction::NotEmpty => bail!(
+            "Aborted initialization of project. Reason: target location at {:?} is not empty. This is not allowed for init kind {}", 
+            write_target, 
+            init_kind
+        ),
+        InitAction::Conflict(conflict) => bail!(
+            "Aborted initialization of project. Reason: found file/folder at {:?} prevents it for current init kind {}", 
+            conflict, 
+            init_kind
+        ),
+        InitAction::NoConflict(data) => {
+            let (files, dirs) = WriteTransactions::new(data).into();
+            let loaded = load_all_files(file_manipulator, files)?;
+            let augmented = augment_loaded_files(augmentor, &loaded)?;
+            ensure_folders(file_manipulator, &dirs)?;
+            write_loaded_files(file_manipulator, &augmented)?;
+            Ok(())
+        }
+        InitAction::Purge(data) => {
+            let (files, dirs) = WriteTransactions::new(data).into();
+            let loaded = load_all_files(file_manipulator, files)?;
+            let augmented = augment_loaded_files(augmentor, &loaded)?;
+
+            file_manipulator.delete_whole_folder(write_target)?;
+
+            ensure_folders(file_manipulator, &dirs)?;
+            write_loaded_files(file_manipulator, &augmented)?;
+            Ok(())
+        }
+    };
+}
+
+fn write_loaded_files<'a>(
+    file_manipulator: &impl FileManipulator,
+    to_write: &[AugmentedFile<'a>],
+) -> AppResult {
+    for (content, path) in to_write {
+        file_manipulator.write_file_to(path, content)?;
+    }
+    Ok(())
+}
+
+fn ensure_folders(
+    file_manipulator: &impl FileManipulator,
+    to_ensure: &[DirToEnsure],
+) -> AppResult {
+    for next in to_ensure {
+        file_manipulator.ensure_dir(next.target())?;
+    }
+    Ok(())
+}
+
+fn augment_loaded_files<'a>(
+    augmentor: &'a mut impl TemplateAugmentor,
+    to_augment: &'a [LoadedFile],
+) -> AppResult<Vec<AugmentedFile<'a>>> {
+    to_augment
+        .into_iter()
+        .map(|next| {
+            let augmented = augmentor.try_replace(next.content())?;
+            Ok((augmented, next.path().as_path()))
+        })
+        .collect()
+}
+
+fn load_all_files(
+    file_sys: &impl FileManipulator,
+    to_load: impl IntoIterator<Item = FileToLoad>,
+) -> AppResult<Vec<LoadedFile>> {
+    to_load
+        .into_iter()
+        .map(|next_to_load| {
+            let content = file_sys.read_file(next_to_load.source())?;
+            Ok(LoadedFile::new(next_to_load.target().clone(), content))
+        })
+        .collect()
+}
+
+#[derive(Debug, new, Getters)]
+struct LoadedFile {
+    path: PathBuf,
+    content: String,
+}
+
+fn determine_init_action(
     init_kind: InitKind,
     write_target: &Path,
     template_source: &Path,

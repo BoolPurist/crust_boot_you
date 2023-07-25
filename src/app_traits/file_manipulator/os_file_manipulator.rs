@@ -105,4 +105,9 @@ impl FileManipulator for OsFileManipulator {
         let path = std::env::current_dir()?;
         Ok(path)
     }
+
+    fn read_file(&self, path: &Path) -> AppIoResult<String> {
+        let result = std::fs::read_to_string(path)?;
+        Ok(result)
+    }
 }

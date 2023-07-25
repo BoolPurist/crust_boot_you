@@ -2,4 +2,4 @@
 source: tests/copy_template_into.rs
 expression: output
 ---
-Folder is not empty at "/[TMP_ROOT]/cwd/not_empty". This is an error for init kind OnlyEmpty.
+Aborted initialization of project. Reason: target location at "/[TMP_ROOT]/cwd/not_empty" is not empty. This is not allowed for init kind only_empty

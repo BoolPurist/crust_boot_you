@@ -1,5 +1,8 @@
 use std::path::PathBuf;
 
+use derive_getters::Getters;
+use derive_new::new;
+
 use super::{FileKind, SourceTargetNode};
 
 #[cfg(test)]
@@ -21,8 +24,8 @@ impl WriteTransactions {
 
         for next_file_or_dir in files_dirs {
             match next_file_or_dir.node_type() {
-                FileKind::File => files.push(FileToLoad(next_file_or_dir.into_target_path())),
-                FileKind::Folder => folders.push(DirToEnsure(next_file_or_dir.into_target_path())),
+                FileKind::File => files.push(next_file_or_dir.into()),
+                FileKind::Folder => folders.push(next_file_or_dir.into()),
                 _ => unreachable!(),
             }
         }
@@ -31,13 +34,32 @@ impl WriteTransactions {
     }
 }
 
-#[derive(Debug, AsRef)]
+#[derive(Debug, Getters, Into, new)]
 #[cfg_attr(test, derive(Serialize, Deserialize))]
-pub struct DirToEnsure(PathBuf);
+pub struct DirToEnsure {
+    source: PathBuf,
+    target: PathBuf,
+}
 
-#[derive(Debug, AsRef)]
+#[derive(Debug, Getters, Into, new)]
 #[cfg_attr(test, derive(Serialize, Deserialize))]
-pub struct FileToLoad(PathBuf);
+pub struct FileToLoad {
+    source: PathBuf,
+    target: PathBuf,
+}
+
+impl From<SourceTargetNode> for FileToLoad {
+    fn from(value: SourceTargetNode) -> Self {
+        let (source, target) = value.into();
+        FileToLoad::new(source, target)
+    }
+}
+impl From<SourceTargetNode> for DirToEnsure {
+    fn from(value: SourceTargetNode) -> Self {
+        let (source, target) = value.into();
+        DirToEnsure::new(source, target)
+    }
+}
 
 #[cfg(test)]
 mod testing {

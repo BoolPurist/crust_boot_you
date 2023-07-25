@@ -10,6 +10,7 @@ use crust_boot_you::constants;
 use crust_boot_you::handle_commands;
 use crust_boot_you::logging;
 use crust_boot_you::prelude::AppResult;
+use crust_boot_you::template_augmentation::RegexTemplateAugmentor;
 use crust_boot_you::AppCliEntry;
 use std::process::ExitCode;
 
@@ -22,15 +23,19 @@ fn main() -> ExitCode {
     debug!("Cli arguments are parsed.");
 
     let is_in_dry = args.dry();
+    let mut augmentor = RegexTemplateAugmentor::default();
+
     let output = match (is_in_debug, is_in_dry) {
         (true, true) => handle_commands::handle(
             &DevPathProvider::default(),
             &DryFileManipulator::default(),
+            &mut augmentor,
             &args,
         ),
         (true, false) => handle_commands::handle(
             &DevPathProvider::default(),
             &DevOsFileManipulator::default(),
+            &mut augmentor,
             &args,
         ),
         (false, _) => todo!("Not implemented for production"),

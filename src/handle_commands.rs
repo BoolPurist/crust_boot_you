@@ -1,7 +1,8 @@
 use crate::{
-    cli::{InitKind, LoadTemplateArg, SaveTemplateCli},
+    cli::{LoadTemplateArg, SaveTemplateCli},
     file_management::{self, FileKind},
     prelude::*,
+    template_augmentation::TemplateAugmentor,
     AppCliEntry, SubCommands, ValidTemplateName,
 };
 use std::path::Path;
@@ -15,11 +16,12 @@ mod load_pipeline;
 pub fn handle(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
+    template_augmentor: &mut impl TemplateAugmentor,
     args: &AppCliEntry,
 ) -> ReturnToUser {
     match args.sub_commands() {
         SubCommands::LoadTemplate(args) => {
-            handle_load_template(path_provider, file_manipulator, args)
+            handle_load_template(path_provider, file_manipulator, template_augmentor, args)
         }
         SubCommands::SaveTemplate(args) => {
             handle_save_template(path_provider, file_manipulator, args)
@@ -93,6 +95,7 @@ pub fn handle_list_template(
 pub fn handle_load_template(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
+    augmentor: &mut impl TemplateAugmentor,
     load_args: &LoadTemplateArg,
 ) -> ReturnToUser {
     debug!("Handling subcommand: {:?}", "LoadTemplate");
@@ -110,33 +113,36 @@ pub fn handle_load_template(
         _ => (),
     }
 
-    let cwd = try_return_valid_target(file_manipulator, init_kind)?;
-    file_manipulator
-        .copy_dir(&path_to_template, &cwd)
-        .with_context(|| format!("Failed to copy from {:?} to {:?}", path_to_template, cwd))?;
+    let cwd = file_manipulator
+        .cwd()
+        .context("Can not access current working directory. No target to copy to")?;
 
-    return Ok(format!(
+    load_pipeline::init_project_with_template(
+        file_manipulator,
+        augmentor,
+        init_kind,
+        &cwd,
+        &path_to_template,
+    )?;
+
+    Ok(format!(
         "Folder {:?} filled with content from Template ({})",
         cwd, name
-    ));
+    ))
 
-    fn try_return_valid_target(
-        file_manipulator: &impl FileManipulator,
-        _init_kind: InitKind,
-    ) -> AppResult<PathBuf> {
-        let cwd = file_manipulator
-            .cwd()
-            .context("Can not access current working directory. No target to copy to")?;
-
-        let is_empty = file_manipulator.all_nodes_inside(&cwd)?.is_empty();
-        if !is_empty {
-            bail!(
-                "Folder is not empty at {:?}. This is an error for init kind OnlyEmpty.",
-                cwd
-            );
-        }
-        Ok(cwd)
-    }
+    // fn try_return_valid_target(
+    //     file_manipulator: &impl FileManipulator,
+    //     _init_kind: InitKind,
+    // ) -> AppResult<PathBuf> {
+    //     let is_empty = file_manipulator.all_nodes_inside(&cwd)?.is_empty();
+    //     if !is_empty {
+    //         bail!(
+    //             "Folder is not empty at {:?}. This is an error for init kind OnlyEmpty.",
+    //             cwd
+    //         );
+    //     }
+    //     Ok(cwd)
+    // }
 }
 
 pub fn handle_save_template(

@@ -21,7 +21,7 @@ pub const fn valid_values_init_kind_msg() -> &'static str {
     const_format::formatcp!(
         "Valid values are ({}, {}, {}, {})",
         INIT_KIND_ONLY_EMPTY,
-        INIT_KIND_PURGE,
+        INIT_KIND_NO_NAME_CONFLICT,
         INIT_KIND_OVERRIDE,
         INIT_KIND_PURGE
     )

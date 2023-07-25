@@ -4,13 +4,31 @@ expression: actual
 ---
 WriteTransactions(
   files: [
-    FileToLoad("/a/target/ccc"),
-    FileToLoad("/a/target/aaaa/aa"),
-    FileToLoad("/a/target/zzz/z"),
+    FileToLoad(
+      source: "/a/source/ccc",
+      target: "/a/target/ccc",
+    ),
+    FileToLoad(
+      source: "/a/source/aaaa/aa",
+      target: "/a/target/aaaa/aa",
+    ),
+    FileToLoad(
+      source: "/a/source/zzz/z",
+      target: "/a/target/zzz/z",
+    ),
   ],
   folders: [
-    DirToEnsure("/a/target/aaaa"),
-    DirToEnsure("/a/target/aaaa/aaa"),
-    DirToEnsure("/a/target/b"),
+    DirToEnsure(
+      source: "/a/source/aaaa",
+      target: "/a/target/aaaa",
+    ),
+    DirToEnsure(
+      source: "/a/source/aaaa/aaa",
+      target: "/a/target/aaaa/aaa",
+    ),
+    DirToEnsure(
+      source: "/a/source/b",
+      target: "/a/target/b",
+    ),
   ],
 )

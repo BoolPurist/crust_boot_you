@@ -126,4 +126,8 @@ impl FileManipulator for DevOsFileManipulator {
     fn cwd(&self) -> AppIoResult<PathBuf> {
         Ok(self.cwd.to_path_buf())
     }
+    fn read_file(&self, path: &Path) -> AppIoResult<String> {
+        self.panic_if_outside_root(path);
+        self.os_impl.read_file(path)
+    }
 }

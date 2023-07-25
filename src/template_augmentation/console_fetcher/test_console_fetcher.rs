@@ -1,10 +1,9 @@
-use std::{cell::RefCell, collections::HashMap};
+use std::cell::RefCell;
 
-use crate::template_augmentation::{AugementKey, AugmentValue, KeyExtact};
+use crate::template_augmentation::{FakeAugmentStore, KeyExtact, TestAugmentStore};
 
 use super::ConsoleFetcher;
 
-type FakeAugmentStore = HashMap<AugementKey, (Option<AugmentValue>, bool)>;
 pub struct TestConsoleFetcher {
     store: RefCell<FakeAugmentStore>,
 }
@@ -31,7 +30,7 @@ impl ConsoleFetcher for TestConsoleFetcher {
 }
 
 impl TestConsoleFetcher {
-    pub fn new(store: HashMap<AugementKey, Option<AugmentValue>>) -> Self {
+    pub fn new(store: TestAugmentStore) -> Self {
         let store: FakeAugmentStore = store
             .into_iter()
             .map(|(key, value)| (key, (value, false)))
