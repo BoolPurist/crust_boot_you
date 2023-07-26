@@ -1,0 +1,5 @@
+---
+source: tests/copy_template_into.rs
+expression: output
+---
+No template named (not_there) could be found

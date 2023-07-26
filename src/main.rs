@@ -26,12 +26,7 @@ fn process_command(args: &AppCliEntry) -> ReturnToUser {
     let output = match (is_debug, is_dry) {
         (true, true) => {
             let paths = dev_logger_init(args);
-            handle_commands::handle(
-                &paths,
-                &DryFileManipulator::default(),
-                &mut augmentor,
-                &args,
-            )
+            handle_commands::handle(&paths, &DryFileManipulator::default(), &mut augmentor, args)
         }
         (true, false) => {
             let paths = dev_logger_init(args);
@@ -39,7 +34,7 @@ fn process_command(args: &AppCliEntry) -> ReturnToUser {
                 &paths,
                 &DevOsFileManipulator::default(),
                 &mut augmentor,
-                &args,
+                args,
             )
         }
         (false, _) => todo!("Not implemented for production"),
@@ -49,7 +44,7 @@ fn process_command(args: &AppCliEntry) -> ReturnToUser {
 
     fn dev_logger_init(args: &AppCliEntry) -> DevPathProvider {
         let paths = DevPathProvider::default();
-        logging::init(&args, &paths);
+        logging::init(args, &paths);
         paths
     }
 }

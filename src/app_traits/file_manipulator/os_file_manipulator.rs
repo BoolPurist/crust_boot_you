@@ -89,10 +89,7 @@ impl FileManipulator for OsFileManipulator {
     }
 
     fn write_file_to(&self, location: &Path, content: &str) -> AppIoResult {
-        debug!(
-            "Wrote to file folder with all its content at {:?}",
-            location
-        );
+        debug!("Wrote to file with all its content at {:?}", location);
         std::fs::write(location, content)?;
         Ok(())
     }
@@ -108,6 +105,7 @@ impl FileManipulator for OsFileManipulator {
 
     fn read_file(&self, path: &Path) -> AppIoResult<String> {
         let result = std::fs::read_to_string(path)?;
+        debug!("Read content of file from {:?}", path);
         Ok(result)
     }
 }

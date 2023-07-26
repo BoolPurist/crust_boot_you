@@ -68,7 +68,7 @@ where
                     TemplateExtractation::FromConsole { key, default_value }
                 };
                 let replacement = self.cache.augment(&extraction)?;
-                expanded.push_str(replacement);
+                expanded.push_str(&replacement);
                 last_match = matched_range.end();
             }
 
@@ -97,8 +97,8 @@ mod testing {
     fn regex_extract_two_value() {
         let input = "aa aaa {{value to get}} {{xxx}}  ";
         let map = hash_map! {
-            "value to get".to_string() => Some("YYY".to_string()),
-            "xxx".to_string() => Some("XXX".to_string()),
+            "value to get".to_string() => "YYY".to_string(),
+            "xxx".to_string() => "XXX".to_string(),
         };
         let test_augmenter = TestConsoleFetcher::new(map);
 
@@ -112,8 +112,8 @@ mod testing {
     fn regex_extract_do_not_change_after_error() {
         let input = "aa aaa {{value to get}} {{!!}} {{value to get}} ";
         let map = hash_map! {
-            "value to get".to_string() => Some("YYY".to_string()),
-            "xxx".to_string() => Some("XXX".to_string()),
+            "value to get".to_string() => "YYY".to_string(),
+            "xxx".to_string() => "XXX".to_string(),
         };
         let test_augmenter = TestConsoleFetcher::new(map);
 
@@ -130,8 +130,8 @@ mod testing {
     fn regex_extract_one_and_other_default_values() {
         let input = "aa aaa {{value to get}} {{!!?A}} {{!!?B}} ";
         let map = hash_map! {
-            "value to get".to_string() => Some("YYY".to_string()),
-            "xxx".to_string() => Some("XXX".to_string()),
+            "value to get".to_string() => "YYY".to_string(),
+            "xxx".to_string() => "XXX".to_string(),
         };
         let test_augmenter = TestConsoleFetcher::new(map);
 
@@ -146,8 +146,8 @@ mod testing {
     fn regex_extract_and_no_default() {
         let input = "aa aaa {{value to get}} {{!!?A}} {{!!?B}} ";
         let map = hash_map! {
-            "value to get".to_string() => Some("YYY".to_string()),
-            "!!".to_string() => Some("XXX".to_string()),
+            "value to get".to_string() => "YYY".to_string(),
+            "!!".to_string() => "XXX".to_string(),
         };
         let test_augmenter = TestConsoleFetcher::new(map);
 

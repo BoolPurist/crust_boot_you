@@ -3,6 +3,7 @@ use crust_boot_you::prelude::*;
 use super::TestSetup;
 pub struct TestSetupBuilder {
     suffix_cwd: Option<PathBuf>,
+    with_pres_name: Option<String>,
     actual: PathBuf,
     expected: Option<PathBuf>,
 }
@@ -14,6 +15,7 @@ impl TestSetupBuilder {
             actual,
             expected: Some(expected),
             suffix_cwd: None,
+            with_pres_name: None,
         }
     }
 
@@ -22,6 +24,7 @@ impl TestSetupBuilder {
             actual,
             expected: None,
             suffix_cwd: None,
+            with_pres_name: None,
         }
     }
 
@@ -30,11 +33,13 @@ impl TestSetupBuilder {
         self
     }
 
+    pub fn with_pres_name(mut self, name: String) -> Self {
+        self.with_pres_name = Some(name);
+        self
+    }
+
     pub fn build(self) -> TestSetup {
-        let mut setup = match self.expected {
-            Some(given_expected) => TestSetup::new((self.actual, given_expected)),
-            None => TestSetup::only_actual(self.actual.clone()),
-        };
+        let mut setup = TestSetup::init_create(self.actual, self.expected, self.with_pres_name);
 
         if let Some(cwd) = self.suffix_cwd {
             let new_cwd = setup.os_mani.cwd().unwrap().join(cwd);

@@ -63,6 +63,11 @@ impl Display for DirAssert {
                 ),
                 "".to_string(),
                 different_from_text(actual, expected),
+                format!(
+                    "Actual byte length: {}.\nExpected byte length: {}",
+                    actual.len(),
+                    expected.len()
+                ),
             ]
             .join("\n")
         }
@@ -160,6 +165,8 @@ impl Display for DirAssert {
                     format!(": {}", color)
                 })
                 .join("\n")
+                + &format!("Actual content: \n{}", actual)
+                + &format!("Expected content: \n{}", expected)
         }
     }
 }

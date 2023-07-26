@@ -78,6 +78,7 @@ pub fn handle_list_template(
         .into_iter()
         .map(|path| {
             let template_name = path.file_name().unwrap().to_string_lossy();
+            info!("Found template at {:?}", path);
             format!("{}  {:?}\n", template_name, path)
         })
         .collect();

@@ -6,7 +6,7 @@ use super::{
 };
 
 pub struct AugementRepository<CF> {
-    console_map: HashMap<AugementKey, AugmentValue>,
+    console_map: HashMap<AugementKey, Option<AugmentValue>>,
     console_fetcher: CF,
 }
 
@@ -22,9 +22,9 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
         &'a mut self,
         extract: &'a TemplateExtractation<'a>,
     ) -> AugmentationResult<'a> {
-        let value = match extract {
+        match extract {
             TemplateExtractation::FromConsole { key, default_value } => {
-                if self.console_map.get(*key).is_none() {
+                if !self.console_map.contains_key(*key) {
                     let may_new_value = self.console_fetcher.fetch_from(key)?;
 
                     debug_assert!(
@@ -35,32 +35,26 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
                         "Read value should not have a new line at the end"
                     );
 
-                    let new_value = match (may_new_value, default_value) {
-                        (Some(new_value), _) => new_value,
-                        (None, Some(default_value)) => {
-                            return {
-                                info!("Using default value ({}) for key ({})", key, default_value);
-                                Ok(default_value)
-                            }
-                        }
-                        _ => {
-                            return Err(AugmentationError::NoValueAndDefaultConsole(
-                                key.to_string(),
-                            ))
-                        }
-                    };
-                    self.console_map.insert(key.to_string(), new_value);
+                    let first_time = self
+                        .console_map
+                        .insert(key.to_string(), may_new_value)
+                        .is_none();
+                    debug_assert!(first_time);
                 }
-                self.console_map.get(*key).unwrap_or_else(|| {
-                    panic!(
-                        "Key ({}) should have been inserted anyway before returning it !",
-                        key
-                    )
-                })
-            }
-        };
 
-        Ok(value)
+                let fetched_key = self.console_map.get(*key);
+                debug_assert!(
+                    fetched_key.is_some(),
+                    "Key {} should have been already inserted",
+                    key
+                );
+                match (fetched_key, default_value) {
+                    (Some(Some(resolved)), _) => Ok(resolved.as_str()),
+                    (Some(None), Some(default)) => Ok(default),
+                    _ => Err(AugmentationError::NoValueAndDefaultConsole(key.to_string())),
+                }
+            }
+        }
     }
 }
 
@@ -75,7 +69,7 @@ mod testing {
         let expected_value = "World".to_string();
         let key = "WW".to_string();
         let map = hash_map! {
-           key.clone() => Some(expected_value.clone()),
+           key.clone() => expected_value.clone(),
         };
         let test_fetcher = TestConsoleFetcher::new(map);
 
@@ -88,7 +82,7 @@ mod testing {
         let actual = respo.augment(&extraction).unwrap();
 
         assert_eq!(
-            &expected_value,
+            expected_value.as_str(),
             actual,
             "Should have returned the value {} to the key {}",
             key.clone(),
@@ -101,7 +95,8 @@ mod testing {
         };
         let actual_cached = respo.augment(&extraction).unwrap();
         assert_eq!(
-            &expected_value, actual_cached,
+            expected_value.as_str(),
+            actual_cached,
             "Did not reuse cached value: {}",
             actual_cached
         );
@@ -111,8 +106,8 @@ mod testing {
     fn default_no_key_found() {
         let does_not_matter = String::new();
         let map = hash_map! {
-           "WW".to_string() => Some(does_not_matter.clone()),
-           "YYY".to_string() => Some(does_not_matter)
+           "WW".to_string() => does_not_matter.clone(),
+           "YYY".to_string() => does_not_matter
         };
 
         let test_fetcher = TestConsoleFetcher::new(map);

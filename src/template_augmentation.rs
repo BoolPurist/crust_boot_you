@@ -5,8 +5,8 @@ pub type AugmentValue = String;
 pub type KeyExtact<'a> = &'a str;
 pub type DefaultExtact<'a> = Option<&'a str>;
 
-pub type FakeAugmentStore = HashMap<AugementKey, (Option<AugmentValue>, bool)>;
-pub type TestAugmentStore = HashMap<AugementKey, Option<AugmentValue>>;
+pub type FakeAugmentStore = HashMap<AugementKey, AugmentValue>;
+pub type TestAugmentStore = HashMap<AugementKey, AugmentValue>;
 
 pub use augment_repository::AugementRepository;
 pub use augmentation_error::AugmentationError;
