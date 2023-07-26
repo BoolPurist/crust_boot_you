@@ -11,6 +11,8 @@ CWD: current working directory
 
 ## [unreleased]
 
+## 0.2.0 - 2023.07.26
+
 ### Added 
 
 - Added option to let logger also print to terminal beside file logging.
