@@ -19,33 +19,44 @@ pub trait PathProvider {
 
     fn scripts(&self) -> PathResult {
         let data = self.data()?;
-        Ok(data.join(constants::SCRIPT_FOLDER_NAME))
+        let path = data.join(constants::SCRIPT_FOLDER_NAME);
+        info!("Location to scripts: {:?}", path);
+        Ok(path)
     }
 
     fn general_template_entry(&self) -> PathResult {
         let data = self.data()?;
-        Ok(data.join(constants::TEMPLATES_FOLDER))
+        let path = data.join(constants::TEMPLATES_FOLDER);
+        info!("Location of tempaltes: {:?}", path);
+        Ok(path)
     }
 
     fn specific_entry_template_files(&self, template_name: &ValidTemplateName) -> PathResult {
         let named = self.specific_entry_template(template_name)?;
-        Ok(named.join(constants::FILES_FOLDER))
+        let path = named.join(constants::FILES_FOLDER);
+        info!("Files of template path: {:?}", path);
+        Ok(path)
     }
 
     fn specific_entry_template(&self, template_name: &ValidTemplateName) -> PathResult {
         let general_template_entry = self.general_template_entry()?;
         let named = general_template_entry.join(template_name.as_ref());
+        info!("Location of template, ({}): {:?}", template_name, named);
         Ok(named)
     }
 
     fn template_meta(&self, template_name: &ValidTemplateName) -> PathResult {
         let specific_template_entry = self.specific_entry_template(template_name)?;
-        Ok(specific_template_entry.join(constants::TEMPLATE_META_FILE_NAME))
+        let path_template_config = specific_template_entry.join(constants::TEMPLATE_META_FILE_NAME);
+        info!("Path to template config: {:?}", path_template_config);
+        Ok(path_template_config)
     }
 
     fn dictionary(&self) -> PathResult {
         let config = self.config()?;
-        Ok(config.join(constants::DICTIONARY_FILE))
+        let general_config_path = config.join(constants::DICTIONARY_FILE);
+        info!("Location of general config path: {:?}", general_config_path);
+        Ok(general_config_path)
     }
 }
 
