@@ -1,0 +1,5 @@
+---
+source: tests/copy_template_into.rs
+expression: output
+---
+Folder "/[TMP_ROOT]/cwd/to_delete" filled with content from Template (with_placeholders)
