@@ -130,3 +130,30 @@ fn purge_and_initialze() {
     setup.assert_with_expected();
     insta_display_filter_random_tmp!(output);
 }
+
+#[test]
+#[named]
+fn override_it() {
+    let setup = TestSetupBuilder::new(actual_expected!())
+        .suffix_cwd(PathBuf::from("cwd").join("override_it"))
+        .build();
+
+    let to_copy_from = ValidTemplateName::new("with_placeholders".to_string()).unwrap();
+    let init_kind = InitKind::Override;
+    let arg = LoadTemplateArg::new(to_copy_from, init_kind);
+    let values = hash_map! {"user_name".to_string() => "pattern".to_string()};
+
+    let mut store: RegexTemplateAugmentor<TestConsoleFetcher> =
+        RegexTemplateAugmentor::from_fake(values);
+
+    let output = handle_commands::handle_load_template(
+        setup.path_provider(),
+        setup.os_mani(),
+        &mut store,
+        &arg,
+    )
+    .unwrap();
+
+    setup.assert_with_expected();
+    insta_display_filter_random_tmp!(output);
+}
