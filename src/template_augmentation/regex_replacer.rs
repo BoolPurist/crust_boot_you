@@ -1,7 +1,7 @@
+use crate::cli::LoadTemplateArg;
 use crate::prelude::*;
 use std::borrow::Cow;
 
-use once_cell::sync::Lazy;
 use regex::Regex;
 
 use super::console_fetcher::TestConsoleFetcher;
@@ -14,15 +14,23 @@ use super::{
     AugementRepository, TemplateAugmentor,
 };
 
-fn build_regex_template() -> Regex {
-    Regex::new(r#"\{\{(?<value>[^\{]*)\}\}"#)
-        .expect("Incorrect regex matcher for a key to be replaced within a template")
-}
+fn build_placehold_matcher(left: &str, right: &str) -> Regex {
+    let escpaded_left = regex::escape(left);
+    let escpaded_right = regex::escape(right);
 
-static REGEX_TEMPLATE: Lazy<Regex> = Lazy::new(build_regex_template);
+    // Example: with left: %%
+    // Example: with right: %%
+    // Matches things like "%%aaa%%"
+    let regex = format!(
+        "{}(?<value>[^{}]*){}",
+        escpaded_left, escpaded_right, escpaded_right
+    );
+    Regex::new(&regex).expect("Incorrect regex matcher for a key to be replaced within a template")
+}
 
 pub struct RegexTemplateAugmentor<CF> {
     cache: AugementRepository<CF>,
+    placeholder_matcher: Regex,
 }
 
 impl Default for RegexTemplateAugmentor<IoConsoleFetcher> {
@@ -35,7 +43,26 @@ impl Default for RegexTemplateAugmentor<IoConsoleFetcher> {
 
 impl<CF: ConsoleFetcher> RegexTemplateAugmentor<CF> {
     pub fn new(cache: AugementRepository<CF>) -> Self {
-        Self { cache }
+        Self {
+            cache,
+            placeholder_matcher: build_placehold_matcher(
+                constants::DEFAULT_LEFT_DELIMITER,
+                constants::DEFAULT_RIGHT_DELIMITER,
+            ),
+        }
+    }
+    pub fn from_cli(cache: AugementRepository<CF>, args: &LoadTemplateArg) -> Self {
+        let (left, right) = (args.left_delimiter(), args.right_delimiter());
+        Self {
+            cache,
+            placeholder_matcher: build_placehold_matcher(left, right),
+        }
+    }
+    pub fn direct_new(cache: AugementRepository<CF>, left: &str, right: &str) -> Self {
+        Self {
+            cache,
+            placeholder_matcher: build_placehold_matcher(left, right),
+        }
     }
 }
 
@@ -52,7 +79,7 @@ where
     CF: ConsoleFetcher,
 {
     fn try_replace<'a>(&mut self, input: &'a str) -> Result<Cow<'a, str>, AugmentationError> {
-        let mut captures = REGEX_TEMPLATE.captures_iter(input).peekable();
+        let mut captures = self.placeholder_matcher.captures_iter(input).peekable();
         let needs_expansion = captures.peek().is_some();
         if needs_expansion {
             let mut expanded = String::with_capacity(input.len());
@@ -85,6 +112,8 @@ where
 
 #[cfg(test)]
 mod testing {
+    use std::collections::HashMap;
+
     use crate::template_augmentation::console_fetcher::TestConsoleFetcher;
 
     use super::*;
@@ -92,25 +121,11 @@ mod testing {
     #[test]
     fn regex_extract_one_value() {
         let input = "aa aaa {{value to get}} aaa";
-        let actual = REGEX_TEMPLATE.captures(input).unwrap();
+        let actual = build_placehold_matcher("{{", "}}").captures(input).unwrap();
         let actual_extracted = &actual["value"];
         assert_eq!("value to get", actual_extracted);
     }
-    #[test]
-    fn regex_extract_two_value() {
-        let input = "aa aaa {{value to get}} {{xxx}}  ";
-        let map = hash_map! {
-            "value to get".to_string() => "YYY".to_string(),
-            "xxx".to_string() => "XXX".to_string(),
-        };
-        let test_augmenter = TestConsoleFetcher::new(map);
 
-        let respo = AugementRepository::new(test_augmenter);
-        let mut regex_augmentor = RegexTemplateAugmentor::new(respo);
-        let actual = regex_augmentor.try_replace(&input).unwrap();
-
-        assert_eq!("aa aaa YYY XXX  ", actual);
-    }
     #[test]
     fn regex_extract_do_not_change_after_error() {
         let input = "aa aaa {{value to get}} {{!!}} {{value to get}} ";
@@ -118,12 +133,23 @@ mod testing {
             "value to get".to_string() => "YYY".to_string(),
             "xxx".to_string() => "XXX".to_string(),
         };
-        let test_augmenter = TestConsoleFetcher::new(map);
 
-        let respo = AugementRepository::new(test_augmenter);
-        let mut regex_augmentor = RegexTemplateAugmentor::new(respo);
-        let _ = regex_augmentor.try_replace(&input).unwrap_err();
+        let _ = assert_standard_left_right_delimiters(input, map).unwrap_err();
     }
+
+    #[test]
+    fn regex_extract_two_value() {
+        let input = "aa aaa {{value to get}} {{xxx}}  ";
+        let map = hash_map! {
+            "value to get".to_string() => "YYY".to_string(),
+            "xxx".to_string() => "XXX".to_string(),
+        };
+
+        let actual = assert_standard_left_right_delimiters(input, map).unwrap();
+
+        assert_eq!("aa aaa YYY XXX  ", actual);
+    }
+
     #[test]
     fn regex_extract_one_and_other_default_values() {
         let input = "aa aaa {{value to get}} {{!!?A}} {{!!?B}} ";
@@ -131,11 +157,8 @@ mod testing {
             "value to get".to_string() => "YYY".to_string(),
             "xxx".to_string() => "XXX".to_string(),
         };
-        let test_augmenter = TestConsoleFetcher::new(map);
 
-        let respo = AugementRepository::new(test_augmenter);
-        let mut regex_augmentor = RegexTemplateAugmentor::new(respo);
-        let actual = regex_augmentor.try_replace(&input).unwrap();
+        let actual = assert_standard_left_right_delimiters(input, map).unwrap();
 
         assert_eq!("aa aaa YYY A B ", actual);
     }
@@ -147,12 +170,80 @@ mod testing {
             "value to get".to_string() => "YYY".to_string(),
             "!!".to_string() => "XXX".to_string(),
         };
-        let test_augmenter = TestConsoleFetcher::new(map);
 
+        let actual = assert_standard_left_right_delimiters(input, map).unwrap();
+        assert_eq!("aa aaa YYY XXX XXX ", actual);
+    }
+
+    #[test]
+    fn regex_double_precent() {
+        let input = r#"aa aaa {{value to get}} {{!!?A}} {{!!?B}} %%AAA%% 
+                   %%world%%  {{world}} %%world%%
+                      %%a?b%%
+        "#;
+        let map = hash_map! {
+            "world".to_string() => "P x!!x C".to_string(),
+            "value to get".to_string() => "YYY".to_string(),
+            "!!".to_string() => "XXX".to_string(),
+            "AAA".to_string() => "BBB".to_string(),
+        };
+
+        let actual = assert_custom_right_left_matcher(input, map, ("%%", "%%"));
+        insta::assert_display_snapshot!(actual);
+    }
+
+    #[test]
+    fn regex_double_inter_precent() {
+        let input = r#"
+                    {{world}} %%world%%
+                     %%a?b%%"#;
+        let map = hash_map! {
+            "world".to_string() => "P x!!x C".to_string(),
+            "value to get".to_string() => "YYY".to_string(),
+            "!!".to_string() => "XXX".to_string(),
+            "AAA".to_string() => "BBB".to_string(),
+        };
+
+        let actual = assert_custom_right_left_matcher(input, map, ("%%", "%%"));
+        insta::assert_display_snapshot!(actual);
+    }
+
+    #[test]
+    fn regex_arrow_a_b_precent_r_arrow() {
+        let input = r#"
+                    {{world}} <ABworld%>
+                     %%a?b%%"#;
+        let map = hash_map! {
+            "world".to_string() => "P x!!x C".to_string(),
+            "value to get".to_string() => "YYY".to_string(),
+            "!!".to_string() => "XXX".to_string(),
+            "AAA".to_string() => "BBB".to_string(),
+        };
+
+        let actual = assert_custom_right_left_matcher(input, map, ("<AB", "%>"));
+        insta::assert_display_snapshot!(actual);
+    }
+
+    fn assert_custom_right_left_matcher(
+        input: &str,
+        map: HashMap<String, String>,
+        (left, right): (&str, &str),
+    ) -> String {
+        let test_augmenter = TestConsoleFetcher::new(map);
         let respo = AugementRepository::new(test_augmenter);
-        let mut regex_augmentor = RegexTemplateAugmentor::new(respo);
+        let mut regex_augmentor = RegexTemplateAugmentor::direct_new(respo, left, right);
         let actual = regex_augmentor.try_replace(&input).unwrap();
 
-        assert_eq!("aa aaa YYY XXX XXX ", actual);
+        actual.to_string()
+    }
+
+    fn assert_standard_left_right_delimiters(
+        input: &str,
+        map: HashMap<String, String>,
+    ) -> Result<Cow<'_, str>, AugmentationError> {
+        let test_augmenter = TestConsoleFetcher::new(map);
+        let respo = AugementRepository::new(test_augmenter);
+        let mut regex_augmentor = RegexTemplateAugmentor::new(respo);
+        regex_augmentor.try_replace(&input)
     }
 }

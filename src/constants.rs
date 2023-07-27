@@ -10,6 +10,8 @@ pub static DRY_LABEL: Lazy<String> = Lazy::new(|| "DRY:".blue().to_string());
 pub static SUCCESS_LABEL: Lazy<String> = Lazy::new(|| "SUCCESS:".green().to_string());
 pub static PROJECT_ROOT_PATH: Lazy<&Path> = Lazy::new(|| Path::new(project_root()));
 
+pub const DEFAULT_LEFT_DELIMITER: &str = "{{";
+pub const DEFAULT_RIGHT_DELIMITER: &str = "}}";
 pub const PROD_LOG_FILE: &str = "crust_boot_you.log";
 pub const TEMPLATES_FOLDER: &str = "templates";
 pub const TEMPLATE_META_FILE_NAME: &str = "meta_data.json";

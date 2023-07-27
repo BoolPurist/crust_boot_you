@@ -13,6 +13,9 @@ CWD: current working directory
 
 ### Added 
 
+- Added 2 ClI/environment option: ( left_delimiter, right_delimiter )
+  Allows to change what determines the left and right border of a placeholder in file while initializing.
+  Example: With left: %% and right: %%. Placeholder like %%aa%% are matched for replacement instead of {{aak}}.
 - Errors within a file to augment are also shown with a line number
 - Added CLI/environment option: ignore_placeholders in subcommand save-template.
   If true no placeholders are replaced by the template system.

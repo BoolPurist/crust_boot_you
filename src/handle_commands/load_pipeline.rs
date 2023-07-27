@@ -111,7 +111,7 @@ fn augment_loaded_files<'a>(
 ) -> AppResult<Vec<AugmentedFile<'a>>> {
     if *args.ignore_placeholders() {
         let unaugmented: Vec<AugmentedFile> = to_augment
-            .into_iter()
+            .iter()
             .map(|loaded| {
                 (
                     Cow::Borrowed(loaded.content().as_ref()),
@@ -119,6 +119,7 @@ fn augment_loaded_files<'a>(
                 )
             })
             .collect();
+        info!("Skipping replacing placeholders due the option ignore placeholders is activated",);
         return Ok(unaugmented);
     }
 

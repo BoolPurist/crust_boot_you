@@ -1,0 +1,8 @@
+---
+source: src/template_augmentation/regex_replacer.rs
+expression: actual
+---
+aa aaa {{value to get}} {{!!?A}} {{!!?B}} BBB 
+                   P x!!x C  {{world}} P x!!x C
+                      b
+        
