@@ -11,7 +11,6 @@ use crust_boot_you::handle_commands;
 use crust_boot_you::logging;
 use crust_boot_you::prelude::AppResult;
 use crust_boot_you::prelude::ReturnToUser;
-use crust_boot_you::template_augmentation::RegexTemplateAugmentor;
 use crust_boot_you::AppCliEntry;
 use std::process::ExitCode;
 
@@ -24,30 +23,25 @@ fn main() -> ExitCode {
 fn process_command(args: &AppCliEntry) -> ReturnToUser {
     let is_debug = cfg!(debug_assertions);
     let is_dry = args.dry();
-    let mut augmentor = RegexTemplateAugmentor::default();
+
     let output = match (is_debug, is_dry) {
         (true, true) => {
             let paths = dev_logger_init(args);
-            handle_commands::handle(&paths, &DryFileManipulator::default(), &mut augmentor, args)
+            handle_commands::handle(&paths, &DryFileManipulator::default(), args)
         }
         (true, false) => {
             let paths = dev_logger_init(args);
-            handle_commands::handle(
-                &paths,
-                &DevOsFileManipulator::default(),
-                &mut augmentor,
-                args,
-            )
+            handle_commands::handle(&paths, &DevOsFileManipulator::default(), args)
         }
         (false, false) => {
             let paths = ProdPathProvider;
             logging::init(args, &paths);
-            handle_commands::handle(&paths, &OsFileManipulator::default(), &mut augmentor, args)
+            handle_commands::handle(&paths, &OsFileManipulator::default(), args)
         }
         (false, true) => {
             let paths = ProdPathProvider;
             logging::init(args, &paths);
-            handle_commands::handle(&paths, &DryFileManipulator::default(), &mut augmentor, args)
+            handle_commands::handle(&paths, &DryFileManipulator::default(), args)
         }
     }?;
 

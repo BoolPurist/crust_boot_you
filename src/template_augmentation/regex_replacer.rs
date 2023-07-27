@@ -33,15 +33,18 @@ pub struct RegexTemplateAugmentor<CF> {
     placeholder_matcher: Regex,
 }
 
-impl Default for RegexTemplateAugmentor<IoConsoleFetcher> {
-    fn default() -> Self {
+impl RegexTemplateAugmentor<IoConsoleFetcher> {
+    pub fn prod_new(agrs: &LoadTemplateArg) -> Self {
         let console_fetcher = IoConsoleFetcher;
         let cache = AugementRepository::new(console_fetcher);
-        Self::new(cache)
+        Self::from_cli(cache, agrs)
     }
 }
 
-impl<CF: ConsoleFetcher> RegexTemplateAugmentor<CF> {
+impl<CF> RegexTemplateAugmentor<CF>
+where
+    CF: ConsoleFetcher,
+{
     pub fn new(cache: AugementRepository<CF>) -> Self {
         Self {
             cache,
@@ -51,6 +54,7 @@ impl<CF: ConsoleFetcher> RegexTemplateAugmentor<CF> {
             ),
         }
     }
+
     pub fn from_cli(cache: AugementRepository<CF>, args: &LoadTemplateArg) -> Self {
         let (left, right) = (args.left_delimiter(), args.right_delimiter());
         Self {

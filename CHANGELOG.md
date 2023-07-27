@@ -20,6 +20,10 @@ CWD: current working directory
 - Added CLI/environment option: ignore_placeholders in subcommand save-template.
   If true no placeholders are replaced by the template system.
 
+### Fixed
+
+- Now set custom placeholder option are taken into account. Before there were ignored in the release build.
+
 ## 0.2.1 - 2023.07.27
 
 ### Added 

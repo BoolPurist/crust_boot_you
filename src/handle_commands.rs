@@ -2,7 +2,7 @@ use crate::{
     cli::{LoadTemplateArg, SaveTemplateCli},
     file_management::{self, FileKind},
     prelude::*,
-    template_augmentation::TemplateAugmentor,
+    template_augmentation::{RegexTemplateAugmentor, TemplateAugmentor},
     AppCliEntry, SubCommands, ValidTemplateName,
 };
 use std::path::Path;
@@ -16,12 +16,12 @@ mod load_pipeline;
 pub fn handle(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
-    template_augmentor: &mut impl TemplateAugmentor,
     args: &AppCliEntry,
 ) -> ReturnToUser {
     match args.sub_commands() {
         SubCommands::LoadTemplate(args) => {
-            handle_load_template(path_provider, file_manipulator, template_augmentor, args)
+            let mut augmentor = RegexTemplateAugmentor::prod_new(args);
+            handle_load_template(path_provider, file_manipulator, &mut augmentor, args)
         }
         SubCommands::SaveTemplate(args) => {
             handle_save_template(path_provider, file_manipulator, args)
