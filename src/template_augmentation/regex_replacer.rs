@@ -71,7 +71,7 @@ where
                     .cache
                     .augment(&extraction)
                     .map_err(|error| AugmentationError::new(input, matched_range.start(), error))?;
-                expanded.push_str(&replacement);
+                expanded.push_str(replacement);
                 last_match = matched_range.end();
             }
 

@@ -40,12 +40,12 @@ fn process_command(args: &AppCliEntry) -> ReturnToUser {
             )
         }
         (false, false) => {
-            let paths = ProdPathProvider::default();
+            let paths = ProdPathProvider;
             logging::init(args, &paths);
             handle_commands::handle(&paths, &OsFileManipulator::default(), &mut augmentor, args)
         }
         (false, true) => {
-            let paths = ProdPathProvider::default();
+            let paths = ProdPathProvider;
             logging::init(args, &paths);
             handle_commands::handle(&paths, &DryFileManipulator::default(), &mut augmentor, args)
         }
@@ -79,8 +79,8 @@ fn print_result(output: AppResult<String>, args: &AppCliEntry) -> ExitCode {
                     .unwrap_or(true),
             );
             match (*loggin_in_term, logging_allowed) {
-                (false, _) => eprint_output(error_message.to_string()),
-                (true, false) => eprint_output(error_message.to_string()),
+                (false, _) => eprint_output(&error_message),
+                (true, false) => eprint_output(&error_message),
                 (true, true) => (),
             }
 
@@ -88,7 +88,10 @@ fn print_result(output: AppResult<String>, args: &AppCliEntry) -> ExitCode {
         }
     };
 
-    fn eprint_output(error_message: String) {
-        eprintln!("{}: {}", "Error".red(), error_message);
+    fn eprint_output<T>(error_message: &T)
+    where
+        T: std::fmt::Display + std::fmt::Debug,
+    {
+        eprintln!("{}: {:?}", "Error".red(), error_message);
     }
 }
