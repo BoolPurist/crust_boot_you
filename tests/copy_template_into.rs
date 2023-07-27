@@ -187,3 +187,30 @@ fn correct_line_number_error() {
     setup.assert_with_expected();
     insta_display_filter_random_tmp!(output);
 }
+
+#[test]
+#[named]
+fn ignore_templating() {
+    let setup = TestSetupBuilder::new(actual_expected!())
+        .suffix_cwd(PathBuf::from("cwd"))
+        .build();
+
+    let to_copy_from = ValidTemplateName::new("ignore_template".to_string()).unwrap();
+    let init_kind = InitKind::NoNameConflicts;
+    let arg = LoadTemplateArg::new(to_copy_from, init_kind).activate_ignore_placeholders();
+    let values = hash_map! {"world".to_string() => "pattern".to_string()};
+
+    let mut store: RegexTemplateAugmentor<TestConsoleFetcher> =
+        RegexTemplateAugmentor::from_fake(values);
+
+    let output = handle_commands::handle_load_template(
+        setup.path_provider(),
+        setup.os_mani(),
+        &mut store,
+        &arg,
+    )
+    .unwrap();
+
+    setup.assert_with_expected();
+    insta_display_filter_random_tmp!(output);
+}

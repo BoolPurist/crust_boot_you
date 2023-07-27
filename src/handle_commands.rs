@@ -100,12 +100,16 @@ pub fn handle_load_template(
     load_args: &LoadTemplateArg,
 ) -> ReturnToUser {
     debug!("Handling subcommand: {:?}", "LoadTemplate");
-    let (name, init_kind) = (load_args.name(), load_args.with());
+    let name = load_args.name();
 
     let path_to_template = path_provider.specific_entry_template_files(name)?;
 
     match file_manipulator.try_exits(path_to_template.as_path()) {
-        Ok(false) => bail!("No template named ({}) could be found", name),
+        Ok(false) => bail!(
+            "No template named ({}) could be found, under the path {:?}",
+            name,
+            &path_to_template
+        ),
         Err(error) => bail!(
             "No content for teamplate named {}, could be found because of error:\n {}",
             name,
@@ -121,7 +125,7 @@ pub fn handle_load_template(
     load_pipeline::init_project_with_template(
         file_manipulator,
         augmentor,
-        init_kind,
+        load_args,
         &cwd,
         &path_to_template,
     )?;
@@ -130,20 +134,6 @@ pub fn handle_load_template(
         "Folder {:?} filled with content from Template ({})",
         cwd, name
     ))
-
-    // fn try_return_valid_target(
-    //     file_manipulator: &impl FileManipulator,
-    //     _init_kind: InitKind,
-    // ) -> AppResult<PathBuf> {
-    //     let is_empty = file_manipulator.all_nodes_inside(&cwd)?.is_empty();
-    //     if !is_empty {
-    //         bail!(
-    //             "Folder is not empty at {:?}. This is an error for init kind OnlyEmpty.",
-    //             cwd
-    //         );
-    //     }
-    //     Ok(cwd)
-    // }
 }
 
 pub fn handle_save_template(

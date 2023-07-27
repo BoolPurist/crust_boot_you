@@ -25,3 +25,4 @@ local-release:
   mkdir {{ relase_folder }}
   tar --create --gzip --file {{ tar_file_name }} README.md CHANGELOG.md LICENSE-MIT LICENSE-APACHE -C ./target/release/ {{ app_name }}
   sha256sum {{ tar_file_name }} > {{ checksum }}
+  sd 'release/' '' {{ checksum }}

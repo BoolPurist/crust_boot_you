@@ -2,4 +2,4 @@
 source: tests/copy_template_into.rs
 expression: output
 ---
-No template named (not_there) could be found
+No template named (not_there) could be found, under the path "/[TMP_ROOT]/data/templates/not_there/files"

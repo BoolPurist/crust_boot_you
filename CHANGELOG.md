@@ -14,12 +14,15 @@ CWD: current working directory
 ### Added 
 
 - Errors within a file to augment are also shown with a line number
+- Added CLI/environment option: ignore_placeholders in subcommand save-template.
+  If true no placeholders are replaced by the template system.
 
 ## 0.2.1 - 2023.07.27
 
 ### Added 
 
-- Allows usage in release build. Its paths obey the XDG standard.
+- Allows testing application in release build within docker container.
+- In release build all data/configuration is taken form the folders determined by XDG Standard
 
 ## 0.2.0 - 2023.07.26
 

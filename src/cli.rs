@@ -15,15 +15,22 @@ mod from_cli_path;
 
 use clap::Parser;
 
+#[macro_export]
+macro_rules! app_env_name {
+    ($suffix:literal) => {{
+        concat!("CRUST_BOOT_YOU_", $suffix)
+    }};
+}
+
 #[derive(Debug, Parser, Getters)]
 pub struct AppCliEntry {
-    #[clap(short, long, env = "CRUST_BOOT_YOU_RUN_DRY")]
+    #[clap(short, long, env = app_env_name!("RUN_DRY"))]
     dry: bool,
-    #[clap(short, long, env = "CRUST_BOOT_YOU_TERM_LOGGER")]
+    #[clap(short, long, env = app_env_name!("TERM_LOGGER"))]
     term_logging: bool,
-    #[clap(short, long, value_enum, env = "CRUST_BOOT_YOU_LOG_LEVEL")]
+    #[clap(short, long, value_enum, env = app_env_name!("LOG_LEVEL"))]
     log_level: Option<CliLogLevel>,
-    #[clap(short, long, num_args = 1.., value_delimiter = ',', env = "CRUST_BOOT_YOU_LOG_MODULE_FILTER")]
+    #[clap(short, long, num_args = 1.., value_delimiter = ',', env = app_env_name!("LOG_MODULE_FILTER"))]
     module_filter: Option<Vec<String>>,
     #[clap(subcommand)]
     sub_commands: SubCommands,
