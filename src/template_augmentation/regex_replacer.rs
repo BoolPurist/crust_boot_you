@@ -67,7 +67,10 @@ where
                     let (key, default_value) = (splited.next().unwrap(), splited.next());
                     TemplateExtractation::FromConsole { key, default_value }
                 };
-                let replacement = self.cache.augment(&extraction)?;
+                let replacement = self
+                    .cache
+                    .augment(&extraction)
+                    .map_err(|error| AugmentationError::new(input, matched_range.start(), error))?;
                 expanded.push_str(&replacement);
                 last_match = matched_range.end();
             }
@@ -119,12 +122,7 @@ mod testing {
 
         let respo = AugementRepository::new(test_augmenter);
         let mut regex_augmentor = RegexTemplateAugmentor::new(respo);
-        let actual = regex_augmentor.try_replace(&input).unwrap_err();
-
-        assert_eq!(
-            AugmentationError::NoValueAndDefaultConsole(String::from("!!")),
-            actual,
-        );
+        let _ = regex_augmentor.try_replace(&input).unwrap_err();
     }
     #[test]
     fn regex_extract_one_and_other_default_values() {

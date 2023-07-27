@@ -11,7 +11,13 @@ CWD: current working directory
 
 ## [unreleased]
 
+### Added 
+
+- Errors within a file to augment are also shown with a line number
+
 ## 0.2.1 - 2023.07.27
+
+### Added 
 
 - Allows usage in release build. Its paths obey the XDG standard.
 

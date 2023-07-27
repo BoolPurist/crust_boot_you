@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use super::{
-    augmentation_error::AugmentationError, console_fetcher::ConsoleFetcher,
-    template_extractation::TemplateExtractation, AugementKey, AugmentValue, AugmentationResult,
+    console_fetcher::ConsoleFetcher, template_extractation::TemplateExtractation, AugementKey,
+    AugmentValue, AugmentationResult,
 };
 
 pub struct AugementRepository<CF> {
@@ -51,7 +51,10 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
                 match (fetched_key, default_value) {
                     (Some(Some(resolved)), _) => Ok(resolved.as_str()),
                     (Some(None), Some(default)) => Ok(default),
-                    _ => Err(AugmentationError::NoValueAndDefaultConsole(key.to_string())),
+                    _ => Err(anyhow!(
+                        "Key ({}): Could not be retrieved from console and has no default value ",
+                        key.to_string()
+                    )),
                 }
             }
         }

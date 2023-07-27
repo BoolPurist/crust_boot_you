@@ -157,3 +157,33 @@ fn override_it() {
     setup.assert_with_expected();
     insta_display_filter_random_tmp!(output);
 }
+
+#[test]
+#[named]
+fn correct_line_number_error() {
+    let setup = TestSetupBuilder::new(actual_expected!())
+        .suffix_cwd(PathBuf::from("cwd"))
+        .build();
+
+    let to_copy_from = ValidTemplateName::new("missing_value".to_string()).unwrap();
+    let init_kind = InitKind::NoNameConflicts;
+    let arg = LoadTemplateArg::new(to_copy_from, init_kind);
+    let values = hash_map! {"user_name".to_string() => "pattern".to_string()};
+
+    let mut store: RegexTemplateAugmentor<TestConsoleFetcher> =
+        RegexTemplateAugmentor::from_fake(values);
+
+    let output = handle_commands::handle_load_template(
+        setup.path_provider(),
+        setup.os_mani(),
+        &mut store,
+        &arg,
+    )
+    .unwrap_err();
+
+    let source = output.source().unwrap().to_string();
+    let output = format!("{}\n{}", output, source);
+
+    setup.assert_with_expected();
+    insta_display_filter_random_tmp!(output);
+}

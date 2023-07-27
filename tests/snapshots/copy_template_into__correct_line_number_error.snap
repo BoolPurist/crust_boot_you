@@ -1,0 +1,6 @@
+---
+source: tests/copy_template_into.rs
+expression: output
+---
+Failed to augment file from ("/[TMP_ROOT]/cwd/missing_values.txt") for initializing the project
+Line:4: Key (xxxx): Could not be retrieved from console and has no default value 

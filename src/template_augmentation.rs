@@ -1,6 +1,7 @@
-pub type AugmentationResult<'a> = Result<&'a str, AugmentationError>;
+use crate::prelude::*;
+pub type AugmentationResult<'a> = Result<&'a str, AppError>;
 pub type AugementKey = String;
-pub type OptAugmentationResult = Result<Option<AugmentValue>, AugmentationError>;
+pub type OptAugmentationResult = AppResult<Option<AugmentValue>>;
 pub type AugmentValue = String;
 pub type KeyExtact<'a> = &'a str;
 pub type DefaultExtact<'a> = Option<&'a str>;

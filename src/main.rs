@@ -71,11 +71,7 @@ fn print_result(output: AppResult<String>, args: &AppCliEntry) -> ExitCode {
             ExitCode::SUCCESS
         }
         Err(error_message) => {
-            if is_rust_backtrace_on() {
-                log::error!("{:?}", error_message);
-            } else {
-                log::error!("{}", error_message);
-            }
+            log::error!("{:?}", error_message);
             let (loggin_in_term, logging_allowed) = (
                 args.term_logging(),
                 args.log_level()
@@ -95,10 +91,4 @@ fn print_result(output: AppResult<String>, args: &AppCliEntry) -> ExitCode {
     fn eprint_output(error_message: String) {
         eprintln!("{}: {}", "Error".red(), error_message);
     }
-}
-
-fn is_rust_backtrace_on() -> bool {
-    std::env::var("RUST_BACKTRACE")
-        .map(|var| matches!(var.as_str(), "1" | "full"))
-        .unwrap_or(false)
 }
