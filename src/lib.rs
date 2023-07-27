@@ -15,9 +15,12 @@ extern crate derive_more;
 #[macro_use]
 extern crate map_macro;
 
+pub use valid_placeholder_border::ValidPlaceholderBorder;
+
 pub mod app_traits;
 pub mod cli;
 pub mod template_augmentation;
+mod valid_placeholder_border;
 pub mod valid_template_name;
 use app_traits::path_resolver::DevPathResolver;
 pub use valid_template_name::ValidTemplateName;

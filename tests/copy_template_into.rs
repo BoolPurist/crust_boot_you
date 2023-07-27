@@ -228,8 +228,8 @@ fn with_different_placeholder() {
     let init_kind = InitKind::Override;
 
     let arg = LoadTemplateArg::new(to_copy_from, init_kind)
-        .new_left_delimiter(deliminter.clone())
-        .new_right_delimiter(deliminter);
+        .new_left_delimiter(deliminter.clone().parse().unwrap())
+        .new_right_delimiter(deliminter.parse().unwrap());
     let values = hash_map! {"world".to_string() => "P x!!x C".to_string()};
 
     let console_fetcher = TestConsoleFetcher::new(values);

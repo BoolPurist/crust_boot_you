@@ -1,7 +1,7 @@
 use clap::Args;
 
 use crate::cli::init_kind::InitKind;
-use crate::{app_env_name, prelude::*};
+use crate::{app_env_name, prelude::*, ValidPlaceholderBorder};
 
 #[derive(Debug, Args, Getters)]
 pub struct LoadTemplateArg {
@@ -10,10 +10,10 @@ pub struct LoadTemplateArg {
     with: InitKind,
     #[arg(long, short, env = app_env_name!("IGNORE_PLACEHOLDERS"))]
     ignore_placeholders: bool,
-    #[arg(long, short,default_value_t = String::from(constants::DEFAULT_LEFT_DELIMITER),  env = app_env_name!("LEFT_DELIMITER"))]
-    left_delimiter: String,
-    #[arg(long, short, default_value_t = String::from(constants::DEFAULT_RIGHT_DELIMITER), env = app_env_name!("RIGHT_DELIMITER"))]
-    right_delimiter: String,
+    #[arg(long, short,default_value_t = constants::DEFAULT_LEFT_DELIMITER.parse().unwrap(),  env = app_env_name!("LEFT_DELIMITER"))]
+    left_delimiter: ValidPlaceholderBorder,
+    #[arg(long, short, default_value_t = constants::DEFAULT_RIGHT_DELIMITER.parse().unwrap(), env = app_env_name!("RIGHT_DELIMITER"))]
+    right_delimiter: ValidPlaceholderBorder,
 }
 
 impl LoadTemplateArg {
@@ -22,8 +22,14 @@ impl LoadTemplateArg {
             name,
             with,
             ignore_placeholders: false,
-            left_delimiter: String::from(constants::DEFAULT_LEFT_DELIMITER),
-            right_delimiter: String::from(constants::DEFAULT_RIGHT_DELIMITER),
+            left_delimiter: ValidPlaceholderBorder::new(
+                constants::DEFAULT_LEFT_DELIMITER.to_owned(),
+            )
+            .unwrap(),
+            right_delimiter: ValidPlaceholderBorder::new(
+                constants::DEFAULT_RIGHT_DELIMITER.to_owned(),
+            )
+            .unwrap(),
         }
     }
 
@@ -31,11 +37,11 @@ impl LoadTemplateArg {
         self.ignore_placeholders = true;
         self
     }
-    pub fn new_left_delimiter(mut self, left: String) -> Self {
+    pub fn new_left_delimiter(mut self, left: ValidPlaceholderBorder) -> Self {
         self.left_delimiter = left;
         self
     }
-    pub fn new_right_delimiter(mut self, right: String) -> Self {
+    pub fn new_right_delimiter(mut self, right: ValidPlaceholderBorder) -> Self {
         self.right_delimiter = right;
         self
     }
