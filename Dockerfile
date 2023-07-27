@@ -7,15 +7,22 @@ RUN cargo build --release
 
 FROM ubuntu:22.04
 
+RUN yes | unminimize
+RUN apt-get update
+RUN apt-get upgrade --yes
+RUN apt-get install --yes vim less 
+
 RUN adduser crust
 
 RUN mkdir -p /home/crust/.local/bin
 
 COPY --from=build ./target/release/crust_boot_you /home/crust/.local/bin/crust_boot_you
 
-RUN chown crust /home/crust/.local/bin/crust_boot_you
+RUN chown -R crust /home/crust
 
 RUN chmod +x /home/crust/.local/bin/crust_boot_you
 
 ENV PATH "$PATH:~/.local/bin"
+ENV XDG_DATA_HOME "~/.local/share"
+
 

@@ -11,6 +11,10 @@ CWD: current working directory
 
 ## [unreleased]
 
+## 0.2.1 - 2023.07.27
+
+- Allows usage in release build. Its paths obey the XDG standard.
+
 ## 0.2.0 - 2023.07.26
 
 ### Added 

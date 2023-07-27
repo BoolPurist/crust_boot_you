@@ -20,18 +20,28 @@ pub fn init(cli: &AppCliEntry, path_proiver: &impl PathProvider) {
         ConfigBuilder::default()
     };
 
-    let logger_path = path_proiver
-        .logger_file_location()
-        .expect("Failed to get path to logging file.");
-    let file_writer = WriteLogger::new(
-        file_log_level,
-        config.set_location_level(LevelFilter::Error).build(),
-        File::options()
-            .create(true)
-            .append(true)
-            .open(logger_path)
-            .expect("Failed to create or access logger file."),
-    );
+    let file_writer = {
+        let logger_folder_path = path_proiver.logger_folder_location().unwrap();
+        let logger_file_path = path_proiver
+            .logger_file_location()
+            .expect("Failed to get path to logging file.");
+        std::fs::create_dir_all(&logger_folder_path).unwrap_or_else(|error| {
+            panic!(
+                "Aborting: can not ensure folder for logging at {:?}.\nError: {:?}",
+                logger_folder_path, error
+            )
+        });
+
+        WriteLogger::new(
+            file_log_level,
+            config.set_location_level(LevelFilter::Error).build(),
+            File::options()
+                .create(true)
+                .append(true)
+                .open(logger_file_path)
+                .expect("Failed to create or access logger file."),
+        )
+    };
 
     let loggers: Vec<Box<dyn SharedLogger>> = if *cli.term_logging() {
         let term_logger = TermLogger::new(

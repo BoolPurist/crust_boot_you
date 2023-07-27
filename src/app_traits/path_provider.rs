@@ -1,8 +1,12 @@
-use crate::{prelude::*, ValidTemplateName};
-mod dev_path_provider;
 pub use dev_path_provider::DevPathProvider;
-mod test_path_provider;
+pub use prod_path_provider::ProdPathProvider;
 pub use test_path_provider::TestPathProvider;
+
+mod dev_path_provider;
+mod prod_path_provider;
+mod test_path_provider;
+
+use crate::{prelude::*, ValidTemplateName};
 
 pub fn get_root_dev() -> PathBuf {
     std::env::temp_dir().join(constants::dev::TMP_ROOT)
@@ -16,6 +20,7 @@ pub trait PathProvider {
     fn data(&self) -> PathResult;
     fn config(&self) -> PathResult;
     fn logger_file_location(&self) -> PathResult;
+    fn logger_folder_location(&self) -> PathResult;
 
     fn scripts(&self) -> PathResult {
         let data = self.data()?;

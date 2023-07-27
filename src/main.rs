@@ -2,7 +2,9 @@ use clap::Parser;
 use colored::*;
 use crust_boot_you::app_traits::file_manipulator::DevOsFileManipulator;
 use crust_boot_you::app_traits::file_manipulator::DryFileManipulator;
+use crust_boot_you::app_traits::file_manipulator::OsFileManipulator;
 use crust_boot_you::app_traits::path_provider::DevPathProvider;
+use crust_boot_you::app_traits::path_provider::ProdPathProvider;
 use crust_boot_you::cli::CliLogLevel;
 use crust_boot_you::constants;
 use crust_boot_you::handle_commands;
@@ -37,7 +39,16 @@ fn process_command(args: &AppCliEntry) -> ReturnToUser {
                 args,
             )
         }
-        (false, _) => todo!("Not implemented for production"),
+        (false, false) => {
+            let paths = ProdPathProvider::default();
+            logging::init(args, &paths);
+            handle_commands::handle(&paths, &OsFileManipulator::default(), &mut augmentor, args)
+        }
+        (false, true) => {
+            let paths = ProdPathProvider::default();
+            logging::init(args, &paths);
+            handle_commands::handle(&paths, &DryFileManipulator::default(), &mut augmentor, args)
+        }
     }?;
 
     return Ok(output);

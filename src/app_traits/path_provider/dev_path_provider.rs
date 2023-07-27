@@ -38,6 +38,16 @@ impl PathProvider for DevPathProvider {
     }
 
     fn logger_file_location(&self) -> PathResult {
-        Ok(PathBuf::from(constants::project_root()).join(constants::dev::LOGGER_DEV_FILE))
+        let file_path = self
+            .logger_folder_location()?
+            .join(constants::dev::LOGGER_DEV_FILE);
+        info!("Log folder path: {:?}", file_path);
+        Ok(file_path)
+    }
+
+    fn logger_folder_location(&self) -> PathResult {
+        let folder_log = PathBuf::from(constants::project_root());
+        info!("Log folder path: {:?}", &folder_log);
+        Ok(folder_log)
     }
 }

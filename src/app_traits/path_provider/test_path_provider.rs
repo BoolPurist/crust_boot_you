@@ -40,4 +40,8 @@ impl PathProvider for TestPathProvider {
     fn config(&self) -> PathResult {
         Ok(self.root.join(self.config.clone()))
     }
+
+    fn logger_folder_location(&self) -> PathResult {
+        todo!()
+    }
 }
