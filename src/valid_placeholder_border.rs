@@ -13,6 +13,10 @@ impl ValidPlaceholderBorder {
             trimmed_len == to_validate_len, 
             "Border of a placeholder must not contain any non-visible characters to the left or right, aka whitespace"
         );
+        ensure!(
+            !to_validate.is_empty(), 
+            "A placeholder value must not be empty !"
+        );
         Ok(Self(to_validate))
     }
 }
@@ -43,6 +47,10 @@ mod testing {
     #[test]
     fn deny_invalid_placeholder_borders() {
          
+        assert_case("");
+        assert_case(" ");
+        assert_case("\n");
+        assert_case(" \t");
         assert_case("  aa");
         assert_case("a aaa a   ");
         assert_case("\tz zzz z zz z z");
