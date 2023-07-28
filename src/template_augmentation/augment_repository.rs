@@ -1,12 +1,16 @@
 use std::collections::HashMap;
 
 use super::{
-    console_fetcher::ConsoleFetcher, template_extractation::TemplateExtractation, AugementKey,
-    AugmentValue, AugmentationResult,
+    console_fetcher::ConsoleFetcher, template_extractation::TemplateExtractation,
+    AugmentationResult,
 };
 
+/// We do not need to clone
+type RespositoryKey = Box<str>;
+type ResolvedValue = Option<RespositoryKey>;
+
 pub struct AugementRepository<CF> {
-    console_map: HashMap<AugementKey, Option<AugmentValue>>,
+    console_map: HashMap<RespositoryKey, ResolvedValue>,
     console_fetcher: CF,
 }
 
@@ -25,7 +29,10 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
         match extract {
             TemplateExtractation::FromConsole { key, default_value } => {
                 if !self.console_map.contains_key(*key) {
-                    let may_new_value = self.console_fetcher.fetch_from(key)?;
+                    let may_new_value: ResolvedValue = self
+                        .console_fetcher
+                        .fetch_from(key)?
+                        .map(|key| key.as_str().into());
 
                     debug_assert!(
                         may_new_value
@@ -37,7 +44,7 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
 
                     let first_time = self
                         .console_map
-                        .insert(key.to_string(), may_new_value)
+                        .insert((*key).into(), may_new_value)
                         .is_none();
                     debug_assert!(first_time);
                 }
@@ -49,7 +56,7 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
                     key
                 );
                 match (fetched_key, default_value) {
-                    (Some(Some(resolved)), _) => Ok(resolved.as_str()),
+                    (Some(Some(resolved)), _) => Ok(resolved),
                     (Some(None), Some(default)) => Ok(default),
                     _ => Err(anyhow!(
                         "Key ({}): Could not be retrieved from console and has no default value ",
