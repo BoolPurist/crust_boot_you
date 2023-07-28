@@ -1,6 +1,5 @@
 ---
 source: tests/copy_template_into.rs
-assertion_line: 284
 expression: output
 ---
 Folder "/[TMP_ROOT]/cwd" filled with content from Template (no_valid_utf8)

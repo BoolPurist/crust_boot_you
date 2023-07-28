@@ -1,8 +1,8 @@
 ---
-source: src/handle_commands/load_pipeline.rs
+source: src/handle_commands/load_pipeline/init_validation.rs
 expression: actual
 ---
-Purge([
+NoConflict([
   SourceTargetNode(
     source_node: NodeEntryMeta(
       node_type: File,
@@ -16,5 +16,12 @@ Purge([
       source_path: "/some/source/b",
     ),
     target: "/some/target/b",
+  ),
+  SourceTargetNode(
+    source_node: NodeEntryMeta(
+      node_type: Folder,
+      source_path: "/some/source/aaa/ccc",
+    ),
+    target: "/some/target/aaa/ccc",
   ),
 ])

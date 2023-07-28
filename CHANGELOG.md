@@ -11,6 +11,11 @@ CWD: current working directory
 
 ## [unreleased]
 
+### Fixed 
+
+- Invalid utf8 files like binary in a template do not prevent initialization of project anymore. 
+  They are just copied without augmenting. Fixes Issue: https://github.com/BoolPurist/crust_boot_you/issues/1
+
 ### Added 
 
 - Added 2 ClI/environment option: ( left_delimiter, right_delimiter )

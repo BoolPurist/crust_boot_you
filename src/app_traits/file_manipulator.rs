@@ -23,6 +23,8 @@ pub trait FileManipulator {
     fn write_file_to(&self, location: &Path, content: &str) -> AppIoResult;
     fn resolver(&self) -> &Self::Resolver;
     fn read_file(&self, path: &Path) -> AppIoResult<String>;
+    fn read_bytes(&self, path: &Path) -> AppIoResult<Vec<u8>>;
+    fn write_bytes(&self, path: &Path, to_write: &[u8]) -> AppIoResult;
 
     fn root(&self) -> &Path {
         self.resolver().root()

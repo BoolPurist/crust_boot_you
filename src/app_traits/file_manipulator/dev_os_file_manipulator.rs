@@ -130,4 +130,14 @@ impl FileManipulator for DevOsFileManipulator {
         self.panic_if_outside_root(path);
         self.os_impl.read_file(path)
     }
+
+    fn read_bytes(&self, path: &Path) -> AppIoResult<Vec<u8>> {
+        self.panic_if_outside_root(path);
+        self.os_impl.read_bytes(path)
+    }
+
+    fn write_bytes(&self, path: &Path, to_write: &[u8]) -> AppIoResult {
+        self.panic_if_outside_root(path);
+        self.os_impl.write_bytes(path, to_write)
+    }
 }

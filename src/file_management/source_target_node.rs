@@ -1,6 +1,3 @@
-//! TODO: Remove if used
-#![allow(dead_code)]
-
 use crate::prelude::*;
 
 use super::{FileKind, NodeEntryMeta};

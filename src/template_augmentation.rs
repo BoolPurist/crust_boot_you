@@ -22,9 +22,6 @@ mod template_extractation;
 
 use std::{borrow::Cow, collections::HashMap};
 
-/// TODO: Provide otther implementation which also keeps track of lines and colums for better error
-/// message to end user.
-/// The only current implementation regex is limented in that regard.
 pub trait TemplateAugmentor {
     fn try_replace<'a>(&mut self, input: &'a str) -> Result<Cow<'a, str>, AugmentationError>;
 }

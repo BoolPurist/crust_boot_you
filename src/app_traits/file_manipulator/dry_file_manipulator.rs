@@ -66,4 +66,14 @@ impl FileManipulator for DryFileManipulator {
         let content = self.os_imp.read_file(path)?;
         Ok(content)
     }
+
+    fn read_bytes(&self, path: &Path) -> AppIoResult<Vec<u8>> {
+        let content = self.os_imp.read_bytes(path)?;
+        Ok(content)
+    }
+
+    fn write_bytes(&self, path: &Path, _to_write: &[u8]) -> AppIoResult {
+        println!("Would write bytes to {:?}", path);
+        Ok(())
+    }
 }

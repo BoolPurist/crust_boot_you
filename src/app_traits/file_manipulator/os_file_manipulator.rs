@@ -1,5 +1,7 @@
 use std::{
     collections::VecDeque,
+    fs::File,
+    io::{Read, Write},
     path::{Path, PathBuf},
 };
 
@@ -107,5 +109,18 @@ impl FileManipulator for OsFileManipulator {
         let result = std::fs::read_to_string(path)?;
         debug!("Read content of file from {:?}", path);
         Ok(result)
+    }
+
+    fn read_bytes(&self, path: &Path) -> AppIoResult<Vec<u8>> {
+        let mut f = File::open(path)?;
+        let mut buffer = Vec::new();
+        f.read_to_end(&mut buffer)?;
+        Ok(buffer)
+    }
+
+    fn write_bytes(&self, path: &Path, to_write: &[u8]) -> AppIoResult {
+        let mut buffer = File::create(path)?;
+        buffer.write_all(to_write)?;
+        Ok(())
     }
 }
