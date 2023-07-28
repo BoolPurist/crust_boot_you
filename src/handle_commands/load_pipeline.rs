@@ -138,6 +138,8 @@ fn augment_loaded_files<'a>(
         .collect()
 }
 
+/// TODO: make sure invalid utf 8 content is handled
+/// Issue: https://github.com/BoolPurist/crust_boot_you/issues/1 .
 fn load_all_files(
     file_sys: &impl FileManipulator,
     to_load: impl IntoIterator<Item = FileToLoad>,
