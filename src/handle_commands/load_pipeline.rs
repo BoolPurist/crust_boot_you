@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 /// TODO:DEAD_CODE
-use std::{borrow::Cow, collections::HashSet};
+use std::{borrow::Cow, collections::HashSet, io};
 
 use crate::{
     cli::{InitKind, LoadTemplateArg},
@@ -143,13 +143,29 @@ fn load_all_files(
     to_load: impl IntoIterator<Item = FileToLoad>,
 ) -> AppResult<Vec<LoadedFile>> {
     info!("Reading all files from the template folder.");
-    to_load
+    return to_load
         .into_iter()
         .map(|next_to_load| {
-            let content = file_sys.read_file(next_to_load.source())?;
-            Ok(LoadedFile::new(next_to_load.target().clone(), content))
+            let path = next_to_load.source();
+            match file_sys.read_file(next_to_load.source()) {
+                Ok(read) => Ok(LoadedFile::new(next_to_load.target().clone(), read)),
+                Err(AppIoError::Io(io_error)) if io_error.kind() == io::ErrorKind::InvalidData => {
+                    Err(report_temporary_unhandled_case(io_error))
+                }
+                Err(error) => Err(AppError::from(error)),
+            }
+            .with_context(|| format!("Failed to read file at {:?}", path))
         })
-        .collect()
+        .collect();
+
+    fn report_temporary_unhandled_case(error: io::Error) -> AppError {
+        let error_msg = "
+File contains a invalid ut8 content. Right now the application does not handle this.
+It is planned to be handled in the future, see issue: https://github.com/BoolPurist/crust_boot_you/issues/1.
+Please remove it from the template for now.
+";
+        anyhow!("{}\nUnderling error: {}", error_msg, error)
+    }
 }
 
 #[derive(Debug, new, Getters)]
