@@ -1,95 +1,65 @@
-use std::{ffi::OsStr, fs::File};
-
-use log::LevelFilter;
-use simplelog::{
-    ColorChoice, CombinedLogger, ConfigBuilder, SharedLogger, TermLogger, TerminalMode, WriteLogger,
-};
+use flexi_logger::{Cleanup, Criterion, Duplicate, FileSpec, Logger, LoggerHandle, Naming};
 
 use crate::{prelude::*, AppCliEntry};
-pub fn init(cli: &AppCliEntry, path_proiver: &impl PathProvider) {
+
+pub fn init(cli: &AppCliEntry, path_proiver: &dyn PathProvider) -> AppResult<LoggerHandle> {
     let is_debug = cfg!(debug_assertions);
-    let (file_log_level, term_log_level) = get_logger_level(cli, is_debug);
-    let mut config = if let Some(filters) = cli.module_filter() {
-        let mut config = ConfigBuilder::default();
-        config.clear_filter_allow();
-        for next in filters {
-            config.add_filter_allow(next.clone());
+    // let (file_log_level, term_log_level) = get_logger_level(cli, is_debug);
+
+    let logger_folder_path = path_proiver.logger_folder_location().unwrap();
+    let base_name = if is_debug {
+        constants::PREFIX_FILE_DEV_LOG
+    } else {
+        constants::APP_NAME
+    };
+
+    let fs_specs = FileSpec::default()
+        .directory(logger_folder_path)
+        .basename(base_name)
+        .suffix(constants::SUFFIX_FILE_LOG)
+        .suppress_timestamp();
+
+    let level = get_logger_settings(cli, is_debug)
+        .format_for_files(flexi_logger::detailed_format)
+        .format_for_stderr(flexi_logger::colored_default_format);
+
+    let up_to_file = level.log_to_file(fs_specs).rotate(
+        Criterion::Size(constants::MAX_SIZE_MEGA_BYTES),
+        if is_debug {
+            Naming::Numbers
+        } else {
+            Naming::Timestamps
+        },
+        Cleanup::KeepLogFiles(constants::NUMBER_OF_FILES),
+    );
+
+    let up_to_file = {
+        let up_to_file = if is_debug {
+            up_to_file
+        } else {
+            up_to_file.append()
+        };
+
+        if *cli.term_logging() {
+            up_to_file.duplicate_to_stderr(Duplicate::All)
+        } else {
+            up_to_file
         }
-        config
-    } else {
-        ConfigBuilder::default()
-    };
-
-    let file_writer = {
-        let logger_folder_path = path_proiver.logger_folder_location().unwrap();
-        let logger_file_path = path_proiver
-            .logger_file_location()
-            .expect("Failed to get path to logging file.");
-        std::fs::create_dir_all(&logger_folder_path).unwrap_or_else(|error| {
-            panic!(
-                "Aborting: can not ensure folder for logging at {:?}.\nError: {:?}",
-                logger_folder_path, error
-            )
-        });
-
-        WriteLogger::new(
-            file_log_level,
-            config.set_location_level(LevelFilter::Error).build(),
-            File::options()
-                .create(true)
-                .append(true)
-                .open(logger_file_path)
-                .expect("Failed to create or access logger file."),
-        )
-    };
-
-    let loggers: Vec<Box<dyn SharedLogger>> = if *cli.term_logging() {
-        let term_logger = TermLogger::new(
-            term_log_level,
-            config.set_location_level(LevelFilter::Off).build(),
-            TerminalMode::Mixed,
-            ColorChoice::Auto,
-        );
-        vec![file_writer, term_logger]
-    } else {
-        vec![file_writer]
-    };
-    const UNKOWN: &str = "Unknown";
-
-    CombinedLogger::init(loggers).expect("Failed to initialze logger");
-    let (app_name, app_path) = std::env::current_exe()
-        .map(|path| {
-            let file_name = path
-                .file_name()
-                .unwrap_or(OsStr::new(UNKOWN))
-                .to_string_lossy()
-                .into_owned();
-            let stem = path.to_string_lossy().into_owned();
-            (file_name, stem)
-        })
-        .unwrap_or((UNKOWN.to_string(), UNKOWN.to_string()));
+        .start()
+    }?;
 
     let banner = "=".repeat(100);
     info!("{}", banner);
-    info!("Starting application with name: {}", app_name);
-    info!("Appliaction loaction: {}", app_path)
+
+    info!("Starting application with name: {}", constants::APP_NAME);
+    Ok(up_to_file)
 }
 
-fn get_logger_level(cli: &AppCliEntry, is_debug: bool) -> (LevelFilter, LevelFilter) {
-    if let Some(given) = cli.log_level() {
-        let for_both: LevelFilter = (*given).into();
-        (for_both, for_both)
-    } else {
-        let term_file_logging_level = if is_debug {
-            LevelFilter::Debug
-        } else {
-            LevelFilter::Info
-        };
-        let term_logging_level = if is_debug {
-            LevelFilter::Debug
-        } else {
-            LevelFilter::Warn
-        };
-        (term_file_logging_level, term_logging_level)
+fn get_logger_settings(cli_entry: &AppCliEntry, is_debug: bool) -> Logger {
+    match (is_debug, cli_entry.log_settings()) {
+        (true, None) => Logger::try_with_str("debug"),
+        (false, None) => Logger::try_with_str("info"),
+        (_, Some(settings)) => Logger::try_with_str(settings),
     }
+    .unwrap()
 }

@@ -15,6 +15,7 @@ CWD: current working directory
 
 - Invalid utf8 files like binary in a template do not prevent initialization of project anymore. 
   They are just copied without augmenting. Fixes Issue: https://github.com/BoolPurist/crust_boot_you/issues/1
+- Now set custom placeholder option are taken into account. Before there were ignored in the release build.
 
 ### Added 
 
@@ -24,10 +25,8 @@ CWD: current working directory
 - Errors within a file to augment are also shown with a line number
 - Added CLI/environment option: ignore_placeholders in subcommand save-template.
   If true no placeholders are replaced by the template system.
+- File logging is now rotated in production
 
-### Fixed
-
-- Now set custom placeholder option are taken into account. Before there were ignored in the release build.
 
 ## 0.2.1 - 2023.07.27
 

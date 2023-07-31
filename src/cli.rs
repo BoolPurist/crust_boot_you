@@ -28,10 +28,8 @@ pub struct AppCliEntry {
     dry: bool,
     #[clap(short, long, env = app_env_name!("TERM_LOGGER"))]
     term_logging: bool,
-    #[clap(short, long, value_enum, env = app_env_name!("LOG_LEVEL"))]
-    log_level: Option<CliLogLevel>,
-    #[clap(short, long, num_args = 1.., value_delimiter = ',', env = app_env_name!("LOG_MODULE_FILTER"))]
-    module_filter: Option<Vec<String>>,
+    #[clap(short, long, env = app_env_name!("LOG_SETTINGS"))]
+    log_settings: Option<String>,
     #[clap(subcommand)]
     sub_commands: SubCommands,
 }

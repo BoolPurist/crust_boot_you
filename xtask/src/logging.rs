@@ -1,13 +1,10 @@
-use log::LevelFilter;
-use simplelog::{ColorChoice, Config, TermLogger, TerminalMode};
-pub fn init_logger() {
-    let logging_level = LevelFilter::Debug;
+use flexi_logger::Logger;
 
-    TermLogger::init(
-        logging_level,
-        Config::default(),
-        TerminalMode::Mixed,
-        ColorChoice::Auto,
-    )
-    .expect("Could initialize logger");
+use crate::AppResult;
+
+pub fn init() -> AppResult {
+    Logger::try_with_env()?
+        .format_for_stderr(flexi_logger::colored_detailed_format)
+        .start()?;
+    Ok(())
 }

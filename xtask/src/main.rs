@@ -8,7 +8,7 @@ mod logging;
 pub type AppResult<T = ()> = Result<T, anyhow::Error>;
 fn main() -> AppResult {
     let cli = TaskCliEntry::parse();
-    logging::init_logger();
+    logging::init()?;
     let output = commands::handle_commands(cli)?;
     println!("{}", output);
     Ok(())

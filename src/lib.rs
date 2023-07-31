@@ -22,6 +22,7 @@ pub mod cli;
 pub mod template_augmentation;
 mod valid_placeholder_border;
 pub mod valid_template_name;
+#[cfg_attr(not(debug_assertions), allow(unused_imports))]
 use app_traits::path_resolver::DevPathResolver;
 pub use valid_template_name::ValidTemplateName;
 pub mod constants;

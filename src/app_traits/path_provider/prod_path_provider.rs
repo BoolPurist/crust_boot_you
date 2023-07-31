@@ -18,15 +18,8 @@ impl PathProvider for ProdPathProvider {
         Ok(path)
     }
 
-    fn logger_file_location(&self) -> PathResult {
-        let data = self.logger_folder_location()?;
-        let path = data.join(constants::PROD_LOG_FILE);
-        info!("Path log file: {:?}", path);
-        Ok(path)
-    }
-
     fn logger_folder_location(&self) -> PathResult {
-        let data = self.data()?;
+        let data = self.data()?.join(constants::LOG_FOLDER_NAME);
         info!("Path log folder: {:?}", data);
         Ok(data)
     }
