@@ -10,7 +10,7 @@ impl ValidPlaceholderBorder {
     pub fn new(to_validate: String) -> AppResult<Self> {
         let (trimmed_len, to_validate_len) = (to_validate.trim().len(), to_validate.len());
         ensure!(
-            trimmed_len == to_validate_len, 
+            trimmed_len == to_validate_len,
             "Border of a placeholder must not contain any non-visible characters to the left or right, aka whitespace"
         );
         ensure!(

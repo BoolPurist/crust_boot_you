@@ -14,8 +14,8 @@ pub struct LoadTemplateArg {
     left_delimiter: ValidPlaceholderBorder,
     #[arg(long, short, default_value_t = constants::DEFAULT_RIGHT_DELIMITER.parse().unwrap(), env = app_env_name!("RIGHT_DELIMITER"))]
     right_delimiter: ValidPlaceholderBorder,
-    #[arg(long, short, 
-        default_value_t = constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE.to_string().parse().unwrap(), 
+    #[arg(long, short,
+        default_value_t = constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE.to_string().parse().unwrap(),
         env = app_env_name!("SEP_VAL_DEFAULT")
     )]
     sep_val_default: ValidPlaceholderBorder,
