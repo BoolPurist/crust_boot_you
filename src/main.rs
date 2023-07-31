@@ -3,9 +3,7 @@ use colored::*;
 use crust_boot_you::app_traits::file_manipulator::DevOsFileManipulator;
 use crust_boot_you::app_traits::file_manipulator::DryFileManipulator;
 use crust_boot_you::app_traits::file_manipulator::OsFileManipulator;
-#[cfg_attr(not(debug_assertions), allow(unused_imports))]
-use crust_boot_you::app_traits::path_provider::DevPathProvider;
-use crust_boot_you::app_traits::path_provider::ProdPathProvider;
+#[cfg_attr(not(debug_assertions), allow(dead_code, unused_imports))]
 use crust_boot_you::constants;
 use crust_boot_you::handle_commands;
 use crust_boot_you::logging;
@@ -13,24 +11,21 @@ use crust_boot_you::prelude::AppResult;
 use crust_boot_you::prelude::PathProvider;
 use crust_boot_you::prelude::ReturnToUser;
 use crust_boot_you::AppCliEntry;
+use crust_boot_you::UsedPathProvider;
 use log::log_enabled;
 use std::process::ExitCode;
 
 fn main() -> ExitCode {
     let args = AppCliEntry::parse();
-    let path_provider: Box<dyn PathProvider> = if cfg!(debug_assertions) {
-        Box::<DevPathProvider>::default()
-    } else {
-        Box::<ProdPathProvider>::default()
-    };
+    let path_provider = UsedPathProvider::default();
 
-    logging::init(&args, path_provider.as_ref()).expect("Failed to initialize logger.");
+    logging::init(&args, &path_provider).expect("Failed to initialize logger.");
 
-    let output = process_command(&args, path_provider.as_ref());
+    let output = process_command(&args, &path_provider);
     print_result(output, &args)
 }
 
-fn process_command(args: &AppCliEntry, paths: &dyn PathProvider) -> ReturnToUser {
+fn process_command(args: &AppCliEntry, paths: &impl PathProvider) -> ReturnToUser {
     let is_debug = cfg!(debug_assertions);
     let is_dry = *args.dry();
 

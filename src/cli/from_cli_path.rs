@@ -1,4 +1,4 @@
-use crate::{prelude::*, UsedPathResolver};
+use crate::prelude::*;
 use std::{
     path::{Path, PathBuf},
     str::FromStr,
@@ -20,9 +20,8 @@ impl AbsoluteExistingPath {
 impl FromStr for AbsoluteExistingPath {
     type Err = AppError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let resolver = UsedPathResolver::default();
         let path = s.into();
-        Self::new(path, &resolver)
+        Self::new(path, &*constants::USED_PATH_PROVIDER)
     }
 }
 

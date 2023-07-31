@@ -30,16 +30,21 @@ pub mod file_management;
 pub mod handle_commands;
 pub mod logging;
 pub use app_traits::path_provider::DevPathProvider;
+pub use app_traits::path_provider::ProdPathProvider;
 pub use app_traits::path_provider::TestPathProvider;
+pub use app_traits::path_resolver::OsPathResolver;
 pub use cli::AppCliEntry;
 pub use cli::SubCommands;
 
 #[cfg(any(debug_assertions, test))]
-type UsedPathResolver = DevPathResolver;
+pub type UsedPathResolver = DevPathResolver;
 #[cfg(not(any(debug_assertions, test)))]
-type UsedPathResolver = OsPathResolver;
+pub type UsedPathResolver = OsPathResolver;
+
+#[cfg(any(debug_assertions, test))]
+pub type UsedPathProvider = DevPathProvider;
 #[cfg(not(any(debug_assertions, test)))]
-use app_traits::path_resolver::OsPathResolver;
+pub type UsedPathProvider = ProdPathProvider;
 
 pub fn create_path_resolver() -> UsedPathResolver {
     UsedPathResolver::default()

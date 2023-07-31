@@ -14,7 +14,7 @@ fn save_err_already_created_template(name: &ValidTemplateName) -> String {
 mod load_pipeline;
 
 pub fn handle(
-    path_provider: &dyn PathProvider,
+    path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
     args: &AppCliEntry,
 ) -> ReturnToUser {
@@ -34,7 +34,7 @@ pub fn handle(
 }
 
 pub fn handle_delete_template(
-    path_provider: &dyn PathProvider,
+    path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
     name: &ValidTemplateName,
 ) -> ReturnToUser {
@@ -67,7 +67,7 @@ fn error_delet_msg_other_err(name: &ValidTemplateName, error: AppIoError) -> Str
 }
 
 pub fn handle_list_template(
-    path_provider: &dyn PathProvider,
+    path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
 ) -> ReturnToUser {
     let entry_point = path_provider.general_template_entry()?;
@@ -94,7 +94,7 @@ pub fn handle_list_template(
 }
 
 pub fn handle_load_template(
-    path_provider: &dyn PathProvider,
+    path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
     augmentor: &mut impl TemplateAugmentor,
     load_args: &LoadTemplateArg,
@@ -137,7 +137,7 @@ pub fn handle_load_template(
 }
 
 pub fn handle_save_template(
-    path_provider: &dyn PathProvider,
+    path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
     from_cli: &SaveTemplateCli,
 ) -> ReturnToUser {
@@ -168,7 +168,7 @@ fn success_save_msg(name: &ValidTemplateName, file_kind: &str, source_path: &Pat
 /// - If the copy process was not successful.
 ///
 fn save_template(
-    path_provider: &dyn PathProvider,
+    path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
     on_detect_file_kind: impl Fn(&Path) -> AppIoResult<FileKind>,
     name: &ValidTemplateName,

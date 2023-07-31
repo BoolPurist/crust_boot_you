@@ -2,7 +2,7 @@ use flexi_logger::{Cleanup, Criterion, Duplicate, FileSpec, Logger, LoggerHandle
 
 use crate::{prelude::*, AppCliEntry};
 
-pub fn init(cli: &AppCliEntry, path_proiver: &dyn PathProvider) -> AppResult<LoggerHandle> {
+pub fn init(cli: &AppCliEntry, path_proiver: &impl PathProvider) -> AppResult<LoggerHandle> {
     let is_debug = cfg!(debug_assertions);
     // let (file_log_level, term_log_level) = get_logger_level(cli, is_debug);
 

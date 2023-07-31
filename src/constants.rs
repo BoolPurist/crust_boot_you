@@ -1,6 +1,8 @@
 use colored::Colorize;
 use once_cell::sync::Lazy;
 use std::path::Path;
+
+use crate::UsedPathResolver;
 pub const fn project_root() -> &'static str {
     env!("CARGO_MANIFEST_DIR")
 }
@@ -31,6 +33,8 @@ pub const MAX_SIZE_MEGA_BYTES: u64 = 10 * 1024 * 1024;
 pub const NUMBER_OF_FILES: usize = 10;
 pub const PREFIX_FILE_DEV_LOG: &str = "dev";
 pub const SUFFIX_FILE_LOG: &str = "log";
+
+pub static USED_PATH_PROVIDER: Lazy<UsedPathResolver> = Lazy::new(|| UsedPathResolver::default());
 
 pub mod dev {
     pub const TMP_ROOT: &str = "crust_boot_you_tmp";
