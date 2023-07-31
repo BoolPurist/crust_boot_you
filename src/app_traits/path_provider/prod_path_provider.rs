@@ -18,8 +18,23 @@ impl PathProvider for ProdPathProvider {
         Ok(path)
     }
 
+    fn state_dir(&self) -> PathResult {
+        let dir = dirs::state_dir()
+            .ok_or(anyhow!("Could not get access to state folder on linux."))?
+            .join(constants::APP_NAME);
+        Ok(dir)
+    }
+
     fn logger_folder_location(&self) -> PathResult {
-        let data = self.data()?.join(constants::LOG_FOLDER_NAME);
+        let target = if cfg!(target_os = "linux") {
+            match self.state_dir() {
+                Ok(path) => Ok(path),
+                Err(_) => self.data(),
+            }
+        } else {
+            self.data()
+        }?;
+        let data = target.join(constants::LOG_FOLDER_NAME);
         info!("Path log folder: {:?}", data);
         Ok(data)
     }

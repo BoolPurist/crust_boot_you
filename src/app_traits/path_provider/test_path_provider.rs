@@ -41,4 +41,8 @@ impl PathProvider for TestPathProvider {
     fn logger_folder_location(&self) -> PathResult {
         todo!()
     }
+
+    fn state_dir(&self) -> PathResult {
+        todo!()
+    }
 }

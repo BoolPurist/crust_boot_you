@@ -42,4 +42,10 @@ impl PathProvider for DevPathProvider {
         info!("Log folder path: {:?}", &folder_log);
         Ok(folder_log)
     }
+
+    fn state_dir(&self) -> PathResult {
+        let state = self.root.join("state");
+        debug!("State folder {:?}", state);
+        Ok(state)
+    }
 }
