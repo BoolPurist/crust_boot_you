@@ -32,6 +32,9 @@ impl DecodedFile {
             ..self
         }
     }
+    pub fn is_not_decodalbe(&self) -> bool {
+        matches!(self.content, DecodedContent::NotDecodedable(_))
+    }
 }
 
 impl DecodedContent {

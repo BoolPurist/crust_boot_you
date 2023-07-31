@@ -2,4 +2,6 @@
 source: tests/copy_template_into.rs
 expression: output
 ---
-Folder "/[TMP_ROOT]/cwd" filled with content from Template (no_valid_utf8)
+Folder "/[TMP_ROOT]/cwd" filled with content from Template (no_valid_utf8).
+
+Warning: Some files had invalid utf8 content and were just copied and not augmented. One example was at "/[TMP_ROOT]/data/templates/no_valid_utf8/files/aa.rlib"

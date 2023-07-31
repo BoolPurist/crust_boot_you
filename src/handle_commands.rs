@@ -122,17 +122,19 @@ pub fn handle_load_template(
         .cwd()
         .context("Can not access current working directory. No target to copy to")?;
 
-    load_pipeline::init_project_with_template(
+    let maybe_warning = load_pipeline::init_project_with_template(
         file_manipulator,
         augmentor,
         load_args,
         &cwd,
         &path_to_template,
-    )?;
+    )?.map(|path| format!("\n\nWarning: Some files had invalid utf8 content and were just copied and not augmented. One example was at {:?}", path));
 
     Ok(format!(
-        "Folder {:?} filled with content from Template ({})",
-        cwd, name
+        "Folder {:?} filled with content from Template ({}).{}",
+        cwd,
+        name,
+        maybe_warning.unwrap_or_default()
     ))
 }
 

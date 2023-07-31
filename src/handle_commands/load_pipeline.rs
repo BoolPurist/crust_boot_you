@@ -21,13 +21,15 @@ type NodeId<'a> = (&'a Path, FileKind);
 type Text = Box<str>;
 type ByteContent = Box<[u8]>;
 
+type WithWarning = AppResult<Option<PathBuf>>;
+
 pub fn init_project_with_template(
     file_manipulator: &impl FileManipulator,
     augmentor: &mut impl TemplateAugmentor,
     args: &LoadTemplateArg,
     write_target: &Path,
     template_source: &Path,
-) -> AppResult<()> {
+) -> WithWarning {
     let init_kind = *args.with();
     let action =
         init_validation::determine_init_action(init_kind, write_target, template_source, |path| {
@@ -50,8 +52,7 @@ pub fn init_project_with_template(
             let decoded = decoding::decode_files(file_manipulator, files)?;
             let augmented = augment_loaded_files(augmentor, decoded, args)?;
             ensure_folders(file_manipulator, &dirs)?;
-            write_loaded_files(file_manipulator, &augmented)?;
-            Ok(())
+            write_loaded_files(file_manipulator, &augmented)
         }
         InitAction::Purge(data) => {
             let (files, dirs) = WriteTransactions::new(data).into();
@@ -67,8 +68,7 @@ pub fn init_project_with_template(
             })?;
 
             ensure_folders(file_manipulator, &dirs)?;
-            write_loaded_files(file_manipulator, &augmented)?;
-            Ok(())
+            write_loaded_files(file_manipulator, &augmented)
         }
     }
 }
@@ -132,15 +132,22 @@ fn augment_loaded_files(
 fn write_loaded_files(
     file_manipulator: &impl FileManipulator,
     to_write: &[DecodedFile],
-) -> AppResult {
+) -> WithWarning {
     info!("Write augmented files to the target location");
+    let mut found_no_invalid_utf8: Option<PathBuf> = None;
     for next in to_write {
         let target = next.target();
+
+        if found_no_invalid_utf8.is_none() && next.is_not_decodalbe() {
+            found_no_invalid_utf8 = Some(next.source().to_path_buf());
+        }
+
         file_manipulator
             .write_bytes(target, next.content().to_byte_ref())
             .with_context(|| format!("Failed to write file to location: {:?}", target))?;
     }
-    Ok(())
+
+    Ok(found_no_invalid_utf8)
 }
 
 fn many_node_metas_to_ids(many: &[NodeEntryMeta]) -> Vec<NodeId> {
