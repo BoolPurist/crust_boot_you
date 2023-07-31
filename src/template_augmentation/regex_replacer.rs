@@ -7,6 +7,7 @@ use regex::Regex;
 use super::console_fetcher::TestConsoleFetcher;
 use super::TestAugmentStore;
 
+use super::template_extractation::ExtractForConsole;
 use super::{
     augmentation_error::AugmentationError,
     console_fetcher::{ConsoleFetcher, IoConsoleFetcher},
@@ -96,7 +97,7 @@ where
                     let value = &found["value"];
                     let mut splited = value.split(constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE);
                     let (key, default_value) = (splited.next().unwrap(), splited.next());
-                    TemplateExtractation::FromConsole { key, default_value }
+                    TemplateExtractation::FromConsole(ExtractForConsole::new(key, default_value))
                 };
                 let replacement = self
                     .cache

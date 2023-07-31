@@ -19,6 +19,7 @@ CWD: current working directory
 
 ### Added 
 
+- In the console prompt: Default value is also shown if no value to a key is given.
 - Added 2 ClI/environment option: ( left_delimiter, right_delimiter )
   Allows to change what determines the left and right border of a placeholder in file while initializing.
   Example: With left: %% and right: %%. Placeholder like %%aa%% are matched for replacement instead of {{aak}}.

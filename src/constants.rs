@@ -34,7 +34,7 @@ pub const NUMBER_OF_FILES: usize = 10;
 pub const PREFIX_FILE_DEV_LOG: &str = "dev";
 pub const SUFFIX_FILE_LOG: &str = "log";
 
-pub static USED_PATH_PROVIDER: Lazy<UsedPathResolver> = Lazy::new(|| UsedPathResolver::default());
+pub static USED_PATH_PROVIDER: Lazy<UsedPathResolver> = Lazy::new(UsedPathResolver::default);
 
 pub mod dev {
     pub const TMP_ROOT: &str = "crust_boot_you_tmp";

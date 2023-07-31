@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, template_augmentation::template_extractation::ExtractForConsole};
 use std::io;
 
 use super::ConsoleFetcher;
@@ -10,9 +10,15 @@ pub struct IoConsoleFetcher;
 impl ConsoleFetcher for IoConsoleFetcher {
     fn fetch_from(
         &self,
-        key: crate::template_augmentation::KeyExtact<'_>,
+        extract: &ExtractForConsole<'_>,
     ) -> crate::template_augmentation::OptAugmentationResult {
-        print!("{}: ", key);
+        let ExtractForConsole { key, default_value } = extract;
+        if let Some(hint_to) = default_value {
+            print!("{} (Defaults to \"{}\"): ", key, hint_to);
+        } else {
+            print!("{}: ", key);
+        };
+
         io::stdout()
             .flush()
             .context("Could not flush stdin after printing key as label")?;

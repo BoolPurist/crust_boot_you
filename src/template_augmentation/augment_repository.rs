@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use super::{
-    console_fetcher::ConsoleFetcher, template_extractation::TemplateExtractation,
+    console_fetcher::ConsoleFetcher,
+    template_extractation::{ExtractForConsole, TemplateExtractation},
     AugmentationResult,
 };
 
@@ -27,11 +28,12 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
         extract: &'a TemplateExtractation<'a>,
     ) -> AugmentationResult<'a> {
         match extract {
-            TemplateExtractation::FromConsole { key, default_value } => {
+            TemplateExtractation::FromConsole(extract) => {
+                let ExtractForConsole { key, default_value } = extract;
                 if !self.console_map.contains_key(*key) {
                     let may_new_value: ResolvedValue = self
                         .console_fetcher
-                        .fetch_from(key)?
+                        .fetch_from(extract)?
                         .map(|key| key.as_str().into());
 
                     debug_assert!(
@@ -57,7 +59,10 @@ impl<CF: ConsoleFetcher> AugementRepository<CF> {
                 );
                 match (fetched_key, default_value) {
                     (Some(Some(resolved)), _) => Ok(resolved),
-                    (Some(None), Some(default)) => Ok(default),
+                    (Some(None), Some(default)) => {
+                        info!("Using default value {} for key {}", default, key);
+                        Ok(default)
+                    }
                     _ => Err(anyhow!(
                         "Key ({}): Could not be retrieved from console and has no default value ",
                         key.to_string()
@@ -85,10 +90,7 @@ mod testing {
 
         let mut respo = AugementRepository::new(test_fetcher);
 
-        let extraction = TemplateExtractation::FromConsole {
-            key: &key,
-            default_value: None,
-        };
+        let extraction = TemplateExtractation::FromConsole(ExtractForConsole::new(&key, None));
         let actual = respo.augment(&extraction).unwrap();
 
         assert_eq!(
@@ -99,10 +101,8 @@ mod testing {
             expected_value.clone(),
         );
 
-        let extraction = TemplateExtractation::FromConsole {
-            key: &key,
-            default_value: Some("Default"),
-        };
+        let extraction =
+            TemplateExtractation::FromConsole(ExtractForConsole::new(&key, Some("Default")));
         let actual_cached = respo.augment(&extraction).unwrap();
         assert_eq!(
             expected_value.as_str(),
@@ -124,12 +124,9 @@ mod testing {
 
         let mut respo = AugementRepository::new(test_fetcher);
         let expected_default = "Default";
-        let actual_default = respo
-            .augment(&TemplateExtractation::FromConsole {
-                key: "xxx",
-                default_value: Some("Default"),
-            })
-            .unwrap();
+        let extract =
+            TemplateExtractation::FromConsole(ExtractForConsole::new("xxx", Some("Default")));
+        let actual_default = respo.augment(&extract).unwrap();
         assert_eq!(
             expected_default, actual_default,
             "Did not use default value: {}",
