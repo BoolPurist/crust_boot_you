@@ -14,6 +14,11 @@ pub struct LoadTemplateArg {
     left_delimiter: ValidPlaceholderBorder,
     #[arg(long, short, default_value_t = constants::DEFAULT_RIGHT_DELIMITER.parse().unwrap(), env = app_env_name!("RIGHT_DELIMITER"))]
     right_delimiter: ValidPlaceholderBorder,
+    #[arg(long, short, 
+        default_value_t = constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE.to_string().parse().unwrap(), 
+        env = app_env_name!("SEP_VAL_DEFAULT")
+    )]
+    sep_val_default: ValidPlaceholderBorder,
 }
 
 impl LoadTemplateArg {
@@ -22,6 +27,10 @@ impl LoadTemplateArg {
             name,
             with,
             ignore_placeholders: false,
+            sep_val_default: ValidPlaceholderBorder::new(
+                constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE.to_string(),
+            )
+            .unwrap(),
             left_delimiter: ValidPlaceholderBorder::new(
                 constants::DEFAULT_LEFT_DELIMITER.to_owned(),
             )
@@ -43,6 +52,10 @@ impl LoadTemplateArg {
     }
     pub fn new_right_delimiter(mut self, right: ValidPlaceholderBorder) -> Self {
         self.right_delimiter = right;
+        self
+    }
+    pub fn new_default_sep(mut self, sep_default: ValidPlaceholderBorder) -> Self {
+        self.sep_val_default = sep_default;
         self
     }
 }

@@ -14,7 +14,7 @@ impl ValidPlaceholderBorder {
             "Border of a placeholder must not contain any non-visible characters to the left or right, aka whitespace"
         );
         ensure!(
-            !to_validate.is_empty(), 
+            !to_validate.is_empty(),
             "A placeholder value must not be empty !"
         );
         Ok(Self(to_validate))
@@ -22,7 +22,7 @@ impl ValidPlaceholderBorder {
 }
 impl FromStr for ValidPlaceholderBorder {
     type Err = AppError;
-    
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         ValidPlaceholderBorder::new(s.to_string())
     }
@@ -33,20 +33,18 @@ mod testing {
 
     #[test]
     fn accept_valid_placeholder_borders() {
-         
         assert_case("aa");
         assert_case("a aaa a");
         assert_case("z zzz z zz z z");
         assert_case("a \t \n a");
         fn assert_case(input: &str) {
             let actual: ValidPlaceholderBorder = input.parse().unwrap();
-            
+
             assert_eq!(input, actual.as_str());
         }
     }
     #[test]
     fn deny_invalid_placeholder_borders() {
-         
         assert_case("");
         assert_case(" ");
         assert_case("\n");

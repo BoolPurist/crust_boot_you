@@ -7,6 +7,7 @@ use crust_boot_you::{
     template_augmentation::{
         console_fetcher::TestConsoleFetcher, AugementRepository, RegexTemplateAugmentor,
     },
+    ValidPlaceholderBorder,
 };
 use map_macro::hash_map;
 
@@ -264,6 +265,37 @@ fn with_invalid_utf8() {
     let init_kind = InitKind::OnlyEmpty;
 
     let arg = LoadTemplateArg::new(to_copy_from, init_kind);
+    let values = hash_map! {"xxx xxx".to_string() => "C CC".to_string()};
+
+    let console_fetcher = TestConsoleFetcher::new(values);
+    let repo = AugementRepository::new(console_fetcher);
+
+    let mut store: RegexTemplateAugmentor<TestConsoleFetcher> =
+        RegexTemplateAugmentor::from_cli(repo, &arg);
+
+    let output = handle_commands::handle_load_template(
+        setup.path_provider(),
+        setup.os_mani(),
+        &mut store,
+        &arg,
+    )
+    .unwrap();
+
+    setup.assert_with_expected();
+    insta_display_filter_random_tmp!(output);
+}
+#[test]
+#[named]
+fn with_custom_default_sep() {
+    let setup = TestSetupBuilder::new(actual_expected!())
+        .suffix_cwd(PathBuf::from("cwd"))
+        .build();
+
+    let to_copy_from = ValidTemplateName::new("with_custom_default".to_string()).unwrap();
+    let init_kind = InitKind::OnlyEmpty;
+
+    let custom_v_sep_default = ValidPlaceholderBorder::new("!!".to_string()).unwrap();
+    let arg = LoadTemplateArg::new(to_copy_from, init_kind).new_default_sep(custom_v_sep_default);
     let values = hash_map! {"xxx xxx".to_string() => "C CC".to_string()};
 
     let console_fetcher = TestConsoleFetcher::new(values);

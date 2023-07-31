@@ -1,5 +1,5 @@
 use crate::cli::LoadTemplateArg;
-use crate::prelude::*;
+use crate::{prelude::*, ValidPlaceholderBorder};
 use std::borrow::Cow;
 
 use regex::Regex;
@@ -31,6 +31,7 @@ fn build_placehold_matcher(left: &str, right: &str) -> Regex {
 
 pub struct RegexTemplateAugmentor<CF> {
     cache: AugementRepository<CF>,
+    v_default_sep: ValidPlaceholderBorder,
     placeholder_matcher: Regex,
 }
 
@@ -49,6 +50,10 @@ where
     pub fn new(cache: AugementRepository<CF>) -> Self {
         Self {
             cache,
+            v_default_sep: ValidPlaceholderBorder::new(
+                constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE.to_string(),
+            )
+            .unwrap(),
             placeholder_matcher: build_placehold_matcher(
                 constants::DEFAULT_LEFT_DELIMITER,
                 constants::DEFAULT_RIGHT_DELIMITER,
@@ -60,12 +65,17 @@ where
         let (left, right) = (args.left_delimiter(), args.right_delimiter());
         Self {
             cache,
+            v_default_sep: args.sep_val_default().clone(),
             placeholder_matcher: build_placehold_matcher(left, right),
         }
     }
     pub fn direct_new(cache: AugementRepository<CF>, left: &str, right: &str) -> Self {
         Self {
             cache,
+            v_default_sep: ValidPlaceholderBorder::new(
+                constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE.to_string(),
+            )
+            .unwrap(),
             placeholder_matcher: build_placehold_matcher(left, right),
         }
     }
@@ -95,7 +105,7 @@ where
 
                 let extraction = {
                     let value = &found["value"];
-                    let mut splited = value.split(constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE);
+                    let mut splited = value.split(self.v_default_sep.as_str());
                     let (key, default_value) = (splited.next().unwrap(), splited.next());
                     TemplateExtractation::FromConsole(ExtractForConsole::new(key, default_value))
                 };
