@@ -26,7 +26,11 @@ CWD: current working directory
 - Added CLI/environment option: ignore_placeholders in subcommand save-template.
   If true no placeholders are replaced by the template system.
 - File logging is now rotated in production
+- Added option "log_settings" to allow setting logging level and which module to log.
 
+### Removed
+
+- Removed option to "mod-filtering". It is obsolete.
 
 ## 0.2.1 - 2023.07.27
 
