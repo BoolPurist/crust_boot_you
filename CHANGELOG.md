@@ -11,6 +11,8 @@ CWD: current working directory
 
 ## [unreleased]
 
+## 0.3.0 - 2023.07.31
+
 ### Fixed 
 
 - Invalid utf8 files like binary in a template do not prevent initialization of project anymore. 
