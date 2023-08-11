@@ -1,11 +1,9 @@
 use derive_getters::Getters;
 pub use subcommands::SubCommands;
 
-mod cli_loglevel;
 mod init_kind;
 mod subcommands;
 
-pub use cli_loglevel::CliLogLevel;
 pub use from_cli_path::AbsoluteExistingPath;
 pub use init_kind::InitKind;
 pub use subcommands::LoadTemplateArg;
