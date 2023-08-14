@@ -1,11 +1,14 @@
 use clap::Args;
 
+use crate::cli::from_cli_path::AbsoluteExistingDirPath;
 use crate::cli::init_kind::InitKind;
 use crate::{app_env_name, prelude::*, ValidPlaceholderBorder};
 
 #[derive(Debug, Args, Getters)]
 pub struct LoadTemplateArg {
     name: ValidTemplateName,
+    #[arg(long, short)]
+    target: Option<AbsoluteExistingDirPath>,
     #[arg(long, short, value_enum, env = app_env_name!("INIT_KIND"), default_value_t = InitKind::OnlyEmpty)]
     with: InitKind,
     #[arg(long, short, env = app_env_name!("IGNORE_PLACEHOLDERS"))]
@@ -27,6 +30,7 @@ impl LoadTemplateArg {
             name,
             with,
             ignore_placeholders: false,
+            target: None,
             sep_val_default: ValidPlaceholderBorder::new(
                 constants::SEPERATOR_BETWEEN_DEFAULT_AND_VALUE.to_string(),
             )

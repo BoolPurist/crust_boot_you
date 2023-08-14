@@ -5,7 +5,7 @@ use crate::{
     template_augmentation::{RegexTemplateAugmentor, TemplateAugmentor},
     AppCliEntry, SubCommands, ValidTemplateName,
 };
-use std::path::Path;
+use std::{borrow::Cow, path::Path};
 
 fn save_err_already_created_template(name: &ValidTemplateName) -> String {
     format!("Template with the name ({}) is already created", name)
@@ -104,6 +104,7 @@ pub fn handle_load_template(
 
     let path_to_template = path_provider.specific_entry_template_files(name)?;
 
+    const TEMPLATE_PATH_EXITS: bool = true;
     match file_manipulator.try_exits(path_to_template.as_path()) {
         Ok(false) => bail!(
             "No template named ({}) could be found, under the path {:?}",
@@ -115,12 +116,16 @@ pub fn handle_load_template(
             name,
             error
         ),
-        _ => (),
+        Ok(TEMPLATE_PATH_EXITS) => (),
     }
 
-    let cwd = file_manipulator
-        .cwd()
-        .context("Can not access current working directory. No target to copy to")?;
+    let cwd: Cow<Path> = match load_args.target() {
+        Some(success) => Ok(Cow::Borrowed(success.as_path())),
+        None => file_manipulator
+            .cwd()
+            .map(|to_borrow| Cow::Owned(to_borrow))
+            .context("Can not access current working directory. No target to copy to"),
+    }?;
 
     let maybe_warning = load_pipeline::init_project_with_template(
         file_manipulator,
@@ -128,7 +133,10 @@ pub fn handle_load_template(
         load_args,
         &cwd,
         &path_to_template,
-    )?.map(|path| format!("\n\nWarning: Some files had invalid utf8 content and were just copied and not augmented. One example was at {:?}", path));
+    )?
+    .map(|path| 
+        format!("\n\nWarning: Some files had invalid utf8 content and were just copied and not augmented. One example was at {:?}", path)
+    );
 
     Ok(format!(
         "Folder {:?} filled with content from Template ({}).{}",
