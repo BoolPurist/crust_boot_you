@@ -11,6 +11,10 @@ CWD: current working directory
 
 ## [unreleased]
 
+### Added 
+
+- Can determine where a project is initialized with option "-t/--target" within subcommand "l/load-template".
+
 ## 0.3.0 - 2023.07.31
 
 ### Fixed 
