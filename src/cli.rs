@@ -2,10 +2,14 @@ use derive_getters::Getters;
 pub use subcommands::SubCommands;
 
 mod init_kind;
+mod load_cli_details;
+mod non_file_path;
 mod subcommands;
 
 pub use from_cli_path::AbsoluteExistingPath;
 pub use init_kind::InitKind;
+pub use load_cli_details::LoadCliDetails;
+pub use non_file_path::NonFilePath;
 pub use subcommands::LoadTemplateArg;
 pub use subcommands::SaveTemplateCli;
 

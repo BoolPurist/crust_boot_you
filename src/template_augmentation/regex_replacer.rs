@@ -62,10 +62,11 @@ where
     }
 
     pub fn from_cli(cache: AugementRepository<CF>, args: &LoadTemplateArg) -> Self {
-        let (left, right) = (args.left_delimiter(), args.right_delimiter());
+        let details = args.details();
+        let (left, right) = (details.left_delimiter(), details.right_delimiter());
         Self {
             cache,
-            v_default_sep: args.sep_val_default().clone(),
+            v_default_sep: details.sep_val_default().clone(),
             placeholder_matcher: build_placehold_matcher(left, right),
         }
     }

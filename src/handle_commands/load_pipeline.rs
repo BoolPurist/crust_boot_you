@@ -30,7 +30,7 @@ pub fn init_project_with_template(
     write_target: &Path,
     template_source: &Path,
 ) -> WithWarning {
-    let init_kind = *args.with();
+    let init_kind = *args.details().with();
     let action =
         init_validation::determine_init_action(init_kind, write_target, template_source, |path| {
             file_manipulator.all_nodes_inside(path)
@@ -94,7 +94,7 @@ fn augment_loaded_files(
     to_augment: Vec<DecodedFile>,
     args: &LoadTemplateArg,
 ) -> AppResult<Vec<DecodedFile>> {
-    if *args.ignore_placeholders() {
+    if *args.details().ignore_placeholders() {
         info!("Skipping replacing placeholders due the option ignore placeholders is activated",);
         return Ok(to_augment);
     }

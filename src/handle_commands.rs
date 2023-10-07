@@ -100,7 +100,7 @@ pub fn handle_load_template(
     load_args: &LoadTemplateArg,
 ) -> ReturnToUser {
     debug!("Handling subcommand: {:?}", "LoadTemplate");
-    let name = load_args.name();
+    let name = load_args.details().name();
 
     let path_to_template = path_provider.specific_entry_template_files(name)?;
 
