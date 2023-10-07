@@ -5,8 +5,21 @@ use std::{
     str::FromStr,
 };
 
+use super::NonFilePath;
+
 #[derive(Debug, Clone)]
 pub struct AbsoluteExistingDirPath(PathBuf);
+
+impl TryFrom<NonFilePath> for AbsoluteExistingDirPath {
+    type Error = AppError;
+
+    fn try_from(value: NonFilePath) -> Result<Self, Self::Error> {
+        let path = value.0;
+        let resolver = &*constants::USED_PATH_PROVIDER;
+        let existing = AbsoluteExistingPath::new(path, resolver)?;
+        Self::new(existing)
+    }
+}
 
 impl FromStr for AbsoluteExistingDirPath {
     type Err = AppError;

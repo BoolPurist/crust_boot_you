@@ -1,4 +1,4 @@
-use crate::cli::LoadTemplateArg;
+use crate::cli::LoadCliDetails;
 use crate::{prelude::*, ValidPlaceholderBorder};
 use std::borrow::Cow;
 
@@ -36,7 +36,7 @@ pub struct RegexTemplateAugmentor<CF> {
 }
 
 impl RegexTemplateAugmentor<IoConsoleFetcher> {
-    pub fn prod_new(agrs: &LoadTemplateArg) -> Self {
+    pub fn prod_new(agrs: &LoadCliDetails) -> Self {
         let console_fetcher = IoConsoleFetcher;
         let cache = AugementRepository::new(console_fetcher);
         Self::from_cli(cache, agrs)
@@ -61,8 +61,7 @@ where
         }
     }
 
-    pub fn from_cli(cache: AugementRepository<CF>, args: &LoadTemplateArg) -> Self {
-        let details = args.details();
+    pub fn from_cli(cache: AugementRepository<CF>, details: &LoadCliDetails) -> Self {
         let (left, right) = (details.left_delimiter(), details.right_delimiter());
         Self {
             cache,

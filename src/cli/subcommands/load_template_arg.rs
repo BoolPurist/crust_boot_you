@@ -5,6 +5,8 @@ use crate::cli::init_kind::InitKind;
 use crate::cli::LoadCliDetails;
 use crate::{prelude::*, ValidPlaceholderBorder};
 
+use super::CreateTemplateArg;
+
 #[derive(Debug, Args, Getters)]
 pub struct LoadTemplateArg {
     #[arg(long, short)]
@@ -41,5 +43,16 @@ impl LoadTemplateArg {
         let new_details = self.details.new_default_sep(sep_default);
         self.details = new_details;
         self
+    }
+}
+
+impl From<CreateTemplateArg> for LoadTemplateArg {
+    fn from(value: CreateTemplateArg) -> Self {
+        let details = value.details;
+        let target: AbsoluteExistingDirPath = value.target.try_into().unwrap();
+        Self {
+            details,
+            target: Some(target),
+        }
     }
 }

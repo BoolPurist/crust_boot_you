@@ -6,7 +6,7 @@ use std::{
 use crate::prelude::{AppError, AppResult};
 
 #[derive(Debug, Clone)]
-pub struct NonFilePath(PathBuf);
+pub struct NonFilePath(pub(super) PathBuf);
 
 impl FromStr for NonFilePath {
     type Err = AppError;
@@ -20,10 +20,9 @@ impl FromStr for NonFilePath {
 impl NonFilePath {
     pub fn new(path: PathBuf) -> AppResult<Self> {
         let exits = path.try_exists()?;
-        ensure!(
-            exits && !path.is_file(),
-            anyhow!("Path must not point to {:?} a file", &path)
-        );
+        if exits && !path.is_file() {
+            bail!("Path must not point to {:?} a file", &path);
+        }
         Ok(Self(path))
     }
     pub fn as_path(&self) -> &Path {

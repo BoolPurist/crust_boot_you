@@ -1,5 +1,5 @@
 use crate::{
-    cli::{LoadTemplateArg, SaveTemplateCli},
+    cli::{LoadTemplateArg, SaveTemplateCli, CreateTemplateArg},
     file_management::{self, FileKind},
     prelude::*,
     template_augmentation::{RegexTemplateAugmentor, TemplateAugmentor},
@@ -20,7 +20,7 @@ pub fn handle(
 ) -> ReturnToUser {
     match args.sub_commands() {
         SubCommands::LoadTemplate(args) => {
-            let mut augmentor = RegexTemplateAugmentor::prod_new(args);
+            let mut augmentor = RegexTemplateAugmentor::prod_new(args.details());
             handle_load_template(path_provider, file_manipulator, &mut augmentor, args)
         }
         SubCommands::SaveTemplate(args) => {
@@ -29,6 +29,11 @@ pub fn handle(
         SubCommands::ListTemplate => handle_list_template(path_provider, file_manipulator),
         SubCommands::DeleteTemplate { name } => {
             handle_delete_template(path_provider, file_manipulator, name)
+        }
+        SubCommands::Create(args) => {
+            
+            let mut augmentor = RegexTemplateAugmentor::prod_new(args.details());
+            handle_create(path_provider, file_manipulator, &mut augmentor, args)
         }
     }
 }
@@ -66,6 +71,17 @@ fn error_delet_msg_other_err(name: &ValidTemplateName, error: AppIoError) -> Str
     )
 }
 
+
+pub fn handle_create(
+    path_provider: &impl PathProvider,
+    file_manipulator: &impl FileManipulator,
+    augmentor: &mut impl TemplateAugmentor,
+    load_args: &CreateTemplateArg,
+) -> ReturnToUser { 
+   file_manipulator.ensure_dir(load_args.target().as_path())?;
+   let load_arguments: LoadTemplateArg = load_args.clone().into();
+   handle_load_template(path_provider, file_manipulator, augmentor, &load_arguments)
+}
 pub fn handle_list_template(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,

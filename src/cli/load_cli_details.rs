@@ -5,7 +5,7 @@ use crate::{app_env_name, constants, ValidPlaceholderBorder, ValidTemplateName};
 
 use super::InitKind;
 
-#[derive(Debug, Args, Getters)]
+#[derive(Debug, Args, Getters, Clone)]
 pub struct LoadCliDetails {
     name: ValidTemplateName,
     #[arg(long, short, value_enum, env = app_env_name!("INIT_KIND"), default_value_t = InitKind::OnlyEmpty)]

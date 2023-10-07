@@ -10,6 +10,7 @@ pub use from_cli_path::AbsoluteExistingPath;
 pub use init_kind::InitKind;
 pub use load_cli_details::LoadCliDetails;
 pub use non_file_path::NonFilePath;
+pub use subcommands::CreateTemplateArg;
 pub use subcommands::LoadTemplateArg;
 pub use subcommands::SaveTemplateCli;
 

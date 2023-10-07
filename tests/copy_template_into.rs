@@ -240,7 +240,7 @@ fn with_different_placeholder() {
     let repo = AugementRepository::new(console_fetcher);
 
     let mut store: RegexTemplateAugmentor<TestConsoleFetcher> =
-        RegexTemplateAugmentor::from_cli(repo, &arg);
+        RegexTemplateAugmentor::from_cli(repo, arg.details());
 
     let output = handle_commands::handle_load_template(
         setup.path_provider(),
@@ -271,7 +271,7 @@ fn with_invalid_utf8() {
     let repo = AugementRepository::new(console_fetcher);
 
     let mut store: RegexTemplateAugmentor<TestConsoleFetcher> =
-        RegexTemplateAugmentor::from_cli(repo, &arg);
+        RegexTemplateAugmentor::from_cli(repo, arg.details());
 
     let output = handle_commands::handle_load_template(
         setup.path_provider(),
@@ -302,7 +302,7 @@ fn with_custom_default_sep() {
     let repo = AugementRepository::new(console_fetcher);
 
     let mut store: RegexTemplateAugmentor<TestConsoleFetcher> =
-        RegexTemplateAugmentor::from_cli(repo, &arg);
+        RegexTemplateAugmentor::from_cli(repo, arg.details());
 
     let output = handle_commands::handle_load_template(
         setup.path_provider(),
