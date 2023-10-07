@@ -1,5 +1,5 @@
 use crate::{
-    cli::{LoadTemplateArg, SaveTemplateCli, CreateTemplateArg},
+    cli::{CreateTemplateArg, LoadTemplateArg, SaveTemplateCli},
     file_management::{self, FileKind},
     prelude::*,
     template_augmentation::{RegexTemplateAugmentor, TemplateAugmentor},
@@ -31,7 +31,6 @@ pub fn handle(
             handle_delete_template(path_provider, file_manipulator, name)
         }
         SubCommands::Create(args) => {
-            
             let mut augmentor = RegexTemplateAugmentor::prod_new(args.details());
             handle_create(path_provider, file_manipulator, &mut augmentor, args)
         }
@@ -71,33 +70,36 @@ fn error_delet_msg_other_err(name: &ValidTemplateName, error: AppIoError) -> Str
     )
 }
 
-
 pub fn handle_create(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
     augmentor: &mut impl TemplateAugmentor,
     load_args: &CreateTemplateArg,
-) -> ReturnToUser { 
-   file_manipulator.ensure_dir(load_args.target().as_path())?;
-   let load_arguments: LoadTemplateArg = load_args.clone().into();
-   handle_load_template(path_provider, file_manipulator, augmentor, &load_arguments)
+) -> ReturnToUser {
+    file_manipulator.ensure_dir(load_args.target().as_path())?;
+    let load_arguments: LoadTemplateArg = load_args.clone().into();
+    handle_load_template(path_provider, file_manipulator, augmentor, &load_arguments)
 }
 pub fn handle_list_template(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
 ) -> ReturnToUser {
+    use std::fmt::Write;
     let entry_point = path_provider.general_template_entry()?;
     file_manipulator.ensure_dir(&entry_point)?;
     let all_template_paths = file_manipulator.list_first_level_dir(&entry_point)?;
 
     let lines: String = all_template_paths
         .into_iter()
-        .map(|path| {
+        .fold(String::new(), |mut buffer, path| {
             let template_name = path.file_name().unwrap().to_string_lossy();
             info!("Found template at {:?}", path);
-            format!("{}  {:?}\n", template_name, path)
-        })
-        .collect();
+            writeln!(&mut buffer, "{}  {:?}", template_name, path).expect(
+                "Error in converting template paths to text inteted to be diplayed to user.",
+            );
+            buffer
+        });
+
     let output = if lines.is_empty() {
         "No templates created yet.".to_string()
     } else {
@@ -139,7 +141,7 @@ pub fn handle_load_template(
         Some(success) => Ok(Cow::Borrowed(success.as_path())),
         None => file_manipulator
             .cwd()
-            .map(|to_borrow| Cow::Owned(to_borrow))
+            .map(Cow::Owned)
             .context("Can not access current working directory. No target to copy to"),
     }?;
 
@@ -150,7 +152,7 @@ pub fn handle_load_template(
         &cwd,
         &path_to_template,
     )?
-    .map(|path| 
+    .map(|path|
         format!("\n\nWarning: Some files had invalid utf8 content and were just copied and not augmented. One example was at {:?}", path)
     );
 
