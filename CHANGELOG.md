@@ -39,6 +39,8 @@ CWD: current working directory
   If true no placeholders are replaced by the template system.
 - File logging is now rotated in production
 - Added option "log_settings" to allow setting logging level and which module to log.
+- New some subcommand "create". This subcommand behaves like the subcommand "load-template" 
+  except it creates the target folder if the target location does not exist yet
 
 ### Removed
 

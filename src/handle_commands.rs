@@ -76,10 +76,24 @@ pub fn handle_create(
     augmentor: &mut impl TemplateAugmentor,
     load_args: &CreateTemplateArg,
 ) -> ReturnToUser {
-    file_manipulator.ensure_dir(load_args.target().as_path())?;
-    let load_arguments: LoadTemplateArg = load_args.clone().into();
-    handle_load_template(path_provider, file_manipulator, augmentor, &load_arguments)
+    debug!("Handling subcommand: {:?}", "LoadTemplate");
+
+    let name = load_args.details().name();
+    let path_to_template = prepare_load_template(path_provider, file_manipulator, name)?;
+    let target = load_args.target().as_path();
+
+    file_manipulator.ensure_dir(target)?;
+    let load_arguments: LoadTemplateArg = load_args.clone().try_into()?;
+    perform_load_template(
+        file_manipulator,
+        augmentor,
+        &load_arguments,
+        name,
+        target,
+        &path_to_template,
+    )
 }
+
 pub fn handle_list_template(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
@@ -111,15 +125,11 @@ pub fn handle_list_template(
     Ok(output)
 }
 
-pub fn handle_load_template(
+fn prepare_load_template(
     path_provider: &impl PathProvider,
     file_manipulator: &impl FileManipulator,
-    augmentor: &mut impl TemplateAugmentor,
-    load_args: &LoadTemplateArg,
-) -> ReturnToUser {
-    debug!("Handling subcommand: {:?}", "LoadTemplate");
-    let name = load_args.details().name();
-
+    name: &ValidTemplateName,
+) -> AppResult<PathBuf> {
     let path_to_template = path_provider.specific_entry_template_files(name)?;
 
     const TEMPLATE_PATH_EXITS: bool = true;
@@ -134,8 +144,19 @@ pub fn handle_load_template(
             name,
             error
         ),
-        Ok(TEMPLATE_PATH_EXITS) => (),
+        Ok(TEMPLATE_PATH_EXITS) => Ok(path_to_template),
     }
+}
+
+pub fn handle_load_template(
+    path_provider: &impl PathProvider,
+    file_manipulator: &impl FileManipulator,
+    augmentor: &mut impl TemplateAugmentor,
+    load_args: &LoadTemplateArg,
+) -> ReturnToUser {
+    debug!("Handling subcommand: {:?}", "LoadTemplate");
+    let name = load_args.details().name();
+    let path_to_template = prepare_load_template(path_provider, file_manipulator, name)?;
 
     let cwd: Cow<Path> = match load_args.target() {
         Some(success) => Ok(Cow::Borrowed(success.as_path())),
@@ -145,12 +166,30 @@ pub fn handle_load_template(
             .context("Can not access current working directory. No target to copy to"),
     }?;
 
+    perform_load_template(
+        file_manipulator,
+        augmentor,
+        load_args,
+        name,
+        &cwd,
+        &path_to_template,
+    )
+}
+
+fn perform_load_template(
+    file_manipulator: &impl FileManipulator,
+    augmentor: &mut impl TemplateAugmentor,
+    load_args: &LoadTemplateArg,
+    name: &ValidTemplateName,
+    target: &Path,
+    path_to_template: &Path,
+) -> ReturnToUser {
     let maybe_warning = load_pipeline::init_project_with_template(
         file_manipulator,
         augmentor,
         load_args,
-        &cwd,
-        &path_to_template,
+        target,
+        path_to_template,
     )?
     .map(|path|
         format!("\n\nWarning: Some files had invalid utf8 content and were just copied and not augmented. One example was at {:?}", path)
@@ -158,7 +197,7 @@ pub fn handle_load_template(
 
     Ok(format!(
         "Folder {:?} filled with content from Template ({}).{}",
-        cwd,
+        target,
         name,
         maybe_warning.unwrap_or_default()
     ))

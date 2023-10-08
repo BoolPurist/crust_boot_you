@@ -10,6 +10,7 @@ use super::CreateTemplateArg;
 #[derive(Debug, Args, Getters)]
 pub struct LoadTemplateArg {
     #[arg(long, short)]
+    /// Location where the project is initialized.
     target: Option<AbsoluteExistingDirPath>,
     #[command(flatten)]
     details: LoadCliDetails,
@@ -46,13 +47,15 @@ impl LoadTemplateArg {
     }
 }
 
-impl From<CreateTemplateArg> for LoadTemplateArg {
-    fn from(value: CreateTemplateArg) -> Self {
+impl TryFrom<CreateTemplateArg> for LoadTemplateArg {
+    type Error = AppError;
+
+    fn try_from(value: CreateTemplateArg) -> Result<Self, Self::Error> {
         let details = value.details;
-        let target: AbsoluteExistingDirPath = value.target.try_into().unwrap();
-        Self {
+        let target: AbsoluteExistingDirPath = value.target.try_into()?;
+        Ok(Self {
             details,
             target: Some(target),
-        }
+        })
     }
 }
